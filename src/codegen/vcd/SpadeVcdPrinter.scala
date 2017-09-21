@@ -39,17 +39,14 @@ trait SpadeVcdDeclarator { self:VcdPrinter =>
       }
     }
     override def traverse(implicit spade: Spade):Unit = {
-      visitNode(spade.top)
-      declare("pcus") { spade.pcus.foreach(visitNode) }
-      declare("mcus") { spade.mcus.foreach(visitNode) }
-      declare("scus") { spade.scus.foreach(visitNode) }
-      declare("ocus") { spade.ocus.foreach(visitNode) }
-      declare("mcs") { spade.mcs.foreach(visitNode) }
-      spade match {
-        case spade:SwitchNetwork => 
-          declare("sbs") { spade.sbs.foreach(visitNode) }
-        case _ =>
-      }
+      import spade._
+      visitNode(top)
+      declare("pcus") { pcus.foreach(visitNode) }
+      declare("mcus") { mcus.foreach(visitNode) }
+      declare("scus") { scus.foreach(visitNode) }
+      declare("ocus") { ocus.foreach(visitNode) }
+      declare("mcs") { mcs.foreach(visitNode) }
+      declare("sbs") { sbs.foreach(visitNode) }
     } 
   } 
 

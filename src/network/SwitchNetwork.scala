@@ -35,6 +35,7 @@ trait SwitchNetwork { self:Spade =>
   def scalarNetwork:GridNetwork = new ScalarNetwork()
 
 
+  /* --- alias to controllers */
   def cus = top.cus
   def mcus = top.mcus
   def pcus = top.pcus
