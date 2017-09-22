@@ -106,15 +106,16 @@ case class Top(override val param:TopParam=new TopParam())(implicit spade:Spade)
 
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
-    val bounds = cfmap(this).bounds
+    val config = cfmap(this)
+    val bounds = config.bounds
     souts.foreach { psout =>
       bounds.get(psout).foreach { _ match {
         case Some(b:Int) => 
           psout.ic.v.head.asSingle := b
-          psout.ic.v.valid := validOf(psout).v
+          psout.ic.v.valid := config.outputValid(psout).v
         case Some(b:Float) => 
           psout.ic.v.head.asSingle := b
-          psout.ic.v.valid := validOf(psout).v
+          psout.ic.v.valid := config.outputValid(psout).v
         case None => warn(s"$psout doesn't have a bound")
         case b => err(s"Don't know how to simulate bound:$b of $psout")
       } }
@@ -123,20 +124,20 @@ case class Top(override val param:TopParam=new TopParam())(implicit spade:Spade)
   }
 
   def config:Unit = {
-    this.genConnections
-    pcus.foreach { _.config }
-    mcus.foreach { _.config }
-    //mus.foreach { _.config }
-    scus.foreach { _.config }
-    mcs.foreach { _.config }
-    ocus.foreach { _.config }
-
     scalarNetwork.reset
     ctrlNetwork.reset
     vectorNetwork.reset
     scalarNetwork.config
     ctrlNetwork.config
     vectorNetwork.config
+
+    this.genConnections
     sbs.foreach { _.genConnections }
+    pcus.foreach { _.config }
+    mcus.foreach { _.config }
+    //mus.foreach { _.config }
+    scus.foreach { _.config }
+    mcs.foreach { _.config }
+    ocus.foreach { _.config }
   }
 }

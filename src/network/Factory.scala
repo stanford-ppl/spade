@@ -3,7 +3,6 @@ package spade.network
 import spade._
 import spade.node._
 import spade.util._
-import spade.arch._
 
 import pirc._
 import pirc.util._
@@ -63,15 +62,6 @@ plasticine {
       config
     case Left(failures) =>
       err(s"Unable to load plasticine config!")
-  }
-
-  def getArch(name:String) = {
-    name match {
-      case "SN16x13_LD" => SN16x13_LD
-      case "SN16x8_LD" => SN16x8_LD
-      case "SN8x8_LD" => SN8x8_LD
-      case "SN4x4" => SN4x4
-    }
   }
 
   // input <== output: input can be configured to output

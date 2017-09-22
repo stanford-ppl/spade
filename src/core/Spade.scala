@@ -2,6 +2,7 @@ package spade
 
 import spade.node._
 import spade.util._
+import spade.codegen._
 
 import pirc._
 import pirc.util._
@@ -25,14 +26,43 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
 
   override def toString = getClass().getSimpleName().replace("$", "")
 
+  val configs = List(Config, SpadeConfig)
+
+  lazy val simulatable = ListBuffer[Simulatable]()
+
   lazy val top = Top(topParam)
 
   var nextSym = 0
   def nextId = {val temp = nextSym; nextSym +=1; temp}
   
-  val simulatable = ListBuffer[Simulatable]()
-
-  def config:Unit = top.config
+  override def reset = {
+    super[SpadeMetadata].reset
+    super[Design].reset
+  }
 
   def handle(e:Exception):Unit = throw e
+
+  def main(args: Array[String]): Unit = {
+    info(s"args=[${args.mkString(", ")}]")
+    reset
+    setArgs(args)
+    top.config
+    endInfo(s"Finishing graph construction for ${this}")
+    run
+  }
+
+  /* Codegen */
+  val spadeNetworkCodegen = new SpadeNetworkCodegen()
+  val spadeParamCodegen = new SpadeParamCodegen()
+
+  /* Debug */
+  val spadePrinter = new SpadePrinter()
+
+  // Debug
+  passes += spadePrinter 
+
+  // Codegen
+  passes += spadeNetworkCodegen 
+  passes += spadeParamCodegen 
+
 }

@@ -11,7 +11,7 @@ import scala.language.existentials
 
 trait SwitchNetwork { self:Spade =>
 
-  val topParam = new TopParam()
+  lazy val topParam = new TopParam()
 
   def pcuAt(x:Int, y:Int) = {
     import topParam._

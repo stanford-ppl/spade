@@ -86,14 +86,14 @@ abstract class ComputeUnit(override val param:ComputeUnitParam)(implicit spade:S
               fanInOf(out.ic).foreach { pout =>
                 out.ic.v.set { v =>
                   v <<= pout.v
-                  v.valid <<= validOf(out).pv // 1 more cycle for sram read
+                  v.valid <<= config.outputValid(out).pv // 1 more cycle for sram read
                 }
               }
             case cu =>
               fanInOf(out.ic).foreach { pout =>
                 out.ic.v.set { v =>
                   v <<= pout.v
-                  v.valid <<= validOf(out).v
+                  v.valid <<= config.outputValid(out).v
                 }
               }
           }
