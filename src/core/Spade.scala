@@ -51,6 +51,9 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
     run
   }
 
+  /* Analysis */
+  //TODO: Area model
+
   /* Codegen */
   lazy val spadeNetworkCodegen = new SpadeNetworkCodegen()
   lazy val spadeParamCodegen = new SpadeParamCodegen()
