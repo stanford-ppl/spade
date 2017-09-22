@@ -52,17 +52,27 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
   }
 
   /* Codegen */
-  val spadeNetworkCodegen = new SpadeNetworkCodegen()
-  val spadeParamCodegen = new SpadeParamCodegen()
+  lazy val spadeNetworkCodegen = new SpadeNetworkCodegen()
+  lazy val spadeParamCodegen = new SpadeParamCodegen()
 
   /* Debug */
-  val spadePrinter = new SpadePrinter()
+  lazy val spadePrinter = new SpadePrinter()
+  lazy val plasticineVecDotPrinter = new PlasticineVectorDotPrinter()
+  lazy val plasticineScalDotPrinter = new PlasticineScalarDotPrinter()
+  lazy val plasticineCtrlDotPrinter = new PlasticineCtrlDotPrinter()
 
-  // Debug
-  passes += spadePrinter 
+  override def run = {
+    // Debug
+    passes += spadePrinter 
+    passes += plasticineVecDotPrinter 
+    passes += plasticineScalDotPrinter 
+    passes += plasticineCtrlDotPrinter 
 
-  // Codegen
-  passes += spadeNetworkCodegen 
-  passes += spadeParamCodegen 
+    // Codegen
+    passes += spadeNetworkCodegen 
+    passes += spadeParamCodegen 
+
+    super.run
+  }
 
 }

@@ -13,6 +13,7 @@ trait ControllerParam extends SpadeParam {
 }
 
 class ControllerConfig (
+  val name:String,
   val outputValid:Map[GlobalOutput[_<:PortType, Module], Output[_<:PortType, Module]]
 ) extends Configuration
 
