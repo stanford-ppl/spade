@@ -61,7 +61,7 @@ plasticine {
     case Right(config) => 
       config
     case Left(failures) =>
-      err(s"Unable to load plasticine config!")
+      throw PIRException(s"Unable to load plasticine config!")
   }
 
   // input <== output: input can be configured to output

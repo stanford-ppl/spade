@@ -3,6 +3,7 @@ package spade.node
 import spade._
 import spade.util._
 
+import pirc.util._
 import pirc.enums._
 
 case class PreloadPatternComputeParam (
@@ -57,10 +58,10 @@ class PatternComputeUnitParam (
     val numReduceStages = if (reduction) Math.ceil(Math.log(numLanes) / Math.log(2)).toInt else 0
     val numFrontStages = numStages - (numReduceStages + 2)
     assert(numFrontStages >= 0, s"numFrontStages=$numFrontStages numStage=$numStages")
-    assert(cu.sins.size >= numSins, s"sins=${cu.sins.size} numSins=${numSins}")
-    assert(cu.vins.size >= numVins, s"vins=${cu.vins.size} numVins=${numVins}")
-    assert(cu.souts.size >= numSouts, s"souts=${cu.souts.size} numSouts=${numSouts}")
-    assert(cu.vouts.size >= numVouts, s"vouts=${cu.vouts.size} numVouts=${numVouts}")
+    warn(cu.sins.size < numSins, s"pcu sins=${cu.sins.size} numSins=${numSins}")
+    warn(cu.vins.size < numVins, s"pcu vins=${cu.vins.size} numVins=${numVins}")
+    warn(cu.souts.size < numSouts, s"pcu souts=${cu.souts.size} numSouts=${numSouts}")
+    warn(cu.vouts.size < numVouts, s"pcu vouts=${cu.vouts.size} numVouts=${numVouts}")
     cu.addRegstages(numStage=numFrontStages, numOprds=3, ops)
     cu.addRdstages(numStage=numReduceStages, numOprds=3, ops)
     cu.addRegstages(numStage=2, numOprds=3, ops)

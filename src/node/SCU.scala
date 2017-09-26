@@ -3,6 +3,7 @@ package spade.node
 import spade._
 import spade.util._
 
+import pirc.util._
 import pirc.enums._
 
 case class PreloadScalarComputeParam(
@@ -37,15 +38,15 @@ class ScalarComputeUnitParam (
   /* Parameters */
   def config(cu:ScalarComputeUnit)(implicit spade:Spade) = {
     cu.addRegstages(numStage=numStages, numOprds=3, fixOps ++ bitOps ++ otherOps)
-    assert(cu.sins.size >= numSins, s"sins=${cu.sins.size} numSins=${numSins}")
-    assert(cu.souts.size >= numSouts, s"souts=${cu.souts.size} numSouts=${numSouts}")
+    warn(cu.sins.size <= numSins, s"scu sins=${cu.sins.size} numSins=${numSins}")
+    warn(cu.souts.size <= numSouts, s"scu souts=${cu.souts.size} numSouts=${numSouts}")
     cu.numScalarBufs(numSins)
     cu.mems.foreach(_.writePortMux.addInputs(muxSize))
     cu.color(1, AccumReg)
     cu.color(0 until numCtrs, CounterReg)
-    cu.color(7 until 7 + cu.numScalarBufs, ScalarInReg)
-    cu.color(8 until 8 + cu.souts.size, ScalarOutReg)
-    cu.color(12 until 12 + cu.numVecBufs, VecInReg)
+    cu.color(numRegs-cu.numScalarBufs until numRegs, ScalarInReg)
+    cu.color(numRegs-cu.souts.size until numRegs, ScalarOutReg)
+    cu.color(numRegs-cu.numVecBufs until numRegs, VecInReg)
     cu.genConnections
   }
 }

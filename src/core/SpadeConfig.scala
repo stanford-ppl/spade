@@ -28,5 +28,6 @@ object SpadeConfig extends GlobalConfig {
 
   def debug = Config.debug
   var debugCodegen:Boolean = debug && register("debug-codegen", true) { v => debugCodegen = v == "true" }
+  var openDot:Boolean = register("open", false) { v => openDot = v == "true" }
   
 }

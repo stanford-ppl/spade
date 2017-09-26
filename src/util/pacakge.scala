@@ -157,11 +157,6 @@ package object util {
     }
   }
 
-  def OCU_MAX_CIN(implicit spade:Spade) = {
-    val ocu = spade.ocus.head
-    ocu.cins.size
-  }
-
   def zip[T1, T2, T](x1:Option[T1], x2:Option[T2])(lambda:(T1,T2) => T):Option[T] = (x1, x2) match {
     case (Some(x1), Some(x2)) => Some(lambda(x1, x2))
     case _ => None

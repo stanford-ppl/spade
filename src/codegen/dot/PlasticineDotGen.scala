@@ -82,7 +82,7 @@ abstract class PlasticineDotGen(fn:String, open:Boolean)(implicit design:Spade) 
     }
     close
     if (open) { 
-      s"out/bin/run -c ${getPath} &".replace(".dot", "") !
+      s"out/bin/run -pc ${getPath} &".replace(".dot", "") !
     }
   }
 

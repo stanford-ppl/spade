@@ -60,9 +60,9 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
 
   /* Debug */
   lazy val spadePrinter = new SpadePrinter()
-  lazy val plasticineVecDotPrinter = new PlasticineVectorDotPrinter()
-  lazy val plasticineScalDotPrinter = new PlasticineScalarDotPrinter()
-  lazy val plasticineCtrlDotPrinter = new PlasticineCtrlDotPrinter()
+  lazy val plasticineVecDotPrinter = new PlasticineVectorDotPrinter(SpadeConfig.openDot)
+  lazy val plasticineScalDotPrinter = new PlasticineScalarDotPrinter(SpadeConfig.openDot)
+  lazy val plasticineCtrlDotPrinter = new PlasticineCtrlDotPrinter(SpadeConfig.openDot)
 
   override def run = {
     // Debug
