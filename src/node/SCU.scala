@@ -38,8 +38,8 @@ class ScalarComputeUnitParam (
   /* Parameters */
   def config(cu:ScalarComputeUnit)(implicit spade:Spade) = {
     cu.addRegstages(numStage=numStages, numOprds=3, fixOps ++ bitOps ++ otherOps)
-    warn(cu.sins.size <= numSins, s"scu sins=${cu.sins.size} numSins=${numSins}")
-    warn(cu.souts.size <= numSouts, s"scu souts=${cu.souts.size} numSouts=${numSouts}")
+    warn(cu.sins.size < numSins, s"scu sins=${cu.sins.size} numSins=${numSins}")
+    warn(cu.souts.size < numSouts, s"scu souts=${cu.souts.size} numSouts=${numSouts}")
     cu.numScalarBufs(numSins)
     cu.mems.foreach(_.writePortMux.addInputs(muxSize))
     cu.color(1, AccumReg)
