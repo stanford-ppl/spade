@@ -44,11 +44,17 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
 
   def main(args: Array[String]): Unit = {
     info(s"args=[${args.mkString(", ")}]")
-    reset
-    setArgs(args)
-    top.config
-    endInfo(s"Finishing graph construction for ${this}")
-    run
+    try {
+      reset
+      setArgs(args)
+      top.config
+      endInfo(s"Finishing graph construction for ${this}")
+      run
+    } catch { 
+      case e:Exception =>
+        errmsg(e)
+        handle(e)
+    }
   }
 
   /* Analysis */
