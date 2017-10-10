@@ -29,10 +29,6 @@ case class Bit()(implicit spade:Spade) extends SingleType {
     ntp.io = this.io
     ntp.asInstanceOf[this.type]
   }
-  //override def equals(that:Any):Boolean = that match {
-    //case that:Bit => true
-    //case _ => false
-  //}
 }
 case class Word(wordWidth:Int)(implicit spade:Spade) extends SingleType {
   override val typeStr = "w"
@@ -44,10 +40,6 @@ case class Word(wordWidth:Int)(implicit spade:Spade) extends SingleType {
     ntp.io = this.io
     ntp.asInstanceOf[this.type]
   }
-  //override def equals(that:Any):Boolean = that match {
-    //case Word(ww) => ww==wordWidth
-    //case _ => false
-  //}
 }
 object Word {
   def apply()(implicit spade:Spade):Word = Word(spade.wordWidth)
@@ -69,10 +61,6 @@ case class Bus(busWidth:Int, elemTp:PortType)(implicit spade:Spade) extends Port
     ntp.io = this.io
     ntp.asInstanceOf[this.type]
   }
-  //override def equals(that:Any):Boolean = that match {
-    //case Bus(bw, et) => (bw==busWidth) && (et==elemTp)
-    //case _ => false
-  //}
 }
 object Bus {
   def apply(elemTp:PortType)(implicit spade:Spade):Bus = Bus(spade.numLanes, elemTp)
