@@ -257,7 +257,7 @@ abstract class CtrlBox()(implicit spade:Spade, override val prt:Controller) exte
   val fifoAndTree = AndTree("fifoAndTree")
   fifoAndTree <== prt.bufs.map(_.notEmpty) 
 
-  def register(implicit sim:Simulator):Unit = {
+  override def register(implicit sim:Simulator):Unit = {
     delays.foreach { delay =>
       delay.in.v.default = false
       delay.out.v.default = false

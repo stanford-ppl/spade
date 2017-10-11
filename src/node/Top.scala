@@ -22,7 +22,9 @@ class TopParam (
   val pattern:Pattern = MixAll,
   val sbufSize:Int = 16,
   val vbufSize:Int = 16
-) extends ControllerParam
+) extends ControllerParam {
+  val cbufSize:Int = 0
+}
 
 case class TopConfig (
   override val name:String,
@@ -112,11 +114,9 @@ case class Top(override val param:TopParam=new TopParam())(implicit spade:Spade)
     souts.foreach { psout =>
       bounds.get(psout).foreach { _ match {
         case Some(b:Int) => 
-          psout.ic.v.head.asSingle := b
-          psout.ic.v.valid := config.outputValid(psout).v
+          psout.ic.v.asSingle := b
         case Some(b:Float) => 
-          psout.ic.v.head.asSingle := b
-          psout.ic.v.valid := config.outputValid(psout).v
+          psout.ic.v.asSingle := b
         case None => warn(s"$psout doesn't have a bound")
         case b => err(s"Don't know how to simulate bound:$b of $psout")
       } }

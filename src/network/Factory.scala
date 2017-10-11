@@ -108,7 +108,7 @@ plasticine {
 
   def connectDataIO(cu:Controller):Unit = {
     // Xbar
-    cu.sins.foreach { sin => cu.sbufs.foreach { sbuf => sbuf.writePortMux.inputs.foreach { _<== sin.ic } } }
+    cu.sins.foreach { sin => cu.sbufs.foreach { sbuf => sbuf.writePortMux.inputs.foreach { _ <== sin.ic } } }
     // One to one
     (cu.vins, cu.vbufs).zipped.foreach { case (vi, vbuf) => vbuf.writePortMux.inputs.foreach { _ <== vi.ic } }
 
@@ -259,66 +259,52 @@ plasticine {
     val low = Const(false)
     (cu, cu.ctrlBox) match {
       case (cu:MemoryComputeUnit, cb:MemoryCtrlBox) => 
-        cu.sbufs.foreach { buf => 
-          buf.dequeueEnable <== cb.readDone.out; 
-          buf.dequeueEnable <== cb.writeDone.out
-          buf.dequeueEnable <== cb.readEn.out; 
-          buf.dequeueEnable <== cb.writeEn.out; 
-          buf.dequeueEnable <== cb.writeEnDelay.out; 
-          buf.dec <== cb.readDone.out; 
-          buf.dec <== cb.writeDone.out
-          buf.dec <== cb.readEn.out; 
-          buf.dec <== cb.writeEn.out; 
-          buf.dec <== cb.writeEnDelay.out; 
-          //buf.enqueueEnable <== buf.writePort.valid 
+        (cu.cbufs ++ cu.sbufs).foreach { buf => 
+          buf.dequeueEnable <== cb.readEn.out
+          buf.dequeueEnable <== cb.writeEn.out
+          buf.enqueueEnable <== buf.writePortMux.valid 
           buf.predicate <== low.out
         }
         cu.vbufs.foreach { buf => 
-          //buf.enqueueEnable <== buf.writePort.valid 
-          buf.dequeueEnable <== cb.writeEnDelay.out; 
-          buf.dec <== cb.writeEn.out 
+          buf.dequeueEnable <== cb.writeEn.out
+          buf.enqueueEnable <== buf.writePortMux.valid 
           buf.predicate <== low.out
         }
         cu.srams.foreach { sram => 
-          sram.inc <== cb.writeDone.out
-          sram.dec <== cb.readDone.out 
-          sram.dequeueEnable <== cb.readDoneDelay.out 
-          sram.enqueueEnable <== cb.writeDoneDelay.out
-          sram.writeEn <== cb.writeEnDelay.out
-          sram.readEn <== cb.readEnDelay.out
+          sram.enqueueEnable <== cu.cbufs.map(_.readPort) 
+          sram.dequeueEnable <== cu.cbufs.map(_.readPort) 
+          //sram.dequeueEnable <== cb.readDoneDelay.out 
+          //sram.enqueueEnable <== cb.writeDoneDelay.out
+          //sram.writeEn <== cb.writeEnDelay.out
+          //sram.readEn <== cb.readEnDelay.out
+          sram.writeEn <== cb.writeEn.out
+          sram.readEn <== cb.readEn.out
         }
         cb.writeFifoAndTree <== cu.bufs.map(_.notEmpty) :+ cu.sram.notFull
         cb.readFifoAndTree <== (cu.bufs.map(_.notEmpty) :+ cu.sram.notEmpty)
-      case (cu:ComputeUnit, cb:InnerCtrlBox) => 
-        cu.bufs.foreach { buf =>
-          buf.dequeueEnable <== cu.ctrs.map(_.done)
-          buf.dequeueEnable <== cu.cins.map(_.ic)
-          buf.dequeueEnable <== cb.en.out; 
-          buf.dec <== cu.ctrs.map(_.done)
-          buf.dec <== cu.cins.map(_.ic)
-          buf.dec <== cb.en.out; 
-          //buf.enqueueEnable <== buf.writePort.valid 
-          buf.predicate <== low.out 
-          buf.predicate <== cb.fifoPredUnit.out
-        }
-      case (cu:OuterComputeUnit, cb:OuterCtrlBox) => 
-        cu.bufs.foreach { buf => 
-          buf.dequeueEnable <== cb.done.out
-          buf.dec <== cb.done.out
-          //buf.enqueueEnable <== buf.writePort.valid 
-          buf.predicate <== low.out
-        }
       case (mc:MemoryController, cb:MCCtrlBox) =>
         //mc.sbufs.foreach { buf => buf.enqueueEnable <== cu.cins.map(_.ic) }
         mc.sbufs.foreach { buf => 
           buf.dequeueEnable <== cb.en.out
-          buf.dec <== cb.en.out
         }
         mc.vdata.dequeueEnable <== cb.running
         mc.sdata.dequeueEnable <== cb.running
-        mc.vdata.dec <== cb.running
-        mc.sdata.dec <== cb.running
         mc.bufs.foreach { buf => buf.predicate <== low.out }
+      case (cu:ComputeUnit, cb:StageCtrlBox) => 
+        cu.bufs.foreach { buf =>
+          buf.dequeueEnable <== cu.ctrs.map(_.done)
+          buf.dequeueEnable <== cb.en.out; 
+          buf.enqueueEnable <== buf.writePortMux.valid 
+          buf.predicate <== low.out 
+          cb match {
+            case cb:InnerCtrlBox =>
+              buf.predicate <== cb.fifoPredUnit.out
+            case _ =>
+          }
+        }
+        cu.sbufs.foreach { buf =>
+          buf.enqueueEnable <== cu.cbufs.map(_.readPort)
+        }
       case (top:Top, cb:TopCtrlBox) =>
     }
   }

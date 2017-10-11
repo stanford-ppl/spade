@@ -7,6 +7,7 @@ import pirc.util._
 import pirc.enums._
 
 case class PreloadPatternComputeParam (
+  override val cbufSize:Int = 16,
   override val sbufSize:Int = 16,
   override val vbufSize:Int = 16,
   override val numCtrs:Int = 8,
@@ -38,12 +39,15 @@ case class SRAMAddrGenParam (
 ) with PreLoadSpadeParam
 
 class PatternComputeUnitParam (
+  val cbufSize:Int = 16,
   val sbufSize:Int = 16,
   val vbufSize:Int = 16,
   val numVins:Int = 4,
   val numVouts:Int = 4,
   val numSins:Int = 4,
   val numSouts:Int = 4,
+  val numCins:Int = 2,
+  val numCouts:Int = 4,
   val numRegs:Int = 16,
   val numStages:Int = 8,
   val numCtrs:Int = 8,
@@ -58,6 +62,7 @@ class PatternComputeUnitParam (
     val numReduceStages = if (reduction) Math.ceil(Math.log(numLanes) / Math.log(2)).toInt else 0
     val numFrontStages = numStages - (numReduceStages + 2)
     assert(numFrontStages >= 0, s"numFrontStages=$numFrontStages numStage=$numStages")
+    warn(cu.cins.size < numCins, s"pcu cins=${cu.cins.size} numCins=${numCins}")
     warn(cu.sins.size < numSins, s"pcu sins=${cu.sins.size} numSins=${numSins}")
     warn(cu.vins.size < numVins, s"pcu vins=${cu.vins.size} numVins=${numVins}")
     warn(cu.souts.size < numSouts, s"pcu souts=${cu.souts.size} numSouts=${numSouts}")
@@ -65,6 +70,7 @@ class PatternComputeUnitParam (
     cu.addRegstages(numStage=numFrontStages, numOprds=3, ops)
     cu.addRdstages(numStage=numReduceStages, numOprds=3, ops)
     cu.addRegstages(numStage=2, numOprds=3, ops)
+    cu.numControlBufs(numCins)
     cu.numScalarBufs(numSins)
     cu.numVecBufs(cu.vins.size)
     cu.mems.foreach(_.writePortMux.addInputs(muxSize))

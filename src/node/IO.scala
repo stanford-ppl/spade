@@ -47,7 +47,7 @@ object Word {
     new Word(spade.wordWidth) { override def toString = name }
   }
 }
-case class Bus(busWidth:Int, elemTp:PortType)(implicit spade:Spade) extends PortType with BusValue {
+case class Bus(busWidth:Int, elemTp:PortType)(implicit spade:Spade) extends PortType with ListValue {
   override val typeStr = "u"
   override def io_= (io:IO[_, Module]) = {
     super.io_= (io)
@@ -112,7 +112,7 @@ class Input[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(implic
   def fanIns = _fanIns.toList
   def connect(n:O):Unit = { _fanIns += n; n.connectedTo(this) }
   private[spade] def <==(n:O) = { connect(n) }
-  private[spade] def <==(ns:List[O]) = ns.foreach(n => connect(n))
+  private[spade] def <==(ns:Iterable[O]) = ns.foreach(n => connect(n))
   private[spade] def <==(r:PipeReg):Unit = { this.asBus.connect(r.out) }
   private[spade] def <==(n:Output[Bus, Module], i:Int) = n.slice(i, this)
   private[spade] def <==(ns:List[Output[Bus, Module]], i:Int) = ns.foreach(_.slice(i, this))
@@ -237,6 +237,7 @@ object Output {
 
 trait GlobalIO[P<:PortType, +S<:Module] extends IO[P, S] with Simulatable {
   val ic:IO[P, this.type]
+  val valid:IO[Bit, this.type]
   def connectedToSwitch:Boolean
   override def reset(implicit sim:Simulator) = {
     super[Simulatable].reset
@@ -250,9 +251,14 @@ trait GlobalIO[P<:PortType, +S<:Module] extends IO[P, S] with Simulatable {
 class GlobalInput[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(implicit spade:Spade)
   extends Input(tp, src, sf) with GlobalIO[P,S] { 
   import spademeta._
-  override val ic:Output[P, this.type] = new Output(tp.clone, this, Some(() => s"$this.ic"))
+  val valid:Output[Bit, this.type] = Output(Bit(), this, s"$this.valid")
+  val ic:Output[P, this.type] = Output(tp.clone, this, s"$this.ic")
   override def register(implicit sim:Simulator):Unit = {
-    ic := this
+    fanInOf(this).foreach { out => 
+      ic := out.asGlobal.ic
+      valid := out.asGlobal.valid
+    }
+    valid.v.default = false
   }
   def connectedToSwitch:Boolean = fanIns.exists { _.src.isInstanceOf[SwitchBox] }
   override def ms = s"${super.ms} ic=$ic"
@@ -275,9 +281,11 @@ object GlobalInput {
 class GlobalOutput[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(implicit spade:Spade) 
   extends Output(tp, src, sf) with GlobalIO[P, S] { 
   import spademeta._
-  override val ic:Input[P, this.type] = new Input(tp.clone, this, Some(() => s"$this.ic"))
+  val valid:Input[Bit, this.type] = Input(Bit(), this, s"$this.valid")
+  val ic:Input[P, this.type] = Input(tp.clone, this, s"$this.ic")
   override def register(implicit sim:Simulator):Unit = {
     this := ic
+    valid.v.default = false
   }
   def connectedToSwitch:Boolean = fanOuts.exists { _.src.isInstanceOf[SwitchBox] }
   override def mt = s"${super.mt} ic=$ic"
@@ -303,16 +311,14 @@ case class Slice[PI<:PortType, PO<:PortType](intp:PI, outtp:PO, i:Int)(implicit 
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
     (in.v, out.v) match {
-      case (in:SingleValue, out:BusValue) =>
+      case (in:SingleValue, out:ListValue) =>
         out.value(i) := in 
-      case (in:BusValue, out:SingleValue) =>
+      case (in:ListValue, out:SingleValue) =>
         out := in.value(i)
-      case (in:BusValue, out:BusValue) if in.bus.busWidth==1 =>
+      case (in:ListValue, out:ListValue) if in.bus.busWidth==1 =>
         out.value(i) := in.value(0)
-        out.valid := in.valid
-      case (in:BusValue, out:BusValue) if out.bus.busWidth==1 =>
+      case (in:ListValue, out:ListValue) if out.bus.busWidth==1 =>
         out.value(0) := in.value(i)
-        out.valid := in.valid
     }
   }
 }
@@ -407,12 +413,20 @@ object GridIO {
   def diagDirections = {"NW":: "NE":: "SE":: "SW" :: Nil}
 }
 
+case class ControlIO[+N<:Routable](src:N)(implicit spade:Spade) extends GridIO[ControlIO.P, N] {
+  override def toString = s"${src}.ctrlIO"
+  override def tp = Bit()
+}
+object ControlIO {
+  type P = Bit 
+}
+
 case class ScalarIO[+N<:Routable](src:N)(implicit spade:Spade) extends GridIO[ScalarIO.P, N] {
   override def toString = s"${src}.scalarIO"
-  override def tp = Bus(1, Word())
+  override def tp = Word()
 }
 object ScalarIO {
-  type P = Bus
+  type P = Word
 }
 
 case class VectorIO[+N<:Routable](src:N)(implicit spade:Spade) extends GridIO[VectorIO.P, N] {
@@ -421,12 +435,4 @@ case class VectorIO[+N<:Routable](src:N)(implicit spade:Spade) extends GridIO[Ve
 }
 object VectorIO {
   type P = Bus
-}
-
-case class ControlIO[+N<:Routable](src:N)(implicit spade:Spade) extends GridIO[ControlIO.P, N] {
-  override def toString = s"${src}.ctrlIO"
-  override def tp = Bit()
-}
-object ControlIO {
-  type P = Bit 
 }

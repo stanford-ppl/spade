@@ -20,9 +20,8 @@ trait Val[P<:PortType]{ self:IO[P, Module] =>
     pv.default = nv.default
     pv.set { pv => pv copy nv }
   }
-  def setPrev(pv:BusValue, nv:BusValue)(implicit sim:Simulator):Unit = {
+  def setPrev(pv:ListValue, nv:ListValue)(implicit sim:Simulator):Unit = {
     (pv.value, nv.value).zipped.foreach { case (pv, nv) => setPrev(pv, nv) }
-    setPrev(pv.valid, nv.valid)
     pv.next = Some(nv)
     nv.prev = Some(pv)
     pv.set { pv => pv copy nv }
@@ -30,7 +29,7 @@ trait Val[P<:PortType]{ self:IO[P, Module] =>
   def setPrev(pv:Value, nv:Value)(implicit sim:Simulator):Unit = {
     (pv, nv) match {
       case (pv:SingleValue, nv:SingleValue) => setPrev(pv, nv)
-      case (pv:BusValue, nv:BusValue) => setPrev(pv, nv)
+      case (pv:ListValue, nv:ListValue) => setPrev(pv, nv)
     }
   }
   def vAt(idx:Int)(implicit sim:Simulator):P = {
@@ -83,7 +82,7 @@ trait Value extends Node with Evaluation { self:PortType =>
   def value:V
   def s:String
   def asSingle:SingleValue = this.asInstanceOf[SingleValue]
-  def asBus:BusValue = this.asInstanceOf[BusValue]
+  def asBus:ListValue = this.asInstanceOf[ListValue]
   var parent:Option[Value] = None
 
   var _funcHasRan = false
@@ -103,7 +102,7 @@ trait Value extends Node with Evaluation { self:PortType =>
   def check(implicit sim:Simulator):Unit = {}
   def isDefined:Boolean
   def svalue(implicit sim:Simulator) = this match {
-    case v:BusValue => v.value.map(ev => sim.quote(ev.value)) :+ sim.quote(v.valid.value)
+    case v:ListValue => v.value.map(ev => sim.quote(ev.value))
     case v => sim.quote(v.value)
   }
   def updated:Boolean = funcHasRan && parent.fold(true) { p => !p.isDefined || p.funcHasRan }
@@ -253,17 +252,13 @@ trait SingleValue extends Value { self:SingleType =>
   def == (vl:Any)(implicit sim:Simulator):Option[AnyVal] = eval(FixEql, this, vl)
 }
 
-trait BusValue extends Value { self:Bus =>
+trait ListValue extends Value { self:Bus =>
   type V = List[Value] 
   val bus:Bus = self
   val value:V = List.tabulate(busWidth) { i => 
     val eval = elemTp.clone(s"${elemTp.typeStr}v[$i]")
     eval.parent = Some(this)
     eval
-  }
-  lazy val valid = new Bit() { 
-    this.io = self.io
-    override def toString = s"${self.toString}.valid"
   }
   def s:String = value.map(_.s).mkString
   override def equals(that:Any):Boolean = {
@@ -275,15 +270,11 @@ trait BusValue extends Value { self:Bus =>
   def foreach(lambda:(Value, Int) => Unit):Unit =  {
     value.zipWithIndex.foreach { case (e, i) => lambda(e, i) }
   }
-  def foreachv(lambda:(Value, Int) => Unit)(vlambda:SingleType => Unit):Unit =  {
-    foreach(lambda)
-    vlambda(valid)
-  }
   def head:Value = value.head
 
   override def check(implicit sim:Simulator) = {
     import sim.util._
-    if (func.isDefined && ((value :+ valid).exists(_.func.isDefined))) {
+    if (func.isDefined && (value.exists(_.func.isDefined))) {
       warn(s"Bus ${quote(this)} has both group and individual update!")
     }
   }
@@ -291,23 +282,19 @@ trait BusValue extends Value { self:Bus =>
     (value.exists(_.isDefined) || func.isDefined || parent.fold(false) { _.func.isDefined }) && 
     next.fold(true) { _.isDefined } 
   override def updated = super.updated && 
-                         value.forall(v => !v.isDefined || v.updated) && 
-                         (!valid.isDefined || valid.updated)
+                         value.forall(v => !v.isDefined || v.updated)
   override def mainUpdate(implicit sim:Simulator):Unit = {
     import sim.util._
     super.mainUpdate
     value.foreach(_.update)
-    valid.update
   }
   override def clearUpdate(implicit sim:Simulator) = {
     super.clearUpdate
     value.foreach(_.clearUpdate)
-    valid.clearUpdate
   }
   override def updateInfo(implicit sim:Simulator):String = {
     var info = super.updateInfo
     info += s"${value.map{ v => s"${sim.quote(v)} updated=${v.updated}" }.mkString("\n")}\n"
-    info += s"${sim.quote(valid)} updated=${valid.updated}"
     info
   }
   override def := (other:Value)(implicit sim:Simulator):Unit = {
@@ -315,23 +302,20 @@ trait BusValue extends Value { self:Bus =>
     other match {
       case other:SingleValue =>
         value.foreach { v => v := other }
-      case other:BusValue =>
+      case other:ListValue =>
         (value, other.value).zipped.foreach { case (v, ov) => v := ov }
-        valid := other.valid
     }
   }
   override def copy (other:Value)(implicit sim:Simulator) = {
     other match {
       case other:SingleValue =>
         value.foreach { v => v copy other }
-      case other:BusValue =>
+      case other:ListValue =>
         (value, other.value).zipped.foreach { case (v, ov) => v copy ov }
-        valid copy other.valid
     }
   }
   def zero(implicit sim:Simulator):Unit = {
     value.foreach(_.zero)
-    valid.zero
   }
 }
 

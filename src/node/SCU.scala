@@ -19,7 +19,10 @@ case class PreloadScalarComputeParam(
 ) with PreLoadSpadeParam
 
 class ScalarComputeUnitParam (
+  val cbufSize:Int = 16,
   val sbufSize:Int = 16,
+  val numCins:Int = 3,
+  val numCouts:Int = 4,
   val numSins:Int = 4,
   val numSouts:Int = 4,
   val numRegs:Int = 16,
@@ -38,8 +41,10 @@ class ScalarComputeUnitParam (
   /* Parameters */
   def config(cu:ScalarComputeUnit)(implicit spade:Spade) = {
     cu.addRegstages(numStage=numStages, numOprds=3, fixOps ++ bitOps ++ otherOps)
+    warn(cu.cins.size < numCins, s"scu cins=${cu.cins.size} numCins=${numCins}")
     warn(cu.sins.size < numSins, s"scu sins=${cu.sins.size} numSins=${numSins}")
     warn(cu.souts.size < numSouts, s"scu souts=${cu.souts.size} numSouts=${numSouts}")
+    cu.numControlBufs(numCins)
     cu.numScalarBufs(numSins)
     cu.mems.foreach(_.writePortMux.addInputs(muxSize))
     cu.color(1, AccumReg)

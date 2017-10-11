@@ -8,6 +8,7 @@ import spade._
 import spade.util._
 
 trait ControllerParam extends SpadeParam {
+  val cbufSize:Int
   val sbufSize:Int
   val vbufSize:Int
 }
@@ -30,8 +31,10 @@ abstract class Controller(val param:ControllerParam)(implicit spade:Spade) exten
 
   var vbufs:List[VectorMem] = Nil
   var sbufs:List[ScalarMem] = Nil
+  var cbufs:List[ControlMem] = Nil
   def bufs:List[LocalMem] = sbufs ++ vbufs
   def mems:List[OnChipMem] = sbufs ++ vbufs
+  def numControlBufs(num:Int):this.type = { cbufs = List.tabulate(num)  { i => ControlMem(cbufSize).index(i) }; this }
   def numScalarBufs(num:Int):this.type = { sbufs = List.tabulate(num)  { i => ScalarMem(sbufSize).index(i) }; this }
   def numScalarBufs:Int = sbufs.size
   def numVecBufs(num:Int):this.type = { vbufs = List.tabulate(num) { i => VectorMem(vbufSize).index(i) }; this }

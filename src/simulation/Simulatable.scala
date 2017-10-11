@@ -16,7 +16,7 @@ trait Simulatable extends Module with Evaluation {
     }
   }
 
-  def register(implicit sim:Simulator):Unit
+  def register(implicit sim:Simulator):Unit = {}
 
   // Check if a mapped simulatable has update function defined on all its io
   def check(implicit sim:Simulator):Unit = {

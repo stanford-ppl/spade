@@ -101,9 +101,9 @@ abstract class VcdPrinter(implicit val sim:Simulator) extends Printer with Spade
     value match {
       case value:Bus =>
         if (value.busWidth>1) emitkv(s"scope module", sname)
-        value.foreachv { 
+        value.foreach { 
           case (v,i) => declare(v, nm.map { n => s"$n($i)"}) 
-        } { valid => declare(valid, nm.map { n => s"${n}_valid" }) }
+        }
         if (value.busWidth>1) emitln(s"$$upscope $$end")
       case Word(wordWidth) if wordWidth == 1 =>
         emitVar("wire", wordWidth, id(value), sname)
@@ -132,7 +132,6 @@ abstract class VcdPrinter(implicit val sim:Simulator) extends Printer with Spade
     value match {
       case p@Bus(busWidth, _) =>
         p.value.zipWithIndex.foreach { case (vv, i) => emitValue(vv) }
-        emitValue(p.valid)
       case p@Word(wordWidth) =>
         emitln(s"${qv(p)} ${id(p)}")
       case p@Bit() =>

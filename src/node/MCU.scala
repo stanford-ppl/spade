@@ -26,8 +26,11 @@ case class PreloadMemoryComputeParam (
 ) with PreLoadSpadeParam
 
 class MemoryComputeUnitParam(
+  val cbufSize:Int = 16,
   val sbufSize:Int = 16,
   val vbufSize:Int = 16,
+  val numCins:Int = 4,
+  val numCouts:Int = 4,
   val numVins:Int = 4,
   val numVouts:Int = 4,
   val numSins:Int = 4,
@@ -47,10 +50,12 @@ class MemoryComputeUnitParam(
     cu.addRegstages(numStage=numStages, numOprds=3, fixOps ++ otherOps)
     //cu.addWAstages(numStage=3, numOprds=3, fixOps ++ otherOps)
     //cu.addRAstages(numStage=3, numOprds=3, fixOps ++ otherOps)
+    assert(cu.cins.size >= numCins, s"cins=${cu.cins.size} numCins=${numCins}")
     assert(cu.sins.size >= numSins, s"sins=${cu.sins.size} numSins=${numSins}")
     assert(cu.vins.size >= numVins, s"vins=${cu.vins.size} numVins=${numVins}")
     assert(cu.souts.size >= numSouts, s"souts=${cu.souts.size} numSouts=${numSouts}")
     assert(cu.vouts.size >= numVouts, s"vouts=${cu.vouts.size} numVouts=${numVouts}")
+    cu.numControlBufs(numCins)
     cu.numScalarBufs(numSins)
     cu.numVecBufs(cu.vins.size)
     cu.mems.foreach(_.writePortMux.addInputs(muxSize))

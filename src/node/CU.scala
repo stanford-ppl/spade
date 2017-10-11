@@ -21,6 +21,9 @@ trait ComputeUnitParam extends ControllerParam {
   val numVouts:Int
   val numSins:Int
   val numSouts:Int
+  val numCins:Int
+  val numCouts:Int
+  val cbufSize:Int
   val sbufSize:Int
   val vbufSize:Int
   val muxSize:Int
@@ -77,30 +80,6 @@ abstract class ComputeUnit(override val param:ComputeUnitParam)(implicit spade:S
 
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
-    // Add delay to output if input is from doneXBar
-    cfmap.get(this).foreach { config =>
-      (souts++vouts).foreach { 
-        case out if isMapped(out)(mapping) =>
-          this match {
-            case cu:MemoryComputeUnit =>
-              fanInOf(out.ic).foreach { pout =>
-                out.ic.v.set { v =>
-                  v <<= pout.v
-                  v.valid <<= config.outputValid(out).pv // 1 more cycle for sram read
-                }
-              }
-            case cu =>
-              fanInOf(out.ic).foreach { pout =>
-                out.ic.v.set { v =>
-                  v <<= pout.v
-                  v.valid <<= config.outputValid(out).v
-                }
-              }
-          }
-          out.ic.v.valid.default = false
-        case _ =>
-      }
-    }
     super.register
   }
 

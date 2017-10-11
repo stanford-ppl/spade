@@ -7,7 +7,9 @@ import pirc.enums._
 import pirc.util._
 
 case class OuterComputeUnitParam (
+  cbufSize:Int = 16,
   sbufSize:Int = 16,
+  numCins:Int = 4,
   numSins:Int = 5,
   numRegs:Int = 0,
   numStages:Int = 0,
@@ -17,6 +19,7 @@ case class OuterComputeUnitParam (
 ) extends ComputeUnitParam() {
   val numVins:Int = 0
   val numVouts:Int = 0
+  val numCouts:Int = 4
   val numSouts:Int = 0
   val vbufSize:Int = 0
   val numSRAMs:Int = 0
@@ -24,7 +27,9 @@ case class OuterComputeUnitParam (
   override lazy val numLanes:Int = 1
 
   def config(cu:OuterComputeUnit)(implicit spade:Spade) = {
+    assert(cu.cins.size >= numCins, s"cins=${cu.cins.size} numCins=${numCins}")
     assert(cu.sins.size >= numSins, s"sins=${cu.sins.size} numSins=${numSins}")
+    cu.numControlBufs(numCins)
     cu.numScalarBufs(numSins)
     cu.mems.foreach(_.writePortMux.addInputs(muxSize))
     cu.genConnections

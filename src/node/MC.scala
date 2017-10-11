@@ -8,6 +8,7 @@ import pirc.util._
 import pirc.exceptions._
 
 case class MemoryControllerParam (
+  cbufSize:Int = 16,
   sbufSize:Int = 16,
   vbufSize:Int = 16,
   muxSize:Int = 10
@@ -69,7 +70,7 @@ class MemoryController(param:MemoryControllerParam)(implicit spade:Spade) extend
                   ev <<= dram.memory(so + i + ctrlBox.count.v.toInt)
                 }
               }
-              v.valid <<= ctrlBox.running.v
+              //v.valid <<= ctrlBox.running.v //TODO
             }
           }
         case TileStore =>

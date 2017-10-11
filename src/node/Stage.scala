@@ -34,14 +34,14 @@ case class PipeReg(stage:Stage, reg:ArchReg)(implicit spade:Spade, override val 
           en.v := true //TODO: set this properly
       }
       // Enable on input
-      in.v.foreachv { case (v, i) =>
+      in.v.foreach { case (v, i) =>
         v.set { v =>
           Match(
             (sim.rst & (i==0)) -> { () => v.asSingle <<= init },
             en.v -> { () => v <<= fimap(in).v.asBus.value(i) }
           ) {}
         }
-      } { valid => valid := en.v }
+      }
       out.v := in.pv
 
       // Enable on output
