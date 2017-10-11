@@ -28,8 +28,8 @@ trait SpadeVcdDeclarator { self:VcdPrinter =>
         case node:ComputeUnit if tracked(node) => declare(node) {
           declare("srams") { node.srams.foreach(visitNode) }
           declare("ctrs") { node.ctrs.foreach(visitNode) }
-          declare("sbufs") { node.sbufs.foreach(visitNode) }
-          declare("vbufs") { node.vbufs.foreach(visitNode) }
+          declare("sfifos") { node.sfifos.foreach(visitNode) }
+          declare("vfifos") { node.vfifos.foreach(visitNode) }
           declare("stages") { node.stages.foreach(visitNode) }
           super.visitNode(node)
         }

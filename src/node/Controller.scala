@@ -29,16 +29,16 @@ abstract class Controller(val param:ControllerParam)(implicit spade:Spade) exten
   lazy val vectorIO:VectorIO[this.type] = VectorIO(this)
   lazy val ctrlIO:ControlIO[this.type] = ControlIO(this)
 
-  var vbufs:List[VectorMem] = Nil
-  var sbufs:List[ScalarMem] = Nil
-  var cbufs:List[ControlMem] = Nil
-  def bufs:List[LocalMem] = sbufs ++ vbufs
-  def mems:List[OnChipMem] = sbufs ++ vbufs
-  def numControlBufs(num:Int):this.type = { cbufs = List.tabulate(num)  { i => ControlMem(cbufSize).index(i) }; this }
-  def numScalarBufs(num:Int):this.type = { sbufs = List.tabulate(num)  { i => ScalarMem(sbufSize).index(i) }; this }
-  def numScalarBufs:Int = sbufs.size
-  def numVecBufs(num:Int):this.type = { vbufs = List.tabulate(num) { i => VectorMem(vbufSize).index(i) }; this }
-  def numVecBufs:Int = vbufs.size
+  var vfifos:List[VectorMem] = Nil
+  var sfifos:List[ScalarMem] = Nil
+  var cfifos:List[ControlMem] = Nil
+  def fifos:List[LocalMem] = sfifos ++ vfifos
+  def mems:List[OnChipMem] = sfifos ++ vfifos
+  def numControlBufs(num:Int):this.type = { cfifos = List.tabulate(num)  { i => ControlMem(cbufSize).index(i) }; this }
+  def numScalarBufs(num:Int):this.type = { sfifos = List.tabulate(num)  { i => ScalarMem(sbufSize).index(i) }; this }
+  def numScalarBufs:Int = sfifos.size
+  def numVecBufs(num:Int):this.type = { vfifos = List.tabulate(num) { i => VectorMem(vbufSize).index(i) }; this }
+  def numVecBufs:Int = vfifos.size
 
   def ctrlBox:CtrlBox
   def config:Unit

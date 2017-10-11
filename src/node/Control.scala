@@ -255,7 +255,7 @@ abstract class CtrlBox()(implicit spade:Spade, override val prt:Controller) exte
   lazy val predicateUnits = ListBuffer[PredicateUnit]()
 
   val fifoAndTree = AndTree("fifoAndTree")
-  fifoAndTree <== prt.bufs.map(_.notEmpty) 
+  fifoAndTree <== prt.fifos.map(_.notEmpty) 
 
   override def register(implicit sim:Simulator):Unit = {
     delays.foreach { delay =>

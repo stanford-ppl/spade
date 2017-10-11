@@ -39,12 +39,12 @@ trait Traversal {
               case n:ComputeUnit =>
                 n.srams.foreach(visitNode)
                 n.ctrs.foreach(visitNode)
-                n.sbufs.foreach(visitNode)
-                n.vbufs.foreach(visitNode)
+                n.sfifos.foreach(visitNode)
+                n.vfifos.foreach(visitNode)
                 n.stages.foreach(visitNode)
               case n:MemoryController =>
-                n.sbufs.foreach(visitNode)
-                n.vbufs.foreach(visitNode)
+                n.sfifos.foreach(visitNode)
+                n.vfifos.foreach(visitNode)
               case n:Top =>
             }
           case n:SwitchBox =>

@@ -20,12 +20,12 @@ case class MemoryControllerParam (
     mc.numScalarBufs(5)
     mc.numVecBufs(mc.vins.size)
     mc.mems.foreach(_.writePortMux.addInputs(muxSize))
-    nameOf(mc.sbufs(0)) = "roffset"
-    nameOf(mc.sbufs(1)) = "woffset"
-    nameOf(mc.sbufs(2)) = "rsize"
-    nameOf(mc.sbufs(3)) = "wsize"
-    nameOf(mc.sbufs(4)) = "sdata"
-    nameOf(mc.vbufs(0)) = "vdata"
+    nameOf(mc.sfifos(0)) = "roffset"
+    nameOf(mc.sfifos(1)) = "woffset"
+    nameOf(mc.sfifos(2)) = "rsize"
+    nameOf(mc.sfifos(3)) = "wsize"
+    nameOf(mc.sfifos(4)) = "sdata"
+    nameOf(mc.vfifos(0)) = "vdata"
     mc.genConnections
   }
 }
@@ -44,12 +44,12 @@ class MemoryController(param:MemoryControllerParam)(implicit spade:Spade) extend
   override val typeStr = "mc"
   lazy val ctrlBox:MCCtrlBox = new MCCtrlBox()
 
-  lazy val woffset = sbufs.filter{ sb => nameOf(sb)=="woffset" }.head
-  lazy val roffset = sbufs.filter{ sb => nameOf(sb)=="roffset" }.head
-  lazy val wsize = sbufs.filter{ sb => nameOf(sb)=="wsize" }.head
-  lazy val rsize = sbufs.filter{ sb => nameOf(sb)=="rsize" }.head
-  lazy val sdata = sbufs.filter{ vb => nameOf(vb)=="sdata" }.head
-  lazy val vdata = vbufs.filter{ vb => nameOf(vb)=="vdata" }.head
+  lazy val woffset = sfifos.filter{ sb => nameOf(sb)=="woffset" }.head
+  lazy val roffset = sfifos.filter{ sb => nameOf(sb)=="roffset" }.head
+  lazy val wsize = sfifos.filter{ sb => nameOf(sb)=="wsize" }.head
+  lazy val rsize = sfifos.filter{ sb => nameOf(sb)=="rsize" }.head
+  lazy val sdata = sfifos.filter{ vb => nameOf(vb)=="sdata" }.head
+  lazy val vdata = vfifos.filter{ vb => nameOf(vb)=="vdata" }.head
   /* Parameters */
   override def config = param.config(this)
 

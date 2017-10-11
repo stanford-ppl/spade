@@ -88,15 +88,15 @@ plasticine {
 
     // Bus input is forwarded to 1 register in empty stage
     val viRegs = cu.regs.filter(_.is(VecInReg))
-    assert(cu.vins.size == cu.vbufs.size, s"cu:${cu} vins:${cu.vins.size} vbufs:${cu.vbufs.size}")
-    if (cu.stages.nonEmpty) assert(cu.vbufs.size == viRegs.size)
-    (cu.vbufs, viRegs).zipped.foreach { case (vbuf, reg) =>
+    assert(cu.vins.size == cu.vfifos.size, s"cu:${cu} vins:${cu.vins.size} vfifos:${cu.vfifos.size}")
+    if (cu.stages.nonEmpty) assert(cu.vfifos.size == viRegs.size)
+    (cu.vfifos, viRegs).zipped.foreach { case (vbuf, reg) =>
       forwardStages(cu).foreach { s => s.get(reg).in <== vbuf.readPort }
     }
 
     // One to one
     val siRegs = cu.regs.filter(_.is(ScalarInReg))
-    (cu.sbufs, siRegs).zipped.foreach { case (sbuf, reg) =>
+    (cu.sfifos, siRegs).zipped.foreach { case (sbuf, reg) =>
       forwardStages(cu).foreach { s => s.get(reg).in <-- sbuf.readPort } // broadcast
     }
 
@@ -108,9 +108,9 @@ plasticine {
 
   def connectDataIO(cu:Controller):Unit = {
     // Xbar
-    cu.sins.foreach { sin => cu.sbufs.foreach { sbuf => sbuf.writePortMux.inputs.foreach { _ <== sin.ic } } }
+    cu.sins.foreach { sin => cu.sfifos.foreach { sbuf => sbuf.writePortMux.inputs.foreach { _ <== sin.ic } } }
     // One to one
-    (cu.vins, cu.vbufs).zipped.foreach { case (vi, vbuf) => vbuf.writePortMux.inputs.foreach { _ <== vi.ic } }
+    (cu.vins, cu.vfifos).zipped.foreach { case (vi, vbuf) => vbuf.writePortMux.inputs.foreach { _ <== vi.ic } }
 
     cu match {
       case cu:MemoryComputeUnit =>
@@ -134,9 +134,9 @@ plasticine {
   def connectSRAM(cu:ComputeUnit):Unit = {
     cu.srams.foreach { sram =>
       sram.readAddrMux.inputs.foreach { _ <== (cu.ctrs.map(_.out), 0) }// sram read/write addr can be from all counters
-      sram.readAddrMux.inputs.foreach { _ <== cu.sbufs.map(_.readPort) }
+      sram.readAddrMux.inputs.foreach { _ <== cu.sfifos.map(_.readPort) }
       sram.writeAddrMux.inputs.foreach { _ <== (cu.ctrs.map(_.out), 0) }
-      sram.writeAddrMux.inputs.foreach { _ <== cu.sbufs.map(_.readPort) }
+      sram.writeAddrMux.inputs.foreach { _ <== cu.sfifos.map(_.readPort) }
       cu match {
         case cu:MemoryComputeUnit =>
           //cu.rastages.foreach { stage => sram.readAddrMux.inputs.foreach { _ <== (stage.fu.out, 0) } }
@@ -148,8 +148,8 @@ plasticine {
         case _ =>
       }
 
-      sram.writePortMux.inputs.foreach { _ <== cu.vbufs.map(_.readPort) }
-      cu.sbufs.foreach { sbuf => sram.writePortMux.inputs.foreach { _.sliceHead(sbuf.readPort) } }
+      sram.writePortMux.inputs.foreach { _ <== cu.vfifos.map(_.readPort) }
+      cu.sfifos.foreach { sbuf => sram.writePortMux.inputs.foreach { _.sliceHead(sbuf.readPort) } }
     } 
   }
 
@@ -161,11 +161,11 @@ plasticine {
 
     cu.ctrs.foreach { c => 
       c.min <== Const().out // Counter max, min, step can be constant or scalarIn(specified later)
-      c.min <== cu.sbufs.map(_.readPort)
+      c.min <== cu.sfifos.map(_.readPort)
       c.max <== Const().out
-      c.max <== cu.sbufs.map(_.readPort)
+      c.max <== cu.sfifos.map(_.readPort)
       c.step <== Const().out
-      c.step <== cu.sbufs.map(_.readPort)
+      c.step <== cu.sfifos.map(_.readPort)
     }
     /* Chain counters together */
     for (i <- 1 until cu.ctrs.size) { cu.ctrs(i).en <== cu.ctrs(i-1).done } 
@@ -197,8 +197,8 @@ plasticine {
       stage.funcUnit.get.operands.foreach { oprd => 
         cu.ctrs.foreach{ oprd <== _.out }
         cu.srams.foreach { oprd <== _.readPort }
-        cu.vbufs.foreach { oprd <== _.readPort }
-        cu.sbufs.foreach { oprd <-- _.readPort }
+        cu.vfifos.foreach { oprd <== _.readPort }
+        cu.sfifos.foreach { oprd <-- _.readPort }
       }
     }
 
@@ -259,20 +259,20 @@ plasticine {
     val low = Const(false)
     (cu, cu.ctrlBox) match {
       case (cu:MemoryComputeUnit, cb:MemoryCtrlBox) => 
-        (cu.cbufs ++ cu.sbufs).foreach { buf => 
+        (cu.cfifos ++ cu.sfifos).foreach { buf => 
           buf.dequeueEnable <== cb.readEn.out
           buf.dequeueEnable <== cb.writeEn.out
           buf.enqueueEnable <== buf.writePortMux.valid 
           buf.predicate <== low.out
         }
-        cu.vbufs.foreach { buf => 
+        cu.vfifos.foreach { buf => 
           buf.dequeueEnable <== cb.writeEn.out
           buf.enqueueEnable <== buf.writePortMux.valid 
           buf.predicate <== low.out
         }
         cu.srams.foreach { sram => 
-          sram.enqueueEnable <== cu.cbufs.map(_.readPort) 
-          sram.dequeueEnable <== cu.cbufs.map(_.readPort) 
+          sram.enqueueEnable <== cu.cfifos.map(_.readPort) 
+          sram.dequeueEnable <== cu.cfifos.map(_.readPort) 
           //sram.dequeueEnable <== cb.readDoneDelay.out 
           //sram.enqueueEnable <== cb.writeDoneDelay.out
           //sram.writeEn <== cb.writeEnDelay.out
@@ -280,18 +280,18 @@ plasticine {
           sram.writeEn <== cb.writeEn.out
           sram.readEn <== cb.readEn.out
         }
-        cb.writeFifoAndTree <== cu.bufs.map(_.notEmpty) :+ cu.sram.notFull
-        cb.readFifoAndTree <== (cu.bufs.map(_.notEmpty) :+ cu.sram.notEmpty)
+        cb.writeFifoAndTree <== cu.fifos.map(_.notEmpty) :+ cu.sram.notFull
+        cb.readFifoAndTree <== (cu.fifos.map(_.notEmpty) :+ cu.sram.notEmpty)
       case (mc:MemoryController, cb:MCCtrlBox) =>
-        //mc.sbufs.foreach { buf => buf.enqueueEnable <== cu.cins.map(_.ic) }
-        mc.sbufs.foreach { buf => 
+        //mc.sfifos.foreach { buf => buf.enqueueEnable <== cu.cins.map(_.ic) }
+        mc.sfifos.foreach { buf => 
           buf.dequeueEnable <== cb.en.out
         }
         mc.vdata.dequeueEnable <== cb.running
         mc.sdata.dequeueEnable <== cb.running
-        mc.bufs.foreach { buf => buf.predicate <== low.out }
+        mc.fifos.foreach { buf => buf.predicate <== low.out }
       case (cu:ComputeUnit, cb:StageCtrlBox) => 
-        cu.bufs.foreach { buf =>
+        cu.fifos.foreach { buf =>
           buf.dequeueEnable <== cu.ctrs.map(_.done)
           buf.dequeueEnable <== cb.en.out; 
           buf.enqueueEnable <== buf.writePortMux.valid 
@@ -300,10 +300,12 @@ plasticine {
             case cb:InnerCtrlBox =>
               buf.predicate <== cb.fifoPredUnit.out
             case _ =>
+              buf.predicate <== low.out
           }
         }
-        cu.sbufs.foreach { buf =>
-          buf.enqueueEnable <== cu.cbufs.map(_.readPort)
+        // Scalar FIFO can map registers
+        cu.sfifos.foreach { buf =>
+          buf.enqueueEnable <== cu.cfifos.map(_.readPort)
         }
       case (top:Top, cb:TopCtrlBox) =>
     }
@@ -337,7 +339,7 @@ plasticine {
     (cu, cu.ctrlBox) match {
       case (cu:ComputeUnit, cb:InnerCtrlBox) => 
         cu.couts.foreach { cout => 
-          cout.ic <== cu.bufs.map(_.notFull)
+          cout.ic <== cu.fifos.map(_.notFull)
           cout.ic <== cb.doneDelay.out
           cout.ic <== cb.enDelay.out
         }
@@ -349,13 +351,13 @@ plasticine {
       case (cu:MemoryComputeUnit, cb:MemoryCtrlBox) => 
         cb.tokenInXbar.in <== cu.cins.map(_.ic)
         cu.couts.foreach { cout => 
-          cout.ic <== cu.bufs.map(_.notFull)
+          cout.ic <== cu.fifos.map(_.notFull)
           cout.ic <== cb.writeDone.out
           cout.ic <== cb.readDone.out
         }
       case (mc:MemoryController, cb:MCCtrlBox) =>
         mc.couts.foreach { cout =>
-          cout.ic <== mc.bufs.map(_.notFull)
+          cout.ic <== mc.fifos.map(_.notFull)
           cout.ic <== cb.rdone
           cout.ic <== cb.wdone
         }

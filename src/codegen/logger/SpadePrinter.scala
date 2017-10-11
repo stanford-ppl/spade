@@ -34,13 +34,13 @@ class SpadePrinter(implicit design: Spade) extends Codegen {
   addPass {
     design.top.ctrlers.foreach { ctrler => emitBlock(s"${ctrler}") {
       emitIO(ctrler)
-      ctrler.sbufs.foreach { s => emitModule(s) }
+      ctrler.sfifos.foreach { s => emitModule(s) }
       ctrler match {
         case top:Top =>
         case mc:MemoryController =>
         case cu:ComputeUnit =>
           cu.srams.foreach { s => emitModule(s) }
-          cu.bufs.foreach { s => emitModule(s) }
+          cu.fifos.foreach { s => emitModule(s) }
           cu.ctrs.foreach{ c => emitModule(c) }
           cu.stages.foreach { s =>
             emitBlock(s"${quote(s)}") {
