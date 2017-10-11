@@ -11,12 +11,14 @@ trait Routable extends Module with Simulatable {
   def vectorIO:VectorIO[this.type]
   def ctrlIO:ControlIO[this.type]
   def gridIOs = scalarIO :: vectorIO :: ctrlIO :: Nil
+  def cins = ctrlIO.ins // Control inputs
+  def couts = ctrlIO.outs // Control outputs
   def sins = scalarIO.ins // Scalar Inputs
   def souts = scalarIO.outs // Scalar Outputs
   def vins = vectorIO.ins// Input Buses/Vector inputs
   def vouts = vectorIO.outs // Output Buses/Vector outputs
-  def cins = ctrlIO.ins // Control inputs
-  def couts = ctrlIO.outs // Control outputs
+  def gins = cins ++ sins ++ vins
+  def gouts = couts ++ souts ++ vouts
 
   def isMCU:Boolean = this.isInstanceOf[MemoryComputeUnit]
   def isSCU:Boolean = this.isInstanceOf[ScalarComputeUnit]

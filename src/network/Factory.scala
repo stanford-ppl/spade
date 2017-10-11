@@ -343,11 +343,16 @@ plasticine {
           cout.ic <== cb.doneDelay.out
           cout.ic <== cb.enDelay.out
         }
+        cu.gouts.foreach { out =>
+          out.valid <== cb.en.out
+          out.valid <== cu.ctrs.map(_.done)
+        }
       case (cu:OuterComputeUnit, cb:OuterCtrlBox) => 
         cu.couts.foreach { cout => 
           cout.ic <== cb.udsm.doneOut 
           cout.ic <== cb.en.out
         }
+        cu.gouts.foreach { _.valid <== cb.en.out }
       case (cu:MemoryComputeUnit, cb:MemoryCtrlBox) => 
         cb.tokenInXbar.in <== cu.cins.map(_.ic)
         cu.couts.foreach { cout => 
@@ -355,15 +360,18 @@ plasticine {
           cout.ic <== cb.writeDone.out
           cout.ic <== cb.readDone.out
         }
+        cu.gouts.foreach { _.valid <== cb.readEnDelay.out }
       case (mc:MemoryController, cb:MCCtrlBox) =>
         mc.couts.foreach { cout =>
           cout.ic <== mc.fifos.map(_.notFull)
           cout.ic <== cb.rdone
           cout.ic <== cb.wdone
         }
+        mc.gouts.foreach { _.valid <== cb.running }
       case (top:Top, cb:TopCtrlBox) =>
         top.cins.foreach { _.ic ==> cb.status }
         top.couts.foreach { _.ic <== cb.command}
+        top.gouts.foreach { _.valid <== cb.command }
     }
   }
 
