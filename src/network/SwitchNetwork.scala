@@ -15,7 +15,7 @@ trait SwitchNetwork { self:Spade =>
 
   def pcuAt(x:Int, y:Int) = {
     import topParam._
-    if (x>0 && x<numCols) new PatternComputeUnitParam()
+    if (x>=0 && x<numCols) new PatternComputeUnitParam()
     else new SRAMAddrGenParam()
   }
 
