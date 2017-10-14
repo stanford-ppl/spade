@@ -8,7 +8,9 @@ import spade.codegen._
 import spade.traversal._
 import spade.config._
 
+import pirc._
 import pirc.test._
+import pirc.codegen._
 
 import org.scalatest._
 import sys.process._
@@ -20,24 +22,29 @@ class SearchTest extends UnitTest { self =>
     implicit val spade = SN4x4
     spade.top.config
 
+    val logger = new Logger {
+      override lazy val stream = newStream(s"${Config.outDir}/SearchTest", s"SearchTest.log")
+    }
+
     val router = new PlasticineGraphTraversal { implicit def arch = spade }
 
     val start = spade.cuArray(0)(0)
     val end = spade.cuArray(2)(2)
 
-    val (path, cost) = router.simpleCostSearch(start, end, router.advance((n:Routable) => n.vouts, start) _)
+    val (path, cost) = router.simpleCostSearch(
+      start=start, 
+      end=end, 
+      advance=router.advance((n:Routable) => n.vouts, start) _,
+      logger=Some(logger)
+    )
 
-    println(path, cost)
     val map = router.setConfig(SpadeMap.empty, path)
 
-    new PlasticineCtrlDotPrinter().print(Some(map))
-    s"out/bin/run -cp out/${spade}/CtrlNetwork".replace(".dot", "") !
+    //new PlasticineCtrlDotPrinter().print(Some(map))
 
     //new PlasticineScalarDotPrinter().print(Some(map))
-    //s"out/bin/run -cp out/${arch}/ScalNetwork".replace(".dot", "") !
 
-    //new PlasticineVectorDotPrinter().print(Some(map))
-    //s"out/bin/run -cp out/${arch}/VecNetwork".replace(".dot", "") !
+    new PlasticineVectorDotPrinter(open=true).print(Some(map))
 
   }
 

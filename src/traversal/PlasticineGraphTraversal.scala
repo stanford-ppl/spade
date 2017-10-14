@@ -5,6 +5,7 @@ import spade.node._
 import spade.config._
 
 import pirc.util._
+import pirc.codegen.Logger
 
 import scala.language.postfixOps
 
@@ -69,7 +70,8 @@ trait PlasticineGraphTraversal extends GraphSearch {
   def search[A](
     start:N, 
     end:N,
-    advance:N => Iterable[(N, A, C)]
+    advance:N => Iterable[(N, A, C)],
+    logger:Option[Logger] = None
   ):(List[(N,A)], C) = {
     search (
       start    = start,
@@ -77,14 +79,16 @@ trait PlasticineGraphTraversal extends GraphSearch {
       zeroCost = 0,
       sumCost  = { (a:C, b:C) => a + b },
       advance  = advance,
-      quote = spade.util.quote _
+      quote = spade.util.quote _,
+      logger = logger
     )
   }
 
   def simpleCostSearch[A](
     start:N, 
     end:N,
-    advance:N => Iterable[(N, A)]
+    advance:N => Iterable[(N, A)],
+    logger:Option[Logger] = None
   ):(List[(N,A)], C) = {
     def simpleCostAdvance(n:N):Iterable[(N, A, C)] = {
       advance(n).map { case (n, a) => (n, a, 1) }
@@ -95,7 +99,8 @@ trait PlasticineGraphTraversal extends GraphSearch {
       zeroCost = 0,
       sumCost  = { (a:C, b:C) => a + b },
       advance  = simpleCostAdvance,
-      quote = spade.util.quote _
+      quote = spade.util.quote _,
+      logger = logger
     )
   }
 }

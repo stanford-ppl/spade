@@ -85,7 +85,7 @@ abstract class PlasticineDotGen(fn:String, open:Boolean)(implicit design:Spade) 
     }
     close
     if (open) { 
-      s"out/bin/run -pc ${getPath} &".replace(".dot", "") !
+      s"out/bin/run -c ${getPath} &".replace(".dot", "") !
     }
   }
 
@@ -120,7 +120,7 @@ abstract class PlasticineDotGen(fn:String, open:Boolean)(implicit design:Spade) 
     mapping.foreach { mp => 
       prt match {
         case prt:Controller =>
-          if (mp.cfmap.contains(prt) || io(prt).ins.exists( in => mp.fimap.contains(in)))
+          if (io(prt).ins.exists( in => mp.fimap.contains(in)) || io(prt).outs.exists(out => mp.fimap.contains(out)))
             attr.style(filled).fillcolor(color(prt))
         case prt:SwitchBox =>
           if (io(prt).ins.exists(in => mp.fimap.contains(in)))
