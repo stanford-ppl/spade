@@ -18,6 +18,9 @@ abstract class PlasticineDotGen(fn:String, open:Boolean)(implicit design:Spade) 
 
   def shouldRun = Config.debug
 
+  private var _mapping:Option[SpadeMap] = None
+  def mapping:Option[SpadeMap] = _mapping
+
   val scale:Int
 
   def io(prt:Routable):GridIO[_<:PortType, Routable]
@@ -86,6 +89,11 @@ abstract class PlasticineDotGen(fn:String, open:Boolean)(implicit design:Spade) 
     }
   }
 
+  def print(mapping:Option[SpadeMap]):Unit = {
+    this._mapping = mapping
+    print
+  }
+
   /*
    * Position of Controller / SwitchBox as a function of coordinate
    * */
@@ -106,9 +114,28 @@ abstract class PlasticineDotGen(fn:String, open:Boolean)(implicit design:Spade) 
     }
 
   }
-  def setColor(prt:Routable, attr:DotAttr) = { } // default no color
 
-  def setColor(pin:GlobalInput[_<:PortType, Module], pout:GlobalOutput[_<:PortType,Module], attr:DotAttr) = { } // default no color
+  def setColor(prt:Routable, attr:DotAttr) = {
+    // Color node if any of the inputs is mapped
+    mapping.foreach { mp => 
+      prt match {
+        case prt:Controller =>
+          if (mp.cfmap.contains(prt) || io(prt).ins.exists( in => mp.fimap.contains(in)))
+            attr.style(filled).fillcolor(color(prt))
+        case prt:SwitchBox =>
+          if (io(prt).ins.exists(in => mp.fimap.contains(in)))
+            attr.style(filled).fillcolor(color(prt))
+      }
+    }
+  }
+
+  def setColor(pin:GlobalInput[_<:PortType, Module], pout:GlobalOutput[_<:PortType, Module], attr:DotAttr) = {
+    mapping.foreach { m => 
+      if (m.fimap.get(pin).fold(false){ _ == pout }) {
+        attr.color(linkColor).style(bold)
+      }
+    }
+  }
 
   def getLabel(prt:Routable):String = quote(prt)
 

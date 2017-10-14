@@ -9,8 +9,27 @@ import scala.reflect.runtime.universe._
 import scala.language.existentials
 
 trait SpadeMap {
+
   def fimap:FIMap
   def cfmap:CFMap
+
+  private def copy(
+    fimap:FIMap=fimap,
+    cfmap:CFMap=cfmap
+  ) = {
+    SpadeMap(fimap, cfmap)
+  }
+
+  def setFI(k:FIMap.K, v:FIMap.V):SpadeMap = copy(fimap=fimap + ((k, v)))
+  def setCF(k:CFMap.K, v:CFMap.V):SpadeMap = copy(cfmap=cfmap + ((k, v)))
+}
+
+object SpadeMap {
+  def apply(fi:FIMap, cf:CFMap) = new SpadeMap {
+    val fimap = fi
+    val cfmap = cf
+  }
+  def empty:SpadeMap = SpadeMap(FIMap.empty, CFMap.empty)
 }
 
 /* FanIn map: a mapping between a PInput and the POutput it connects to */

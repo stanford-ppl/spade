@@ -1,4 +1,4 @@
-package spade.test
+package arch.test
 
 import arch._
 
@@ -10,6 +10,8 @@ import spade.codegen._
 import pirc.util._
 import pirc._
 
+import pirc.test._
+
 import org.scalatest._
 import scala.language.reflectiveCalls
 import scala.util.Random
@@ -19,7 +21,7 @@ import scala.language.postfixOps
 
 class SpadeTest extends UnitTest { self =>
 
-  "SpadeTest" should "success" taggedAs(ARCH) in {
+  "SpadeTest" should "success" in {
     implicit val arch = SN2x2
     arch.top.config
     //arch = SN16x8_LD
