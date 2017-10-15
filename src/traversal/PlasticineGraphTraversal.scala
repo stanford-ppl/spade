@@ -3,6 +3,7 @@ package spade.traversal
 import spade._
 import spade.node._
 import spade.config._
+import spade.util._
 
 import pirc.util._
 import pirc.codegen.Logger
@@ -93,13 +94,16 @@ trait PlasticineGraphTraversal extends GraphSearch {
     def simpleCostAdvance(n:N):Iterable[(N, A, C)] = {
       advance(n).map { case (n, a) => (n, a, 1) }
     }
+    logger.foreach { l =>
+      l.dprintln(s"start=${quote(start)} end=${quote(end)} --------------")
+    }
     search (
       start    = start,
       isEnd    = { (n:N) => n == end },
       zeroCost = 0,
       sumCost  = { (a:C, b:C) => a + b },
       advance  = simpleCostAdvance,
-      quote = spade.util.quote _,
+      quote = quote _,
       logger = logger
     )
   }
