@@ -9,6 +9,7 @@ import pirc.util._
 import pirc.codegen.Logger
 
 import scala.language.postfixOps
+import scala.language.existentials
 
 trait PlasticineGraphTraversal extends GraphSearch {
 
@@ -18,19 +19,33 @@ trait PlasticineGraphTraversal extends GraphSearch {
   type C = Int
   type I = Input[_<:PortType, Module]
   type O = Output[_<:PortType, Module]
+  type E = (IO[_<:PortType, Module], IO[_<:PortType, Module])
   type FE = (O, I) 
   type BE = (I, O)
+  type M = SpadeMap
 
-  def setConfig(map:SpadeMap, path:List[(N, FE)]):SpadeMap = {
+  def setConfig[Edge<:E](map:M, path:List[(N, Edge)]):M = {
     var mp = map
-    path.zipWithIndex.foreach { case ((node, (out, in)), i) => 
+    path.zipWithIndex.foreach { case ((node, (io1, io2)), i) => 
+      val (out, in, outFrom) = (io1, io2) match {
+        case (out:O, in:I) => 
+          val outFrom = out.src match {
+            case sb:SwitchBox => Some(path(i-1)._2._2.asInput.asGlobal)
+            case _ => None
+          }
+          (out, in, outFrom)
+        case (in:I, out:O) => (out, in)
+          val outFrom = out.src match {
+            case sb:SwitchBox => Some(path(i+1)._2._1.asInput.asGlobal)
+            case _ => None
+          }
+          (out, in, outFrom)
+      }
       mp = mp.setFI(in, out)
       out match {
         case out:GlobalOutput[_,_] =>
-          if (out.src.isInstanceOf[SwitchBox]) { // Config SwitchBox
-            val to = out 
-            val from = path(i-1)._2._2.asGlobal
-            mp = mp.setFI(to.ic, from.ic)
+          outFrom.foreach { outFrom => // Config SwitchBox
+            mp = mp.setFI(out.ic, outFrom.ic)
           }
         case _ =>
       }
@@ -68,12 +83,17 @@ trait PlasticineGraphTraversal extends GraphSearch {
     }
   }
 
-  def search[A](
+  def search[A<:E](
     start:N, 
     end:N,
     advance:N => Iterable[(N, A, C)],
+    map:M,
+    finPass: (M,C) => M,
     logger:Option[Logger] = None
-  ):(List[(N,A)], C) = {
+  ):M = {
+    def fp(route:List[(N,A)], cost:C):M = {
+      finPass(setConfig(map, route),cost)
+    }
     search (
       start    = start,
       isEnd    = { (n:N) => n == end },
@@ -81,16 +101,19 @@ trait PlasticineGraphTraversal extends GraphSearch {
       sumCost  = { (a:C, b:C) => a + b },
       advance  = advance,
       quote = spade.util.quote _,
+      finPass = fp _,
       logger = logger
     )
   }
 
-  def simpleCostSearch[A](
+  def simpleCostSearch[A<:E](
     start:N, 
     end:N,
     advance:N => Iterable[(N, A)],
+    map:M,
+    finPass: (M,C) => M,
     logger:Option[Logger] = None
-  ):(List[(N,A)], C) = {
+  ):M = {
     def simpleCostAdvance(n:N):Iterable[(N, A, C)] = {
       advance(n).map { case (n, a) => (n, a, 1) }
     }
@@ -98,13 +121,12 @@ trait PlasticineGraphTraversal extends GraphSearch {
       l.dprintln(s"start=${quote(start)} end=${quote(end)} --------------")
     }
     search (
-      start    = start,
-      isEnd    = { (n:N) => n == end },
-      zeroCost = 0,
-      sumCost  = { (a:C, b:C) => a + b },
-      advance  = simpleCostAdvance,
-      quote = quote _,
-      logger = logger
+      start   = start,
+      end     = end,
+      advance = simpleCostAdvance _,
+      map     = map,
+      finPass = finPass,
+      logger  = logger
     )
   }
 }

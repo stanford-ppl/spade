@@ -90,8 +90,8 @@ abstract class IO[P<:PortType, +S<:Module](val tp:P, val src:S)(implicit spade:S
 
   def isIn:Boolean
   def isOut:Boolean
-  def asIn = this.asInstanceOf[Input[P,S]]
-  def asOut = this.asInstanceOf[Output[P,S]]
+  def asInput = this.asInstanceOf[Input[P,S]]
+  def asOutput = this.asInstanceOf[Output[P,S]]
   def isBus = tp.isInstanceOf[Bus]
   def isWord = tp.isInstanceOf[Word]
   def isBit = tp.isInstanceOf[Bit]

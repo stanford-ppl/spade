@@ -33,26 +33,30 @@ class SearchTest extends UnitTest { self =>
       val start = spade.cuArray(x1)(y1)
       val end = spade.cuArray(x2)(y2)
 
-      val (path, cost) = router.simpleCostSearch(
+      def validate(map:SpadeMap, cost:Int):SpadeMap = {
+        val xMinCost = math.max(math.abs(x1-x2)-1, 0)
+        val yMinCost = math.max(math.abs(y1-y2)-1, 0)
+
+        assert(cost == xMinCost + yMinCost + 2)
+
+        map
+      }
+
+      val map = router.simpleCostSearch(
         start=start, 
         end=end, 
         advance=router.advance((n:Routable) => n.couts, start) _,
+        map=SpadeMap.empty,
+        finPass=validate _,
         logger=None//Some(logger)
       )
-
-      val map = router.setConfig(SpadeMap.empty, path)
 
       //new PlasticineCtrlDotPrinter(open=false).print(Some(map))
 
       //new PlasticineScalarDotPrinter().print(Some(map))
 
       //new PlasticineVectorDotPrinter(open=false).print(Some(map))
-      
-      val xMinCost = math.max(math.abs(x1-x2)-1, 0)
-      val yMinCost = math.max(math.abs(y1-y2)-1, 0)
-
-      //println(cost, xMinCost, yMinCost, x1, y1, x2, y2)
-      assert(cost == xMinCost + yMinCost + 2)
+        
 
     }
 
