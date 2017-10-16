@@ -94,7 +94,7 @@ trait PlasticineGraphTraversal extends GraphSearch {
     def fp(route:List[(N,A)], cost:C):M = {
       finPass(setConfig(map, route),cost)
     }
-    search (
+    search ( // defined in pirc.util.GraphSearch
       start    = start,
       isEnd    = { (n:N) => n == end },
       zeroCost = 0,
@@ -129,4 +129,20 @@ trait PlasticineGraphTraversal extends GraphSearch {
       logger  = logger
     )
   }
+
+  def span (
+    start:N, 
+    advance:(N,C) => Iterable[(N, C)], 
+    logger:Option[Logger]
+  ):Iterable[N] = {
+    span (
+      start    = start,
+      zeroCost = 0,
+      sumCost  = { (a:C, b:C) => a + b },
+      advance  = advance,
+      quote    = spade.util.quote _,
+      logger   = logger
+    )
+  }
+
 }

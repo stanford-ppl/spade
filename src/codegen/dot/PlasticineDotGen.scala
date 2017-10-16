@@ -120,7 +120,7 @@ abstract class PlasticineDotGen(fn:String, open:Boolean)(implicit design:Spade) 
     mapping.foreach { mp => 
       prt match {
         case prt:Controller =>
-          if (io(prt).ins.exists( in => mp.fimap.contains(in)) || io(prt).outs.exists(out => mp.fimap.contains(out)))
+          if (mp.cfmap.contains(prt) || io(prt).ins.exists( in => mp.fimap.contains(in)) || io(prt).outs.exists(out => mp.fimap.contains(out)))
             attr.style(filled).fillcolor(color(prt))
         case prt:SwitchBox =>
           if (io(prt).ins.exists(in => mp.fimap.contains(in)))
