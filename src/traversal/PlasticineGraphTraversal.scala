@@ -53,33 +53,32 @@ trait PlasticineGraphTraversal extends GraphSearch {
     mp
   }
 
-  def advance(outs:N => Iterable[O], start:N)(n:N):Iterable[(N, FE)] = {
+  def advance(
+    outs:N => Iterable[O], 
+    start:N
+  )(n:N):Iterable[(N, FE)] = {
     type X = (N,FE)
     n match {
-      case n:SwitchBox =>
+      case n:Controller if n != start => Nil
+      case n =>
         outs(n).flatMap[X, Iterable[X]]{ out => 
           out.fanOuts.map[X, Iterable[X]]{ in => (in.src.asInstanceOf[N], (out, in)) } 
         }
-      case `start` => 
-        outs(n).flatMap[X, Iterable[X]]{ out => 
-          out.fanOuts.map[X, Iterable[X]]{ in => (in.src.asInstanceOf[N], (out, in)) } 
-        }
-      case n:Controller => Nil
     }
   }
 
-  def inverseAdvance(ins:N => Iterable[I], start:N)(n:N):Iterable[(N,BE)] = {
+  def inverseAdvance(
+    ins:N => Iterable[I], 
+    start:N, 
+    map:Option[SpadeMap] = None
+  )(n:N):Iterable[(N,BE)] = {
     type X = (N,BE)
     n match {
+      case n:Controller if n != start => Nil
       case n:SwitchBox =>
         ins(n).flatMap[X, Iterable[X]]{ in => 
           in.fanIns.map[X, Iterable[X]]{ out => (out.src.asInstanceOf[N], (in, out)) } 
         }
-      case `start` => 
-        ins(n).flatMap[X, Iterable[X]]{ in => 
-          in.fanIns.map[X, Iterable[X]]{ out => (out.src.asInstanceOf[N], (in, out)) } 
-        }
-      case n:Controller => Nil
     }
   }
 
