@@ -11,7 +11,7 @@ import pirc.codegen.Logger
 import scala.language.postfixOps
 import scala.language.existentials
 
-trait PlasticineGraphTraversal extends GraphSearch {
+trait PlasticineGraphTraversal extends UniformCostGraphSearch {
 
   implicit def arch:Spade
 
@@ -53,33 +53,33 @@ trait PlasticineGraphTraversal extends GraphSearch {
     mp
   }
 
-  def advance(
+  def advance[I,O](
     outs:N => Iterable[O], 
+    fanOuts:O => Iterable[I],
+    src:I => N,
     start:N
-  )(n:N):Iterable[(N, FE)] = {
-    type X = (N,FE)
+  )(n:N):Iterable[(N, (O,I))] = {
+    type X = (N,(O,I))
     n match {
       case n:Controller if n != start => Nil
       case n =>
         outs(n).flatMap[X, Iterable[X]]{ out => 
-          out.fanOuts.map[X, Iterable[X]]{ in => (in.src.asInstanceOf[N], (out, in)) } 
+          fanOuts(out).map[X, Iterable[X]]{ in => (src(in), (out, in)) } 
         }
     }
   }
 
-  def inverseAdvance(
-    ins:N => Iterable[I], 
-    start:N, 
-    map:Option[SpadeMap] = None
-  )(n:N):Iterable[(N,BE)] = {
-    type X = (N,BE)
-    n match {
-      case n:Controller if n != start => Nil
-      case n:SwitchBox =>
-        ins(n).flatMap[X, Iterable[X]]{ in => 
-          in.fanIns.map[X, Iterable[X]]{ out => (out.src.asInstanceOf[N], (in, out)) } 
-        }
-    }
+  def advance(
+    outs:N => Iterable[O], 
+    start:N
+  )(n:N):Iterable[(N, (O,I))] = {
+
+    advance[I,O](
+      outs    = outs,
+      fanOuts = (o:O) => o.fanOuts,
+      src     = (i:I) => i.src.asInstanceOf[N],
+      start   = start
+    )(n)
   }
 
   def search[A<:E](
@@ -93,7 +93,7 @@ trait PlasticineGraphTraversal extends GraphSearch {
     def fp(route:List[(N,A)], cost:C):M = {
       finPass(setConfig(map, route),cost)
     }
-    search ( // defined in pirc.util.GraphSearch
+    uniformCostSearch ( // defined in pirc.util.GraphSearch
       start    = start,
       isEnd    = { (n:N) => n == end },
       zeroCost = 0,
@@ -134,7 +134,7 @@ trait PlasticineGraphTraversal extends GraphSearch {
     advance:(N,C) => Iterable[(N, C)], 
     logger:Option[Logger]
   ):Iterable[N] = {
-    span (
+    uniformCostSpan (
       start    = start,
       zeroCost = 0,
       sumCost  = { (a:C, b:C) => a + b },
