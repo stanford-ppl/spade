@@ -273,16 +273,11 @@ plasticine {
     val low = Const(false)
     (cu, cu.ctrlBox) match {
       case (cu:MemoryComputeUnit, cb:MemoryCtrlBox) => 
-        (cu.cfifos ++ cu.sfifos).foreach { buf => 
-          buf.dequeueEnable <== cb.readEn.out
-          buf.dequeueEnable <== cb.writeEn.out
-          buf.enqueueEnable <== buf.writePortMux.valid 
-          buf.predicate <== low.out
-        }
-        cu.vfifos.foreach { buf => 
-          buf.dequeueEnable <== cb.writeEn.out
-          buf.enqueueEnable <== buf.writePortMux.valid 
-          buf.predicate <== low.out
+        (cu.fifos).foreach { fifo => 
+          fifo.dequeueEnable <== cb.readEn.out
+          fifo.dequeueEnable <== cb.writeEn.out
+          fifo.enqueueEnable <== fifo.writePortMux.valid 
+          fifo.predicate <== low.out
         }
         cu.srams.foreach { sram => 
           sram.enqueueEnable <== cu.cfifos.map(_.readPort) 
@@ -297,24 +292,25 @@ plasticine {
         cb.writeFifoAndTree <== cu.fifos.map(_.notEmpty) :+ cu.sram.notFull
         cb.readFifoAndTree <== (cu.fifos.map(_.notEmpty) :+ cu.sram.notEmpty)
       case (mc:MemoryController, cb:MCCtrlBox) =>
-        //mc.sfifos.foreach { buf => buf.enqueueEnable <== cu.cins.map(_.ic) }
-        mc.sfifos.foreach { buf => 
-          buf.dequeueEnable <== cb.en.out
+        mc.fifos.foreach { fifo => 
+          fifo.dequeueEnable <== cb.en.out
+          fifo.enqueueEnable <== fifo.writePortMux.valid 
+          fifo.predicate <== low.out
         }
         mc.vdata.dequeueEnable <== cb.running
         mc.sdata.dequeueEnable <== cb.running
-        mc.fifos.foreach { buf => buf.predicate <== low.out }
+        mc.fifos.foreach { fifo => fifo.predicate <== low.out }
       case (cu:ComputeUnit, cb:StageCtrlBox) => 
-        cu.fifos.foreach { buf =>
-          buf.dequeueEnable <== cu.ctrs.map(_.done)
-          buf.dequeueEnable <== cb.en.out; 
-          buf.enqueueEnable <== buf.writePortMux.valid 
-          buf.predicate <== low.out 
+        cu.fifos.foreach { fifo =>
+          fifo.dequeueEnable <== cu.ctrs.map(_.done)
+          fifo.dequeueEnable <== cb.en.out; 
+          fifo.enqueueEnable <== fifo.writePortMux.valid 
+          fifo.predicate <== low.out 
           cb match {
             case cb:InnerCtrlBox =>
-              buf.predicate <== cb.fifoPredUnit.out
+              fifo.predicate <== cb.fifoPredUnit.out
             case _ =>
-              buf.predicate <== low.out
+              fifo.predicate <== low.out
           }
         }
         // Scalar FIFO can map registers

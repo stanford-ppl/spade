@@ -111,7 +111,6 @@ package object util {
   )(implicit ev:ClassTag[X], spade:Spade):Set[X] = {
     logger.foreach { l =>
       l.emitBSln(s"collectOut(${quote(x)})")
-      //l.dprintln(s"visited=$visited")
     }
     def f(xx:Any):Set[X] = collectOut[X](xx, visitOut,logger, visited + x)
     val res = x match {

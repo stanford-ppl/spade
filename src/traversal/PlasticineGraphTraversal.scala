@@ -5,6 +5,7 @@ import spade.node._
 import spade.config._
 import spade.util._
 
+import pirc._
 import pirc.util._
 import pirc.codegen.Logger
 
@@ -90,7 +91,7 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
     map:M,
     finPass: (M,List[(N,A)],C) => M,
     logger:Option[Logger] = None
-  ):M = {
+  ):Either[PIRException, M] = {
     def fp(route:List[(N,A)], cost:C):M = {
       finPass(setConfig(map, route),route,cost)
     }
@@ -113,7 +114,7 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
     map:M,
     finPass: (M,C) => M,
     logger:Option[Logger] = None
-  ):M = {
+  ):Either[PIRException,M] = {
     def simpleCostAdvance(n:N,c:C):Iterable[(N, A, C)] = {
       advance(n,c).map { case (n, a) => (n, a, 1) }
     }
