@@ -304,7 +304,7 @@ trait LocalMem extends OnChipMem {
  * exist). Input connects to 1 out port of the InBus */
 case class ControlMem(size:Int)(implicit spade:Spade, prt:Controller) extends LocalMem {
   import spademeta._
-  override val typeStr = "sm"
+  override val typeStr = "cm"
   type P = Bit
   var memory:Array[P] = _
   def wtp = Bit() 

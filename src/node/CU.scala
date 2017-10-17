@@ -40,7 +40,7 @@ abstract class ComputeUnit(override val param:ComputeUnitParam)(implicit spade:S
   val regs:List[ArchReg] = List.tabulate(numRegs) { ir => ArchReg().index(ir) }
   val srams:List[SRAM] = List.tabulate(numSRAMs) { i => SRAM(sramSize, spade.numLanes).index(i) }
   val ctrs:List[Counter] = List.tabulate(numCtrs) { i => Counter().index(i) }
-  override def mems:List[OnChipMem] = sfifos ++ vfifos ++ srams
+  override def mems:List[OnChipMem] = super.mems ++ srams
   def vout = vouts.head
 
   protected val _regstages:ListBuffer[FUStage] = ListBuffer.empty  // Regular Stages

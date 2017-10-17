@@ -90,8 +90,8 @@ plasticine {
     val viRegs = cu.regs.filter(_.is(VecInReg))
     assert(cu.vins.size == cu.vfifos.size, s"cu:${cu} vins:${cu.vins.size} vfifos:${cu.vfifos.size}")
     if (cu.stages.nonEmpty) assert(cu.vfifos.size == viRegs.size)
-    (cu.vfifos, viRegs).zipped.foreach { case (vbuf, reg) =>
-      forwardStages(cu).foreach { s => s.get(reg).in <== vbuf.readPort }
+    (cu.vfifos, viRegs).zipped.foreach { case (fifo, reg) =>
+      forwardStages(cu).foreach { s => s.get(reg).in <== fifo.readPort }
     }
 
     // One to one
@@ -108,9 +108,23 @@ plasticine {
 
   def connectDataIO(cu:Controller):Unit = {
     // Xbar
-    cu.sins.foreach { sin => cu.sfifos.foreach { sbuf => sbuf.writePortMux.inputs.foreach { _ <== sin.ic } } }
+    cu.cins.foreach { cin => 
+      cu.cfifos.foreach { fifo => 
+        fifo.writePortMux.inputs.foreach { _ <== cin.ic }
+        fifo.writePortMux.valids.foreach { _ <== cin.valid }
+      } 
+    }
+    cu.sins.foreach { sin => 
+      cu.sfifos.foreach { fifo => 
+        fifo.writePortMux.inputs.foreach { _ <== sin.ic }
+        fifo.writePortMux.valids.foreach { _ <== sin.valid }
+      } 
+    }
     // One to one
-    (cu.vins, cu.vfifos).zipped.foreach { case (vi, vbuf) => vbuf.writePortMux.inputs.foreach { _ <== vi.ic } }
+    (cu.vins, cu.vfifos).zipped.foreach { case (vi, fifo) => 
+      fifo.writePortMux.inputs.foreach { _ <== vi.ic }
+      fifo.writePortMux.valids.foreach { _ <== vi.valid }
+    }
 
     cu match {
       case cu:MemoryComputeUnit =>

@@ -77,15 +77,11 @@ object Delay {
 abstract class MuxLike[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade, override val prt:Controller) extends Primitive with Simulatable {
   import spademeta._
   override val typeStr = name.getOrElse("mux")
-  type I <: Input[P, MuxLike[P]]
-  type O <: Output[P, MuxLike[P]]
-  def newInput(i:Int):I
-  def newOutput:O
   val sel = Input(Word(), this, s"${this}.sel")
-  val out:O = newOutput
-  val _inputs = ListBuffer[I]()
+  val out = Output(tp.clone, this, s"${this}.out")
+  val _inputs = ListBuffer[Input[P, MuxLike[P]]]()
   def inputs = _inputs.toList 
-  def addInput:I = { val i = inputs.size; val in = newInput(i:Int).index(i); _inputs += in; in }
+  def addInput = { val i = inputs.size; val in = Input(tp.clone, this, s"${this}.in$i").index(i); _inputs += in; in }
   def addInputs(n:Int):List[Input[P, MuxLike[P]]] = List.fill(n)(addInput) 
   private[spade] def <== (outs:List[Output[P, Module]]):Unit = outs.foreach { out => <==(out) }
   private[spade] def <== (out:Output[P, Module]):Unit = {
@@ -98,10 +94,6 @@ abstract class MuxLike[P<:PortType](name:Option[String], tp:P)(implicit spade:Sp
 }
 
 case class Mux[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade, override val prt:Controller) extends MuxLike(name, tp) {
-  type I = Input[P, Mux[P]] 
-  type O = Output[P, Mux[P]]
-  def newInput(i:Int):I = Input(tp.clone, this, s"${this}.in$i")
-  def newOutput:O = Output(tp.clone, this, s"${this}.out")
   override def register(implicit sim:Simulator):Unit = {
     super.register
     //out.v := inputs(sel.v.toInt).v //TODO: support this
@@ -114,16 +106,18 @@ object Mux {
 }
 
 case class ValidMux[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade, override val prt:Controller) extends MuxLike(name, tp) {
-  type I = GlobalInput[P, ValidMux[P]] 
-  type O = GlobalOutput[P, ValidMux[P]]
   val valid = Output(Bit(), this, s"${this}.valid")
-  def newInput(i:Int):I = GlobalInput(tp.clone, this, s"${this}.in$i")
-  def newOutput:O = GlobalOutput(tp.clone, this, s"${this}.out")
+  val _valids = ListBuffer[Input[Bit, this.type]]()
+  def valids = _valids.toList
+  override def addInput = {
+    val i = inputs.size
+    val valid = Input(Bit(), this, s"${this}.valid$i")
+    super.addInput
+  }
   override def register(implicit sim:Simulator):Unit = {
     super.register
-    out.ic.v.set { _ <<= inputs(sel.v.update.toInt).ic.v.update }
-    out.valid.v.set { _ <<= inputs(sel.v.update.toInt).valid.v.update }
-    valid.v.set { _ <<= inputs(sel.v.update.toInt).valid.v.update }
+    out.v.set { _ <<= inputs(sel.v.update.toInt).v.update }
+    valid.v.set { _ <<= valids(sel.v.update.toInt).v.update }
   }
 }
 object ValidMux {

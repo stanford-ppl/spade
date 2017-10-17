@@ -32,8 +32,8 @@ abstract class Controller(val param:ControllerParam)(implicit spade:Spade) exten
   var vfifos:List[VectorMem] = Nil
   var sfifos:List[ScalarMem] = Nil
   var cfifos:List[ControlMem] = Nil
-  def fifos:List[LocalMem] = sfifos ++ vfifos
-  def mems:List[OnChipMem] = sfifos ++ vfifos
+  def fifos:List[LocalMem] = cfifos ++ sfifos ++ vfifos
+  def mems:List[OnChipMem] = cfifos ++ sfifos ++ vfifos
   def numControlBufs(num:Int):this.type = { cfifos = List.tabulate(num)  { i => ControlMem(cbufSize).index(i) }; this }
   def numScalarBufs(num:Int):this.type = { sfifos = List.tabulate(num)  { i => ScalarMem(sbufSize).index(i) }; this }
   def numScalarBufs:Int = sfifos.size

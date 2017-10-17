@@ -3,6 +3,7 @@ package spade
 import spade.node._
 import pirc._
 
+import scala.language.existentials
 import scala.language.implicitConversions
 import scala.reflect.{ClassTag, classTag}
 
@@ -65,46 +66,74 @@ package object util {
     }
   }
 
-  def collectIn[X](x:Any)(implicit ev:ClassTag[X]):Set[X] = x match {
-    case x:X => Set(x)
-    case x:Iterable[_] => x.flatMap(collectIn[X]).toSet
+  def visitIn(x:Any):Iterable[Any] = x match {
     case x:GlobalInput[_,_] => Set() // Do not cross CU boundary
-    case x:GlobalOutput[_,_] => collectIn[X](x.src) ++ collectIn[X](x.ic)
-    case x:Input[_,_] => collectIn[X](x.fanIns)
-    case x:Output[_,_] => collectIn[X](x.src)
-    case x:Slice[_, _] => collectIn[X](x.in)
-    case x:BroadCast[_] => collectIn[X](x.in)
-    case x:PipeReg => collectIn[X](x.in)
-    case x:Counter => collectIn[X](x.min) ++ collectIn[X](x.max) ++ collectIn[X](x.step)
-    case x:Mux[_] => x.ins.flatMap(collectIn[X]).toSet
-    case x:SRAM => collectIn[X](x.readAddr) ++ collectIn[X](x.writeAddr) ++ collectIn[X](x.writePort)
-    case x:LocalMem => collectIn[X](x.writePort)
-    case _ => Set()
+    case x:GlobalOutput[_,_] => Set(x.src,x.ic)
+    case x:Input[_,_] => x.fanIns
+    case x:Output[_,_] => Set(x.src)
+    case x:Module => x.ins
   }
 
-  def collectOut[X](x:Any)(implicit ev:ClassTag[X]):Set[X] = x match {
-    case x:X => Set(x)
-    case x:Iterable[_] => x.flatMap(collectOut[X]).toSet
-    case x:GlobalInput[_,_] => collectOut[X](x.src) ++ collectOut[X](x.ic)
-    case x:GlobalOutput[_,_] => Set() // Do not cross CU boundary
-    case x:Input[_,_] => collectOut[X](x.src)
-    case x:Output[_,_] => collectOut[X](x.fanOuts)
-    case x:Slice[_, _] => collectOut[X](x.out)
-    case x:BroadCast[_] => collectOut[X](x.out)
-    case x:PipeReg => collectOut[X](x.out)
-    case x:Counter => collectOut[X](x.out)
-    case x:Mux[_] => collectOut[X](x.out)
-    case x:OnChipMem => collectOut[X](x.readPort)
-    case _ => Set()
+  def collectIn[X](
+    x:Any, 
+    visitIn:Any => Iterable[Any]=visitIn, 
+    logger:Option[Logger]=None,
+    visited:Set[Any] = Set.empty
+  )(implicit ev:ClassTag[X]):Set[X] = {
+    def f(xx:Any):Set[X] = collectIn[X](xx, visitIn, logger, visited + x)
+    logger.foreach { _.emitBSln(s"collectIn($x)") }
+    val res = x match {
+      case x:X => Set[X](x)
+      case x:Iterable[_] => x.flatMap(f).toSet
+      case x if visited.contains(x) => Set[X]()
+      case x => f(visitIn(x))
+    }
+    logger.foreach { _.emitBEln }
+    res
   }
 
-  def quote(n:Node)(implicit spade:Spade):String = {
+  def visitOut(x:Any):Iterable[Any] = {
+    val res = x match {
+      case x:GlobalOutput[_,_] => Set() // Do not cross CU boundary
+      case x:GlobalInput[_,_] => Set(x.src) ++ x.outs
+      case x:Input[_,_] => Set(x.src)
+      case x:Output[_,_] => x.fanOuts
+      case x:Module => x.outs
+    }
+    res
+  }
+
+  def collectOut[X](
+    x:Any, 
+    visitOut:Any => Iterable[Any]=visitOut,
+    logger:Option[Logger]=None,
+    visited:Set[Any] = Set.empty
+  )(implicit ev:ClassTag[X], spade:Spade):Set[X] = {
+    logger.foreach { l =>
+      l.emitBSln(s"collectOut(${quote(x)})")
+      //l.dprintln(s"visited=$visited")
+    }
+    def f(xx:Any):Set[X] = collectOut[X](xx, visitOut,logger, visited + x)
+    val res = x match {
+      case x:X => Set(x)
+      case x:Iterable[_] => x.flatMap(f).toSet
+      case x if visited.contains(x) => Set[X]()
+      case x => f(visitOut(x))
+    }
+    logger.foreach { _.emitBEln }
+    res
+  }
+
+  def quote(n:Any)(implicit spade:Spade):String = {
     val spademeta: SpadeMetadata = spade
     import spademeta._
     n match {
+      case n:Iterable[_] => 
+        s"[${n.map(quote).mkString(",")}]"
       case n:Routable => coordOf.get(n).fold(s"$n") { case (x,y) => s"$n[$x,$y]" }
       case n:GlobalIO[_,_] => s"${quote(n.src)}.$n[${n.index}]"
-      case n => indexOf.get(n).fold(s"$n"){ i =>s"$n[$i]"}
+      case n:Node => indexOf.get(n).fold(s"$n"){ i =>s"$n[$i]"}
+      case n => n.toString
     }
   }
 
