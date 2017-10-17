@@ -17,35 +17,36 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
 
   type N = Routable
   type C = Int
-  type I = Input[_<:PortType, Module]
-  type O = Output[_<:PortType, Module]
-  type E = (IO[_<:PortType, Module], IO[_<:PortType, Module])
-  type FE = (O, I) 
-  type BE = (I, O)
-  type M = SpadeMap
+  type PIO = IO[_<:PortType, Module] 
+  type PI = Input[_<:PortType, Module]
+  type PO = Output[_<:PortType, Module]
+  type Edge = (IO[_<:PortType, Module], IO[_<:PortType, Module])
+  type FE = (PO, PI) 
+  type BE = (PI, PO)
+  type M <: SpadeMap
 
-  def setConfig[Edge<:E](map:M, path:List[(N, Edge)]):M = {
+  def setConfig[E<:Edge](map:M, path:List[(N, E)]):M = {
     var mp = map
     path.zipWithIndex.foreach { case ((node, (io1, io2)), i) => 
       val (out, in, outFrom) = (io1, io2) match {
-        case (out:O, in:I) => 
+        case (out:PO, in:PI) => 
           val outFrom = out.src match {
             case sb:SwitchBox => Some(path(i-1)._2._2.asInput.asGlobal)
             case _ => None
           }
           (out, in, outFrom)
-        case (in:I, out:O) => (out, in)
+        case (in:PI, out:PO) => (out, in)
           val outFrom = out.src match {
             case sb:SwitchBox => Some(path(i+1)._2._1.asInput.asGlobal)
             case _ => None
           }
           (out, in, outFrom)
       }
-      mp = mp.setFI(in, out)
+      mp = mp.setFI(in, out).asInstanceOf[M] //TODO: fix this?
       out match {
         case out:GlobalOutput[_,_] =>
           outFrom.foreach { outFrom => // Config SwitchBox
-            mp = mp.setFI(out.ic, outFrom.ic)
+            mp = mp.setFI(out.ic, outFrom.ic).asInstanceOf[M]
           }
         case _ =>
       }
@@ -53,45 +54,45 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
     mp
   }
 
-  def advance[I,O](
-    outs:N => Iterable[O], 
-    fanOuts:O => Iterable[I],
-    src:I => N,
+  def advance[PI,PO](
+    tails:N => Iterable[PO], 
+    heads:PO => Iterable[PI],
+    src:PI => N,
     start:N
-  )(n:N):Iterable[(N, (O,I))] = {
-    type X = (N,(O,I))
+  )(n:N,c:C):Iterable[(N, (PO,PI))] = {
+    type X = (N,(PO,PI))
     n match {
       case n:Controller if n != start => Nil
       case n =>
-        outs(n).flatMap[X, Iterable[X]]{ out => 
-          fanOuts(out).map[X, Iterable[X]]{ in => (src(in), (out, in)) } 
+        tails(n).flatMap[X, Iterable[X]]{ out => 
+          heads(out).map[X, Iterable[X]]{ in => (src(in), (out, in)) } 
         }
     }
   }
 
   def advance(
-    outs:N => Iterable[O], 
+    tails:N => Iterable[PO], 
     start:N
-  )(n:N):Iterable[(N, (O,I))] = {
+  )(n:N,c:C):Iterable[(N, (PO,PI))] = {
 
-    advance[I,O](
-      outs    = outs,
-      fanOuts = (o:O) => o.fanOuts,
-      src     = (i:I) => i.src.asInstanceOf[N],
+    advance[PI,PO](
+      tails   = tails,
+      heads   = (o:PO) => o.fanOuts,
+      src     = (i:PI) => i.src.asInstanceOf[N],
       start   = start
-    )(n)
+    )(n,c)
   }
 
-  def search[A<:E](
+  def uniformCostSearch[A<:Edge](
     start:N, 
     end:N,
-    advance:N => Iterable[(N, A, C)],
+    advance:(N,C) => Iterable[(N, A, C)],
     map:M,
-    finPass: (M,C) => M,
+    finPass: (M,List[(N,A)],C) => M,
     logger:Option[Logger] = None
   ):M = {
     def fp(route:List[(N,A)], cost:C):M = {
-      finPass(setConfig(map, route),cost)
+      finPass(setConfig(map, route),route,cost)
     }
     uniformCostSearch ( // defined in pirc.util.GraphSearch
       start    = start,
@@ -105,35 +106,38 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
     )
   }
 
-  def simpleCostSearch[A<:E](
+  def simpleCostSearch[A<:Edge](
     start:N, 
     end:N,
-    advance:N => Iterable[(N, A)],
+    advance:(N,C) => Iterable[(N, A)],
     map:M,
     finPass: (M,C) => M,
     logger:Option[Logger] = None
   ):M = {
-    def simpleCostAdvance(n:N):Iterable[(N, A, C)] = {
-      advance(n).map { case (n, a) => (n, a, 1) }
+    def simpleCostAdvance(n:N,c:C):Iterable[(N, A, C)] = {
+      advance(n,c).map { case (n, a) => (n, a, 1) }
+    }
+    def fp(mp:M, route:List[(N,A)], cost:C) = {
+      finPass(mp, cost)
     }
     logger.foreach { l =>
       l.dprintln(s"start=${quote(start)} end=${quote(end)} --------------")
     }
-    search (
+    uniformCostSearch (
       start   = start,
       end     = end,
       advance = simpleCostAdvance _,
       map     = map,
-      finPass = finPass,
+      finPass = fp _,
       logger  = logger
     )
   }
 
-  def span (
+  def uniformCostSpan (
     start:N, 
     advance:(N,C) => Iterable[(N, C)], 
     logger:Option[Logger]
-  ):Iterable[N] = {
+  ):Iterable[(N,C)] = {
     uniformCostSpan (
       start    = start,
       zeroCost = 0,

@@ -27,7 +27,10 @@ class SearchTest extends UnitTest { self =>
       override lazy val stream = newStream(s"${Config.outDir}/SearchTest", s"MinRoute.log")
     }
 
-    val router = new PlasticineGraphTraversal { implicit def arch = spade }
+    val router = new PlasticineGraphTraversal { 
+      implicit def arch = spade
+      type M = SpadeMap
+    }
 
     def testRouting(x1:Int, y1:Int, x2:Int, y2:Int) = {
       val start = spade.cuArray(x1)(y1)
@@ -87,7 +90,10 @@ class SearchTest extends UnitTest { self =>
       override lazy val stream = newStream(s"${Config.outDir}/SearchTest", s"SecondMinRoute.log")
     }
 
-    val router = new PlasticineGraphTraversal { implicit def arch = spade }
+    val router = new PlasticineGraphTraversal { 
+      implicit def arch = spade
+      type M = SpadeMap
+    }
 
     def testRouting(x1:Int, y1:Int, x2:Int, y2:Int) = {
       val start = spade.cuArray(x1)(y1)
@@ -141,14 +147,17 @@ class SearchTest extends UnitTest { self =>
       override lazy val stream = newStream(s"${Config.outDir}/SpanTest", s"SpanTest.log")
     }
 
-    val router = new PlasticineGraphTraversal { implicit def arch = spade }
+    val router = new PlasticineGraphTraversal { 
+      implicit def arch = spade
+      type M = SpadeMap
+    }
 
     def testSpanning(x1:Int, y1:Int, maxCost:Int) = {
       val start = spade.cuArray(x1)(y1)
 
       def advance(n:Routable, cost:Int) = {
         if (cost <= maxCost) {
-          router.advance((n:Routable) => n.couts, start)(n).map {
+          router.advance((n:Routable) => n.couts, start)(n,cost).map {
             case (n, a) => (n, 1)
           }
         } else {
@@ -156,14 +165,14 @@ class SearchTest extends UnitTest { self =>
         }
       }
 
-      val nodes = router.span(
+      val nodes = router.uniformCostSpan(
         start=start, 
         advance=advance _,
         logger=Some(logger)
       )
       
       var map = SpadeMap.empty
-      nodes.foreach { n =>
+      nodes.foreach { case (n, c) =>
         map = map.setCF(n, DummyConfig())
       }
       new PlasticineCtrlDotPrinter(open=true).print(Some(map))
