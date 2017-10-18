@@ -13,11 +13,7 @@ trait ControllerParam extends SpadeParam {
   val vbufSize:Int
 }
 
-class ControllerConfig (
-  val name:String,
-  val outputValid:Map[GlobalOutput[_<:PortType, Module], Output[_<:PortType, Module]]
-) extends Configuration
-
+class ControllerConfig (val name:String) extends Configuration
 /* Controller */
 abstract class Controller(val param:ControllerParam)(implicit spade:Spade) extends Routable with Configurable {
 

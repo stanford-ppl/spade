@@ -33,7 +33,7 @@ case class MemoryControllerParam (
 case class MemoryControllerConfig (
   override val name:String,
   mctpe:MCType
-) extends ControllerConfig(name, Map.empty) // No need to configure output valid
+) extends ControllerConfig(name)
 
 class MemoryController(param:MemoryControllerParam)(implicit spade:Spade) extends Controller(param) 
   with Configurable {

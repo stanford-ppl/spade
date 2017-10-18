@@ -40,7 +40,7 @@ case class OuterComputeUnitConfig (
   override val name:String,
   isSeq:Boolean,
   isMeta:Boolean
-) extends ControllerConfig(name,Map.empty)
+) extends ControllerConfig(name)
 
 class OuterComputeUnit(override val param:OuterComputeUnitParam=new OuterComputeUnitParam())(implicit spade:Spade) 
   extends ComputeUnit(param) with Configurable {

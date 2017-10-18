@@ -28,9 +28,8 @@ class TopParam (
 
 case class TopConfig (
   override val name:String,
-  bounds:Map[GlobalOutput[_<:PortType, Module], Option[AnyVal]],
-  override val outputValid:Map[GlobalOutput[_<:PortType, Module], Output[_<:PortType, Module]]
-) extends ControllerConfig(name, outputValid)
+  bounds:Map[GlobalOutput[_<:PortType, Module], Option[AnyVal]]
+) extends ControllerConfig(name)
 
 /* Top-level controller (host)
  * @param argIns argument inputs. scalar inputs to the accelerator
