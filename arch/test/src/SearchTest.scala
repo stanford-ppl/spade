@@ -45,10 +45,13 @@ class SearchTest extends UnitTest { self =>
         map
       }
 
-      val map = router.simpleCostSearch(
+      val map = router.simpleCostSearch[router.FE](
         start=start, 
         end=end, 
-        advance=router.advance((n:Routable) => n.couts, start) _,
+        advance=router.advance(
+          tails=(n:Routable, pi:Option[router.PI]) => n.couts, 
+          start=start
+        ),
         map=SpadeMap.empty,
         finPass=validate _,
         logger=None//Some(logger)
@@ -120,7 +123,10 @@ class SearchTest extends UnitTest { self =>
       router.simpleCostSearch(
         start=start, 
         end=end, 
-        advance=router.advance((n:Routable) => n.couts, start) _,
+        advance=router.advance(
+          tails=(n:Routable, pi:Option[router.PI]) => n.couts, 
+          start=start
+        ),
         map=SpadeMap.empty,
         finPass=validate _,
         logger=Some(logger)
@@ -155,17 +161,18 @@ class SearchTest extends UnitTest { self =>
     def testSpanning(x1:Int, y1:Int, maxCost:Int) = {
       val start = spade.cuArray(x1)(y1)
 
-      def advance(n:Routable, cost:Int) = {
+      def advance(n:Routable, prevAction:Option[router.FE], cost:Int) = {
         if (cost <= maxCost) {
-          router.advance((n:Routable) => n.couts, start)(n,cost).map {
-            case (n, a) => (n, 1)
-          }
+          router.advance(
+            tails=(n:Routable, pi:Option[router.PI]) => n.couts, 
+            start=start
+          )(n,prevAction,cost).map { case (n, a) => (n, a, 1) }
         } else {
           Nil
         }
       }
 
-      val nodes = router.uniformCostSpan(
+      val nodes = router.uniformCostSpan[router.FE](
         start=start, 
         advance=advance _,
         logger=Some(logger)

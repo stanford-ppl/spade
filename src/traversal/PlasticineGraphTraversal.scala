@@ -16,7 +16,7 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
 
   implicit def arch:Spade
 
-  type N = Routable
+  type S = Routable
   type C = Int
   type PIO = IO[_<:PortType, Module] 
   type PI = Input[_<:PortType, Module]
@@ -26,7 +26,7 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
   type BE = (PI, PO)
   type M <: SpadeMap
 
-  def setConfig[E<:Edge](map:M, path:List[(N, E)]):M = {
+  def setConfig[E<:Edge](map:M, path:List[(S, E)]):M = {
     var mp = map
     path.zipWithIndex.foreach { case ((node, (io1, io2)), i) => 
       val (out, in, outFrom) = (io1, io2) match {
@@ -55,52 +55,60 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
     mp
   }
 
-  def advance[PI,PO](
-    tails:N => Iterable[PO], 
-    heads:PO => Iterable[PI],
-    src:PI => N,
-    start:N
-  )(n:N,c:C):Iterable[(N, (PO,PI))] = {
-    type X = (N,(PO,PI))
+  def advance[PH,PT](
+    tails:(S, Option[PH]) => Seq[PT], 
+    heads:PT => Seq[PH],
+    src:PH => S,
+    start:S
+  )(n:S, prevEdge:Option[(PT,PH)], c:C):Seq[(S, (PT,PH))] = {
+    type X = (S,(PT,PH))
     n match {
       case n:Controller if n != start => Nil
       case n =>
-        tails(n).flatMap[X, Iterable[X]]{ out => 
-          heads(out).map[X, Iterable[X]]{ in => (src(in), (out, in)) } 
+        val head = prevEdge.map(_._2)
+        tails(n, head).flatMap[X, Seq[X]]{ out => 
+          heads(out).map[X, Seq[X]]{ in => (src(in), (out, in)) } 
         }
     }
   }
 
+  /*
+   * forward advance
+   * */
   def advance(
-    tails:N => Iterable[PO], 
-    start:N
-  )(n:N,c:C):Iterable[(N, (PO,PI))] = {
+    tails:(S, Option[PI]) => Seq[PO], 
+    start:S
+  )(n:S, prevEdge:Option[(PO,PI)], c:C):Seq[(S, (PO,PI))] = {
 
     advance[PI,PO](
       tails   = tails,
       heads   = (o:PO) => o.fanOuts,
-      src     = (i:PI) => i.src.asInstanceOf[N],
+      src     = (i:PI) => i.src.asInstanceOf[S],
       start   = start
-    )(n,c)
+    )(n, prevEdge, c)
   }
 
   def uniformCostSearch[A<:Edge](
-    start:N, 
-    end:N,
-    advance:(N,C) => Iterable[(N, A, C)],
+    start:S, 
+    end:S,
+    advance:(S, Option[A], C) => Seq[(S, A, C)],
     map:M,
-    finPass: (M,List[(N,A)],C) => M,
+    finPass: (M,List[(S,A)],C) => M,
     logger:Option[Logger] = None
   ):Either[PIRException, M] = {
-    def fp(route:List[(N,A)], cost:C):M = {
+    def fp(route:List[(S,A)], cost:C):M = {
       finPass(setConfig(map, route),route,cost)
     }
-    uniformCostSearch ( // defined in pirc.util.GraphSearch
+    def adv(n:S, backPointers:BackPointer[S,A,C], c:C):Seq[(S,A,C)] = {
+      val prevEdge = backPointers.get(n).map (_._2)
+      advance(n, prevEdge, c)
+    }
+    uniformCostSearch[S,A,C,M]( // defined in pirc.util.GraphSearch
       start    = start,
-      isEnd    = { (n:N) => n == end },
+      isEnd    = { (n:S) => n == end },
       zeroCost = 0,
       sumCost  = { (a:C, b:C) => a + b },
-      advance  = advance,
+      advance  = adv _,
       quote = spade.util.quote _,
       finPass = fp _,
       logger = logger
@@ -108,17 +116,17 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
   }
 
   def simpleCostSearch[A<:Edge](
-    start:N, 
-    end:N,
-    advance:(N,C) => Iterable[(N, A)],
+    start:S, 
+    end:S,
+    advance:(S,Option[A],C) => Seq[(S, A)],
     map:M,
     finPass: (M,C) => M,
     logger:Option[Logger] = None
   ):Either[PIRException,M] = {
-    def simpleCostAdvance(n:N,c:C):Iterable[(N, A, C)] = {
-      advance(n,c).map { case (n, a) => (n, a, 1) }
+    def simpleCostAdvance(n:S, prevEdge:Option[A], c:C):Seq[(S, A, C)] = {
+      advance(n,prevEdge,c).map { case (n, a) => (n, a, 1) }
     }
-    def fp(mp:M, route:List[(N,A)], cost:C) = {
+    def fp(mp:M, route:List[(S,A)], cost:C) = {
       finPass(mp, cost)
     }
     logger.foreach { l =>
@@ -134,16 +142,20 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
     )
   }
 
-  def uniformCostSpan (
-    start:N, 
-    advance:(N,C) => Iterable[(N, C)], 
+  def uniformCostSpan[A <: Edge](
+    start:S, 
+    advance:(S, Option[A], C) => Seq[(S, A, C)], 
     logger:Option[Logger]
-  ):Iterable[(N,C)] = {
-    uniformCostSpan (
+  ):Seq[(S,C)] = {
+    def adv(n:S, backPointers:BackPointer[S,A,C], c:C):Seq[(S,A,C)] = {
+      val prevEdge = backPointers.get(n).map (_._2)
+      advance(n, prevEdge, c)
+    }
+    uniformCostSpan[S,A,C] (
       start    = start,
       zeroCost = 0,
       sumCost  = { (a:C, b:C) => a + b },
-      advance  = advance,
+      advance  = adv _,
       quote    = spade.util.quote _,
       logger   = logger
     )
