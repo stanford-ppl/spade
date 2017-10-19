@@ -107,11 +107,12 @@ object Mux {
 
 case class ValidMux[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade, override val prt:Controller) extends MuxLike(name, tp) {
   val valid = Output(Bit(), this, s"${this}.valid")
-  val _valids = ListBuffer[Input[Bit, this.type]]()
+  val _valids = ListBuffer[Input[Bit, ValidMux[P]]]()
   def valids = _valids.toList
   override def addInput = {
     val i = inputs.size
     val valid = Input(Bit(), this, s"${this}.valid$i")
+    _valids += valid
     super.addInput
   }
   override def register(implicit sim:Simulator):Unit = {
