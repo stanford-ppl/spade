@@ -8,7 +8,9 @@ import pirc.enums._
 import scala.reflect.runtime.universe.{SingleType =>_, _}
 import scala.collection.mutable.ListBuffer
 
-abstract class Primitive(implicit spade:Spade, val prt:Routable) extends Module
+abstract class Primitive(implicit spade:Spade) extends Module {
+  lazy val prt = collectUp[Routable](this).head
+}
 
 case class ConstConfig(value:AnyVal) extends Configuration
 class Const[P<:SingleType](tp:P, value:Option[AnyVal])(implicit spade:Spade) 
@@ -40,13 +42,15 @@ object Const {
 }
 
 case class DelayConfig (delay:Int) extends Configuration
-class Delay[P<:PortType](tp:P, staticDelay:Option[Int], ts:Option[String])(implicit spade:Spade, prt:Routable, ev:TypeTag[P]) 
+class Delay[P<:PortType](tp:P, staticDelay:Option[Int], ts: => String = "delay")(implicit spade:Spade, ev:TypeTag[P]) 
   extends Primitive with Simulatable with Configurable {
   import spademeta._
   type CT = DelayConfig
-  override val typeStr = ts.getOrElse("delay")
+  override def typeStr = ts 
+
   val in = Input(tp, this, s"${this}_in(0)")
   val out = Output(tp.clone, this, s"${this}_out")
+
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
     cfmap.get(this).map { _.delay }.orElse(staticDelay).foreach { delay =>
@@ -55,27 +59,19 @@ class Delay[P<:PortType](tp:P, staticDelay:Option[Int], ts:Option[String])(impli
   }
 }
 object Delay {
-  def apply(tp:Bit, staticDelay:Option[Int], ts:Option[String])
-    (implicit spade:Spade, prt:Routable, ctrlBox:CtrlBox):Delay[Bit] = {
-    val d = new Delay(tp, staticDelay, ts)(spade, prt, typeTag[Bit])
-    ctrlBox.delays += d
-    d
-  }
-  def apply(tp:Bit,ts:String)
-    (implicit spade:Spade, prt:Routable, ctrlBox:CtrlBox):Delay[Bit] = Delay(tp, None, Some(ts))
-  def apply(tp:Bit, delay:Int,ts:String)
-    (implicit spade:Spade, prt:Routable, ctrlBox:CtrlBox):Delay[Bit] = Delay(tp, Some(delay), Some(ts))
-  def apply(tp:Bit, delay:Int)
-    (implicit spade:Spade, prt:Routable, ctrlBox:CtrlBox):Delay[Bit] = Delay(tp, Some(delay), None)
-
-  def apply[P<:PortType](tp:P, delay:Int,ts:Option[String])
-    (implicit spade:Spade, prt:Routable, ev:TypeTag[P]):Delay[P] = new Delay(tp, Some(delay), ts)
-  def apply[P<:PortType](tp:P,ts:String)
-    (implicit spade:Spade, prt:Routable, ev:TypeTag[P]):Delay[P] = new Delay(tp, None, Some(ts))
+  def apply[P<:PortType](tp:P,ts: => String)
+    (implicit spade:Spade, ev:TypeTag[P]):Delay[P] = new Delay(tp, None, ts)
+  def apply[P<:PortType](tp:P, delay:Int, ts: => String)
+    (implicit spade:Spade, ev:TypeTag[P]):Delay[P] = new Delay(tp, Some(delay), ts)
+  def apply[P<:PortType](tp:P, delay:Int)
+    (implicit spade:Spade, ev:TypeTag[P]):Delay[P] = new Delay(tp, Some(delay))
 }
 
-abstract class MuxLike[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade, override val prt:Controller) extends Primitive with Simulatable {
+abstract class MuxLike[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade) extends Primitive with Simulatable {
   import spademeta._
+
+  override lazy val prt:Controller = collectUp[Controller](this).head
+
   override val typeStr = name.getOrElse("mux")
   val sel = Input(Word(), this, s"${this}.sel")
   val out = Output(tp.clone, this, s"${this}.out")
@@ -93,7 +89,8 @@ abstract class MuxLike[P<:PortType](name:Option[String], tp:P)(implicit spade:Sp
   }
 }
 
-case class Mux[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade, override val prt:Controller) extends MuxLike(name, tp) {
+case class Mux[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade) extends MuxLike(name, tp) {
+
   override def register(implicit sim:Simulator):Unit = {
     super.register
     //out.v := inputs(sel.v.toInt).v //TODO: support this
@@ -101,11 +98,11 @@ case class Mux[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade, ove
   }
 }
 object Mux {
-  def apply[P<:PortType](name:String, tp:P)(implicit spade:Spade, prt:Controller):Mux[P] = Mux(Some(name), tp)
-  def apply[P<:PortType](tp:P)(implicit spade:Spade, prt:Controller):Mux[P] = Mux(None, tp)
+  def apply[P<:PortType](name:String, tp:P)(implicit spade:Spade):Mux[P] = Mux(Some(name), tp)
+  def apply[P<:PortType](tp:P)(implicit spade:Spade):Mux[P] = Mux(None, tp)
 }
 
-case class ValidMux[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade, override val prt:Controller) extends MuxLike(name, tp) {
+case class ValidMux[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade) extends MuxLike(name, tp) {
   val valid = Output(Bit(), this, s"${this}.valid")
   val _valids = ListBuffer[Input[Bit, ValidMux[P]]]()
   def valids = _valids.toList
@@ -122,6 +119,6 @@ case class ValidMux[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade
   }
 }
 object ValidMux {
-  def apply[P<:PortType](name:String, tp:P)(implicit spade:Spade, prt:Controller):ValidMux[P] = ValidMux(Some(name), tp)
-  def apply[P<:PortType](tp:P)(implicit spade:Spade, prt:Controller):ValidMux[P] = ValidMux(None, tp)
+  def apply[P<:PortType](name:String, tp:P)(implicit spade:Spade):ValidMux[P] = ValidMux(Some(name), tp)
+  def apply[P<:PortType](tp:P)(implicit spade:Spade):ValidMux[P] = ValidMux(None, tp)
 }

@@ -1,6 +1,7 @@
 package spade.simulation
 
 import spade._
+import spade.node._
 import spade.util._
 
 import pirc.util._
@@ -24,6 +25,10 @@ trait Simulatable extends Module with Evaluation {
     ios.foreach { io =>
       if (isMapped(io) && !io.v.isDefined) {
         warn(s"Simulatable ${quote(io.v)} doesn't have a update function!")
+        io match {
+          case io:Input[_,_] => warn(s"${mapping.fimap.get(io)}")
+          case io:Output[_,_] => warn(s"${mapping.fimap.get(io)}")
+        }
       }
       io.check
     }

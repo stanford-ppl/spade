@@ -27,10 +27,8 @@ trait SpadeAlias {
   type PD        = Delay[_<:PortType]
   type PFU       = FuncUnit
   type PST       = Stage
-  type PEST      = EmptyStage
-  type PFUST     = FUStage
-  type PWAST     = WAStage
   type PRDST     = ReduceStage
+  type PMem = Memory
   type PSMem     = ScalarMem
   type PVMem     = VectorMem
   type PLMem     = LocalMem 

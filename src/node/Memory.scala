@@ -99,7 +99,7 @@ abstract class OnChipMem(implicit spade:Spade, ctrler:Controller) extends Primit
   def wtp:P
   val readPort:Output[_<:PortType, OnChipMem]
   val writePort = Input(wtp, this, s"${this}.wp")
-  val writePortMux = ValidMux(s"$this.wpMux", wtp)
+  val writePortMux = Module(ValidMux(s"$this.wpMux", wtp))
   val dequeueEnable = Input(Bit(), this, s"${this}.deqEn")
   val enqueueEnable = Input(Bit(), this, s"${this}.enqEn")
   val notEmpty = Output(Bit(), this, s"${this}.notEmpty")
@@ -191,9 +191,9 @@ case class SRAM(size:Int, banks:Int)(implicit spade:Spade, prt:Controller) exten
   def wtp:Bus = Bus(Word())
   var memory:M = _
   val readAddr = Input(Word(), this, s"${this}.ra")
-  val readAddrMux = ValidMux(s"$this.raMux", Word()) //TODO: connect select for mux
+  val readAddrMux = Module(ValidMux(s"$this.raMux", Word())) //TODO: connect select for mux
   val writeAddr = Input(Word(), this, s"${this}.wa")
-  val writeAddrMux = ValidMux(s"$this.waMux", Word())
+  val writeAddrMux = Module(ValidMux(s"$this.waMux", Word()))
   val writeEn = Input(Bit(), this, s"${this}.we")
   val readEn = Input(Bit(), this, s"${this}.re")
   val readPort = Output(Bus(Word()), this, s"${this}.rp")

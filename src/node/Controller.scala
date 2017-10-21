@@ -30,10 +30,10 @@ abstract class Controller(val param:ControllerParam)(implicit spade:Spade) exten
   var cfifos:List[ControlMem] = Nil
   def fifos:List[LocalMem] = cfifos ++ sfifos ++ vfifos
   def mems:List[OnChipMem] = cfifos ++ sfifos ++ vfifos
-  def numControlBufs(num:Int):this.type = { cfifos = List.tabulate(num)  { i => ControlMem(cbufSize).index(i) }; this }
-  def numScalarBufs(num:Int):this.type = { sfifos = List.tabulate(num)  { i => ScalarMem(sbufSize).index(i) }; this }
+  def numControlBufs(num:Int):this.type = { cfifos = List.tabulate(num)  { i => Module(ControlMem(cbufSize)).index(i) }; this }
+  def numScalarBufs(num:Int):this.type = { sfifos = List.tabulate(num)  { i => Module(ScalarMem(sbufSize)).index(i) }; this }
   def numScalarBufs:Int = sfifos.size
-  def numVecBufs(num:Int):this.type = { vfifos = List.tabulate(num) { i => VectorMem(vbufSize).index(i) }; this }
+  def numVecBufs(num:Int):this.type = { vfifos = List.tabulate(num) { i => Module(VectorMem(vbufSize)).index(i) }; this }
   def numVecBufs:Int = vfifos.size
 
   def ctrlBox:CtrlBox

@@ -7,6 +7,7 @@ import pirc.util._
 import pirc.collection.mutable._
 
 trait SpadeMetadata extends Metadata { self:Spade =>
+
   /* Coordinate of a spade node. Used for pisa and dot codegen */
   object coordOf extends MOneToOneMap with MetadataMaps { 
     type K = Node

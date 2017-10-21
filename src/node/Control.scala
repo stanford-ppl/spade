@@ -8,25 +8,25 @@ import pirc.util._
 
 import scala.collection.mutable.ListBuffer
 
-abstract class LUT(implicit spade:Spade, prt:Routable) extends Node {
+abstract class LUT(implicit spade:Spade) extends Primitive {
   val numIns:Int
 }
-case class EnLUT(numIns:Int)(implicit spade:Spade, prt:Routable) extends LUT {
+case class EnLUT(numIns:Int)(implicit spade:Spade) extends LUT {
   import spademeta._
   override val typeStr = "enlut"
   override def toString =s"${super.toString}${indexOf.get(this).fold(""){idx=>s"[$idx]"}}"
 }
-case class TokenOutLUT()(implicit spade:Spade, prt:Routable) extends LUT{
+case class TokenOutLUT()(implicit spade:Spade) extends LUT{
   import spademeta._
   override val typeStr = "tolut"
   override def toString =s"${super.toString}${indexOf.get(this).fold(""){idx=>s"[$idx]"}}"
   override val numIns = 2 // Token out is a combination of two output
 }
-case class TokenDownLUT(numIns:Int)(implicit spade:Spade, prt:Routable) extends LUT {
+case class TokenDownLUT(numIns:Int)(implicit spade:Spade) extends LUT {
   override val typeStr = "tdlut"
 }
 object TokenDownLUT {
-  def apply(idx:Int, numIns:Int)(implicit spade:Spade, prt:Routable):TokenDownLUT = 
+  def apply(idx:Int, numIns:Int)(implicit spade:Spade):TokenDownLUT = 
     TokenDownLUT(numIns).index(idx)
 }
 
@@ -35,16 +35,21 @@ case class UDCounterConfig (
   name:String
 ) extends Configuration
 
-case class UDCounter()(implicit spade:Spade, override val prt:Controller) extends Primitive with Simulatable 
+case class UDCounter()(implicit spade:Spade) extends Primitive with Simulatable 
 with Configurable {
   import spademeta._
   type CT = UDCounterConfig
-
   override val typeStr = "udc"
+
+  /* ---------- IOs -----------*/
   val inc = Input(Bit(), this, s"${this}.inc")
   val dec = Input(Bit(), this, s"${this}.dec")
   val count = Output(Word(), this, s"${this}.count")
   val out = Output(Bit(), this, s"${this}.out")
+
+  lazy val ctrlBox = collectUp[CtrlBox](this).headOption
+
+  /* ---------- SIMULATION -----------*/
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
     cfmap.get(this).foreach { config =>
@@ -67,17 +72,10 @@ with Configurable {
     }
   }
 }
-object UDCounter {
-  def apply(idx:Int)(implicit spade:Spade, prt:Controller, cb:CtrlBox):UDCounter = {
-    val udc = UDCounter().index(idx)
-    cb._udcs += udc
-    udc
-  }
-}
 
-case class AndGate(name:Option[String])(implicit spade:Spade, override val prt:Controller, cb:CtrlBox) extends Primitive with Simulatable {
-  cb.andGates += this
-  override val typeStr = name.getOrElse("ag")
+case class AndGate()(implicit spade:Spade) extends Primitive with Simulatable {
+
+  /* ---------- IOs -----------*/
   val out = Output(Bit(), this, s"${this}.out")
   private[spade] def <== (outs:List[Output[Bit, Module]]):Unit = outs.foreach { out => <==(out) }
   private[spade] def <== (out:Output[Bit, Module]):Unit = {
@@ -86,6 +84,7 @@ case class AndGate(name:Option[String])(implicit spade:Spade, override val prt:C
     in <== out
   }
 
+  /* ---------- SIMULATION -----------*/
   override def register(implicit sim:Simulator):Unit = {
     val invs = ins.map(_.v).collect{ case v:SingleValue => v }
     out.v := {
@@ -97,14 +96,14 @@ case class AndGate(name:Option[String])(implicit spade:Spade, override val prt:C
   }
 }
 object AndGate {
-  def apply(name:String)(implicit spade:Spade, prt:Controller, cb:CtrlBox):AndGate = {
-    AndGate(Some(name))
+  def apply(name: => String = "ag")(implicit spade:Spade):AndGate = {
+    new AndGate() { override def typeStr = name }
   }
 }
-case class AndTree(name:Option[String])(implicit spade:Spade, override val prt:Controller, cb:CtrlBox) extends Primitive with Simulatable {
+case class AndTree(name:Option[String])(implicit spade:Spade) extends Primitive with Simulatable {
   import spademeta._
   override val typeStr = name.getOrElse("at")
-  cb.andTrees += this
+  /* ---------- IOs -----------*/
   val out = Output(Bit(), this, s"${this}.out")
   private[spade] def <== (outs:List[Output[Bit, Module]]):Unit = outs.foreach { out => <==(out) }
   private[spade] def <== (out:Output[Bit, Module]):Unit = {
@@ -114,6 +113,7 @@ case class AndTree(name:Option[String])(implicit spade:Spade, override val prt:C
     in <== out
   }
 
+  /* ---------- SIMULATION -----------*/
   override def register(implicit sim:Simulator):Unit = {
     val invs = ins.map(_.v).collect{ case v:SingleValue => v }
     out.v := {
@@ -125,16 +125,20 @@ case class AndTree(name:Option[String])(implicit spade:Spade, override val prt:C
   }
 }
 object AndTree {
-  def apply(name:String)(implicit spade:Spade, prt:Controller, cb:CtrlBox):AndTree = AndTree(Some(name))
-  def apply()(implicit spade:Spade, prt:Controller, cb:CtrlBox):AndTree = AndTree(None)
+  def apply(name:String)(implicit spade:Spade):AndTree = AndTree(Some(name))
+  def apply()(implicit spade:Spade):AndTree = AndTree(None)
 }
 
 case class PulserSMConfig (
   pulserLength:Int
 ) extends Configuration
 
-case class PulserSM()(implicit spade:Spade, override val prt:OuterComputeUnit) extends Primitive with Simulatable with Configurable {
+case class PulserSM()(implicit spade:Spade) extends Primitive with Simulatable with Configurable {
   type CT = PulserSMConfig
+
+  override lazy val prt:OuterComputeUnit = collectUp[OuterComputeUnit](this).head
+
+  /* ---------- IOs -----------*/
   val done = Input(Bit(), this, s"${this}.done")
   val en = Input(Bit(), this, s"${this}.en")
   val init = Input(Bit(), this, s"${this}.init")
@@ -144,6 +148,7 @@ case class PulserSM()(implicit spade:Spade, override val prt:OuterComputeUnit) e
   val state = Output(Bit(), this, s"${this}.state")
   var pulseLength = 1
 
+  /* ---------- SIMULATION -----------*/
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
     cfmap.get(prt).foreach { cuconfig:OuterComputeUnitConfig =>
@@ -175,8 +180,9 @@ case class PulserSM()(implicit spade:Spade, override val prt:OuterComputeUnit) e
   }
 }
 
-case class UpDownSM()(implicit spade:Spade, override val prt:Controller) extends Primitive with Simulatable {
+case class UpDownSM()(implicit spade:Spade) extends Primitive with Simulatable {
 
+  /* ---------- IOs -----------*/
   val doneIn = Input(Bit(), this, s"${this}.doneIn")
   val inc = Input(Bit(), this, s"${this}.inc")
   val dec = Input(Bit(), this, s"${this}.dec")
@@ -188,8 +194,9 @@ case class UpDownSM()(implicit spade:Spade, override val prt:Controller) extends
   val out = Output(Bit(), this, s"${this}.out")
   val count = Output(Word(), this, s"${this}.count")
   val done = Output(Bit(), this, s"${this}.done") // Initially low
-  val udc = UDCounter()
+  val udc = Module(UDCounter()).index(-1)
 
+  /* ---------- SIMULATION -----------*/
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
     if (isMapped(this)) {
@@ -220,20 +227,18 @@ case class PredicateUnitConfig  (
   const:Int
 ) extends Configuration
 
-case class PredicateUnit(name:String)(implicit spade:Spade, override val prt:Controller, cb:CtrlBox) extends Primitive 
+case class PredicateUnit(name:String)(implicit spade:Spade) extends Primitive 
   with Simulatable with Configurable {
 
   type CT = PredicateUnitConfig
 
   override val typeStr = s"pu_$name"
-  cb.predicateUnits += this
+
+  /* ---------- IOs -----------*/
   val in = Input(Word(), this, s"${quote(this)}.in")
-  //prt.match {
-    //case cu:ComputeUnit => 
-      //(0 until numCtrs).foreach { i => Input(Word(), this, s"${quote(this)}.in$i") }
-    //case _ =>
-  //}
   val out = Output(Bit(), this, s"${quote(this)}.out")
+
+  /* ---------- SIMULATION -----------*/
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
     cfmap.get(this).fold {
@@ -244,19 +249,27 @@ case class PredicateUnit(name:String)(implicit spade:Spade, override val prt:Con
   }
 }
 
-abstract class CtrlBox()(implicit spade:Spade, override val prt:Controller) extends Primitive with Simulatable {
-  implicit val ctrlBox:CtrlBox = this
+
+case class CtrlBoxParam (
+  numUDCs:Int = 5
+) extends SpadeParam
+abstract class CtrlBox(val param:CtrlBoxParam)(implicit spade:Spade) extends Primitive with Simulatable {
   import spademeta._
-  lazy val _udcs = ListBuffer[UDCounter]()
-  def udcs = _udcs.toList
-  lazy val andTrees = ListBuffer[AndTree]()
-  lazy val delays = ListBuffer[Delay[Bit]]()
-  lazy val andGates = ListBuffer[AndGate]()
-  lazy val predicateUnits = ListBuffer[PredicateUnit]()
 
-  val fifoAndTree = AndTree("fifoAndTree")
-  fifoAndTree <== prt.fifos.map(_.notEmpty) 
+  override lazy val prt:Controller = collectUp[Controller](this).head
 
+  /* ---------- SUBMODULES -----------*/
+  val fifoAndTree = Module(AndTree("fifoAndTree"))
+  //val predicateUnits = ListBuffer[PredicateUnit]()
+  lazy val delays = collectDown[Delay[Bit]](this)
+  lazy val udcs = collectDown[UDCounter](this).filter{ n => indexOf.get(n).nonEmpty }.toList.sortBy { _.index }
+
+  /* ----- CONNECTION ----- */
+  override def connect = {
+    fifoAndTree <== prt.fifos.map(_.notEmpty) 
+  }
+
+  /* ---------- SIMULATION -----------*/
   override def register(implicit sim:Simulator):Unit = {
     delays.foreach { delay =>
       delay.in.v.default = false
@@ -265,106 +278,135 @@ abstract class CtrlBox()(implicit spade:Spade, override val prt:Controller) exte
   }
 }
 
-abstract class StageCtrlBox()(implicit spade:Spade, override val prt:ComputeUnit) extends CtrlBox {
-  import prt.param._
+abstract class StageCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends CtrlBox(param) {
+  import param._
+  import spademeta._
+  override lazy val prt:ComputeUnit = collectUp[ComputeUnit](this, logger=Some(spade.logger)).head
 
-  val en = Delay(Bit(), 0, s"${quote(prt)}.en")
-  val done = Delay(Bit(), 0, s"${quote(prt)}.done")
+  /* ---------- SUBMODULES -----------*/
+  val en = Module(Delay(Bit(), 0, s"${quote(prt)}.en"))
+  val done = Module(Delay(Bit(), 0, s"${quote(prt)}.done"))
 
-  for (i <- 0 until numUDCs) { UDCounter(idx=i) }
+  for (i <- 0 until numUDCs) { 
+    Module(UDCounter().index(i))
+  }
   val siblingAndTree = AndTree("siblingAndTree") 
-  siblingAndTree <== udcs.map(_.out)
-}
 
-class InnerCtrlBox()(implicit spade:Spade, override val prt:ComputeUnit) 
-  extends StageCtrlBox {
-  val doneDelay = Delay(Bit(), prt.stages.size, s"${quote(prt)}.doneDelay")
-  doneDelay.in <== done.out
-
-  val enDelay = Delay(Bit(), prt.stages.size, s"${quote(prt)}.enDelay")
-  enDelay.in <== en.out
-
-  val tokenInXbar = Delay(Bit(), 0)
-  tokenInXbar.in <== prt.cins.map(_.ic)
-
-  val tokenInAndTree = AndTree("tokenInAndTree")
-  tokenInAndTree <== prt.cins.map(_.ic)
-
-  val enAnd = AndGate("enAnd")
-  enAnd <== siblingAndTree.out
-  enAnd <== tokenInAndTree.out
-  enAnd <== fifoAndTree.out
-
-  en.in <== enAnd.out
-
-  val accumPredUnit = PredicateUnit("accum")
-  val fifoPredUnit = PredicateUnit("fifo")
-  prt.ctrs.foreach { ctr => 
-    accumPredUnit.in <== (ctr.out, 0)
-    fifoPredUnit.in <== (ctr.out, 0) 
+  /* ----- CONNECTION ----- */
+  override def connect = {
+    siblingAndTree <== udcs.map(_.out)
+    super.connect
   }
 }
 
-class OuterCtrlBox()(implicit spade:Spade, override val prt:OuterComputeUnit) 
-  extends StageCtrlBox {
-  val childrenAndTree = AndTree("childrenAndTree") 
-  childrenAndTree <== udcs.map(_.out)
+class InnerCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends StageCtrlBox(param) {
 
-  val udsm = UpDownSM()
-  udsm.doneIn <== done.out
-  udsm.dec <== childrenAndTree.out
-  udsm.inc <== en.out
+  /* ---------- SUBMODULES -----------*/
+  val enAnd = Module(AndGate("enAnd"))
+  lazy val enDelay = Module(Delay(Bit(), prt.stages.size, s"${quote(prt)}.enDelay"))
+  lazy val doneDelay = Module(Delay(Bit(), prt.stages.size, s"${quote(prt)}.doneDelay"))
 
-  val enAnd = AndGate("enAnd")
-  enAnd <== udsm.notDone
-  enAnd <== udsm.notRun
-  enAnd.ins(1).asBit <== Const(true).out
-  enAnd <== siblingAndTree.out
+  val tokenInXbar = Module(Delay(Bit(), 0))
+  val tokenInAndTree = Module(AndTree("tokenInAndTree"))
 
-  en.in <== enAnd.out 
+  val accumPredUnit = Module(PredicateUnit("accum"))
+  val fifoPredUnit = Module(PredicateUnit("fifo"))
+
+  /* ----- CONNECTION ----- */
+  override def connect = {
+    doneDelay.in <== done.out
+    enDelay.in <== en.out
+    tokenInXbar.in <== prt.cins.map(_.ic)
+    tokenInAndTree <== prt.cins.map(_.ic)
+    enAnd <== siblingAndTree.out
+    enAnd <== tokenInAndTree.out
+    enAnd <== fifoAndTree.out
+
+    en.in <== enAnd.out
+    prt.ctrs.foreach { ctr => 
+      accumPredUnit.in <== (ctr.out, 0)
+      fifoPredUnit.in <== (ctr.out, 0) 
+    }
+
+    super.connect
+  }
 }
 
-class MemoryCtrlBox()(implicit spade:Spade, override val prt:MemoryComputeUnit) extends CtrlBox() {
-  val tokenInXbar = Delay(Bit(), 0, s"$prt.tokenInXbar")
+class OuterCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends StageCtrlBox(param) {
+  import spademeta._
+  override lazy val prt:OuterComputeUnit = collectUp[OuterComputeUnit](this).head
 
-  val writeFifoAndTree = AndTree("writeFifoAndTree") 
+  val childrenAndTree = Module(AndTree("childrenAndTree"))
+  val udsm = Module(UpDownSM())
+  val enAnd = Module(AndGate("enAnd"))
 
-  val readFifoAndTree = AndTree("readFifoAndTree") 
+  /* ----- CONNECTION ----- */
+  override def connect = {
+    childrenAndTree <== udcs.map(_.out)
+    udsm.doneIn <== done.out
+    udsm.dec <== childrenAndTree.out
+    udsm.inc <== en.out
+    enAnd <== udsm.notDone
+    enAnd <== udsm.notRun
+    enAnd.ins(1).asBit <== Const(true).out
+    enAnd <== siblingAndTree.out
 
-  val tokenInAndTree = AndTree("tokenInAndTree")
-  tokenInAndTree <== prt.cins.map(_.ic)
+    en.in <== enAnd.out 
+
+    super.connect
+  }
+}
+
+class MemoryCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends CtrlBox(param) {
+  override lazy val prt:MemoryComputeUnit = collectUp[MemoryComputeUnit](this).head
+
+  val tokenInXbar = Module(Delay(Bit(), 0, s"$prt.tokenInXbar"))
+  val writeFifoAndTree = Module(AndTree("writeFifoAndTree"))
+  val readFifoAndTree = Module(AndTree("readFifoAndTree"))
+  val tokenInAndTree = Module(AndTree("tokenInAndTree"))
 
   //val readUDC = UDCounter()
 
-  val readAndGate = AndGate(s"$prt.readAndGate")
-  //readAndGate <== readUDC.out
-  readAndGate <== tokenInAndTree.out
-  readAndGate <== readFifoAndTree.out 
+  val readAndGate = Module(AndGate(s"$prt.readAndGate"))
 
-  val readEn = Delay(Bit(),0, s"$prt.readEn") 
-  readEn.in <== readAndGate.out
-  val writeEn = Delay(Bit(), 0, s"$prt.writeEn")
-  writeEn.in <== writeFifoAndTree.out
+  val readEn = Module(Delay(Bit(),0, s"$prt.readEn"))
+  val writeEn = Module(Delay(Bit(), 0, s"$prt.writeEn"))
 
-  val readEnDelay = Delay(Bit(),0, s"$prt.readEnDelay") 
-  readEnDelay.in <== readEn.out
-  val writeEnDelay = Delay(Bit(),0, s"$prt.writeEnDelay") 
-  writeEnDelay.in <== writeEn.out
+  val readEnDelay = Module(Delay(Bit(),0, s"$prt.readEnDelay"))
+  val writeEnDelay = Module(Delay(Bit(),0, s"$prt.writeEnDelay"))
 
-  val readDone = Delay(Bit(), 0, s"$prt.readDone")
-  val writeDone = Delay(Bit(), 0, s"$prt.writeDone")
+  val readDone = Module(Delay(Bit(), 0, s"$prt.readDone"))
+  val writeDone = Module(Delay(Bit(), 0, s"$prt.writeDone"))
 
-  val readDoneDelay = Delay(Bit(), 0, s"$prt.readDoneDelay")
-  readDoneDelay.in <== readDone.out
-  val writeDoneDelay = Delay(Bit(), 0, s"$prt.writeDoneDelay")
-  writeDoneDelay.in <== writeDone.out
+  val readDoneDelay = Module(Delay(Bit(), 0, s"$prt.readDoneDelay"))
+  val writeDoneDelay = Module(Delay(Bit(), 0, s"$prt.writeDoneDelay"))
+
+  /* ----- CONNECTION ----- */
+  override def connect = {
+    tokenInAndTree <== prt.cins.map(_.ic)
+    //readAndGate <== readUDC.out
+    readAndGate <== tokenInAndTree.out
+    readAndGate <== readFifoAndTree.out 
+    readEn.in <== readAndGate.out
+    writeEn.in <== writeFifoAndTree.out
+    readEnDelay.in <== readEn.out
+    writeEnDelay.in <== writeEn.out
+    readDoneDelay.in <== readDone.out
+    writeDoneDelay.in <== writeDone.out
+
+    super.connect
+  }
 }
 
-case class TopCtrlBox()(implicit spade:Spade, override val prt:Top) extends CtrlBox() {
+case class TopCtrlBox(override val param:CtrlBoxParam)(implicit spade:Spade) extends CtrlBox(param) {
 
+  override lazy val prt:Top = collectUp[Top](this).head
+
+  /* ---------- IOs -----------*/
   val command = Output(Bit(), this, s"command")
   val status = Input(Bit(), this, s"status")
 
+  /* ---------- SIMULATION -----------*/
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
     status.vAt(3)
@@ -376,16 +418,19 @@ case class TopCtrlBox()(implicit spade:Spade, override val prt:Top) extends Ctrl
   }
 }
 
-class MCCtrlBox()(implicit spade:Spade, override val prt:MemoryController) extends CtrlBox() {
+class MCCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends CtrlBox(param) {
+  override lazy val prt:MemoryController = collectUp[MemoryController](this).head
+
   val rdone = Output(Bit(), this, s"${this}.rdone")
   val wdone = Output(Bit(), this, s"${this}.wdone")
-  val en = Delay(Bit(), 0, s"$prt.en")
+  val en = Module(Delay(Bit(), 0, s"$prt.en"))
   val WAITING = false
   val RUNNING = true
   val state = Output(Bit(), this, s"${this}.state")
   val running = Output(Bit(), this, s"${this}.running")
   val count = Output(Word(), this, s"${this}.count")
 
+  /* ---------- SIMULATION -----------*/
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
     import spademeta._

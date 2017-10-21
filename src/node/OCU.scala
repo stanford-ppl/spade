@@ -14,8 +14,7 @@ case class OuterComputeUnitParam (
   numRegs:Int = 0,
   numStages:Int = 0,
   numCtrs:Int = 6,
-  muxSize:Int = 10,
-  numUDCs:Int = 15
+  muxSize:Int = 10
 ) extends ComputeUnitParam() {
   val numVins:Int = 0
   val numVouts:Int = 0
@@ -51,5 +50,5 @@ class OuterComputeUnit(override val param:OuterComputeUnitParam=new OuterCompute
   override val typeStr = "ocu"
   override def config = param.config(this)
 
-  lazy val ctrlBox:OuterCtrlBox = new OuterCtrlBox()
+  lazy val ctrlBox:OuterCtrlBox = Module(new OuterCtrlBox(CtrlBoxParam()))
 }

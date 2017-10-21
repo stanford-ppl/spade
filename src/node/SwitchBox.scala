@@ -10,14 +10,16 @@ case class SwitchBox()(implicit spade:Spade) extends Routable {
   val scalarIO:ScalarIO[this.type] = ScalarIO(this)
   val vectorIO:VectorIO[this.type] = VectorIO(this)
   val ctrlIO:ControlIO[this.type] = ControlIO(this)
+
+  /* --- Connections -----*/
   def connectXbar[P<:PortType](gio:GridIO[P, this.type]) = {
     gio.ins.foreach { in => gio.outs.foreach { out => out.ic <== in.ic } }
   }
-  def connectXbars = {
-    connectXbar(scalarIO)
-    connectXbar(vectorIO)
-    connectXbar(ctrlIO)
-  }
+  connectXbar(scalarIO)
+  connectXbar(vectorIO)
+  connectXbar(ctrlIO)
+
+  /* --- Simulation  -----*/
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
     (souts ++ vouts ++ couts).foreach { out =>

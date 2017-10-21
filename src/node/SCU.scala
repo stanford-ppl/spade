@@ -11,8 +11,7 @@ case class PreloadScalarComputeParam(
   override val numSouts:Int = 4,
   override val numRegs:Int = 16,
   override val numCtrs:Int = 6,
-  override val muxSize:Int = 10,
-  override val numUDCs:Int = 4
+  override val muxSize:Int = 10
 ) extends ScalarComputeUnitParam(
   numSins = ConfigFactory.plasticineConf.sinUcu,
   numStages = ConfigFactory.plasticineConf.stagesUcu
@@ -28,8 +27,7 @@ class ScalarComputeUnitParam (
   val numRegs:Int = 16,
   val numStages:Int = 6,
   val numCtrs:Int = 6,
-  val muxSize:Int = 10,
-  val numUDCs:Int = 4
+  val muxSize:Int = 10
 ) extends ComputeUnitParam() {
   val numVins:Int = 0
   val numVouts:Int = 0
@@ -59,6 +57,6 @@ class ScalarComputeUnitParam (
 class ScalarComputeUnit(override val param:ScalarComputeUnitParam=new ScalarComputeUnitParam())(implicit spade:Spade) 
   extends ComputeUnit(param) {
   override val typeStr = "scu"
-  lazy val ctrlBox:InnerCtrlBox = new InnerCtrlBox()
+  lazy val ctrlBox:InnerCtrlBox = Module(new InnerCtrlBox(CtrlBoxParam()))
   override def config = param.config(this)
 }

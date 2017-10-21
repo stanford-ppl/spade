@@ -1,13 +1,15 @@
 package spade
 
 import spade.node._
+import spade.traversal.HiearchicalTraversal
+
 import pirc._
 
 import scala.language.existentials
 import scala.language.implicitConversions
 import scala.reflect.{ClassTag, classTag}
 
-package object util {
+package object util extends HiearchicalTraversal {
 
   /* ------------- Alias ------------- **/
 
@@ -25,103 +27,6 @@ package object util {
 
   implicit def pr_to_ip(pr:PipeReg):Input[Bus, PipeReg] = pr.in
   implicit def pr_to_op(pr:PipeReg):Output[Bus, PipeReg] = pr.out
-
-  def regsOf(io:IO[_,_]):List[ArchReg] = mappingOf[PipeReg](io).map(_.reg)
-
-  def mappingOf[T](io:IO[_,_])(implicit ev:ClassTag[T]):List[T] = io match {
-    case in:Input[_,_] => 
-      fromInstanceOf[T](in).map{_.src.asInstanceOf[T]}
-    case out:Output[_,_] =>
-      fromInstanceOf[T](out).map{_.src.asInstanceOf[T]}
-  }
-
-  def fromInstanceOf[T](in:Input[_<:PortType,Module])(implicit ev:ClassTag[T]):List[Output[_<:PortType,Module]] = {
-    //println(s"$in.fanIns=[${in.fanIns.map(n => s"($n, ${ev.runtimeClass.isInstance(n)})").mkString("\n")}]")
-    in.fanIns.flatMap { out =>
-      out.src match {
-        case n:T => List(out)
-        case sl:Slice[_,_] => fromInstanceOf[T](sl.in)
-        case bc:BroadCast[_] => fromInstanceOf[T](bc.in)
-        case n => Nil
-      }
-    }
-  }
-
-  def fromInstanceOf[T](out:Output[_<:PortType,Module])(implicit ev:ClassTag[T]):List[Input[_<:PortType,Module]] = {
-    out.fanOuts.flatMap { in =>
-      in.src match {
-        case n:T => List(in);
-        case sl:Slice[_,_] => fromInstanceOf[T](sl.out)
-        case bc:BroadCast[_] => fromInstanceOf[T](bc.out)
-        case n => Nil
-      }
-    }
-  }
-
-  def stageOf(io:IO[_,_]):Option[Stage] = {
-    io.src match {
-      case pr:PipeReg => Some(pr.stage) 
-      case fu:FuncUnit => Some(fu.stage)
-      case _ => None
-    }
-  }
-
-  def visitIn(x:Any):Iterable[Any] = x match {
-    case x:GlobalInput[_,_] => Set() // Do not cross CU boundary
-    case x:GlobalOutput[_,_] => Set(x.src,x.ic)
-    case x:Input[_,_] => x.fanIns
-    case x:Output[_,_] => Set(x.src)
-    case x:Module => x.ins
-  }
-
-  def collectIn[X](
-    x:Any, 
-    visitIn:Any => Iterable[Any]=visitIn, 
-    logger:Option[Logger]=None,
-    visited:Set[Any] = Set.empty
-  )(implicit ev:ClassTag[X]):Set[X] = {
-    def f(xx:Any):Set[X] = collectIn[X](xx, visitIn, logger, visited + x)
-    logger.foreach { _.emitBSln(s"collectIn($x)") }
-    val res = x match {
-      case x:X => Set[X](x)
-      case x:Iterable[_] => x.flatMap(f).toSet
-      case x if visited.contains(x) => Set[X]()
-      case x => f(visitIn(x))
-    }
-    logger.foreach { _.emitBEln }
-    res
-  }
-
-  def visitOut(x:Any):Iterable[Any] = {
-    val res = x match {
-      case x:GlobalOutput[_,_] => Set() // Do not cross CU boundary
-      case x:GlobalInput[_,_] => Set(x.src) ++ x.outs
-      case x:Input[_,_] => Set(x.src)
-      case x:Output[_,_] => x.fanOuts
-      case x:Module => x.outs
-    }
-    res
-  }
-
-  def collectOut[X](
-    x:Any, 
-    visitOut:Any => Iterable[Any]=visitOut,
-    logger:Option[Logger]=None,
-    visited:Set[Any] = Set.empty
-  )(implicit ev:ClassTag[X], spade:Spade):Set[X] = {
-    logger.foreach { l =>
-      l.emitBSln(s"collectOut(${quote(x)})")
-    }
-    def f(xx:Any):Set[X] = collectOut[X](xx, visitOut,logger, visited + x)
-    val res = x match {
-      case x:X => Set(x)
-      case x:Iterable[_] => x.flatMap(f).toSet
-      case x if visited.contains(x) => Set[X]()
-      case x => f(visitOut(x))
-    }
-    logger.foreach { _.emitBEln }
-    res
-  }
 
   def quote(n:Any)(implicit spade:Spade):String = {
     val spademeta: SpadeMetadata = spade
@@ -147,13 +52,13 @@ package object util {
       case n:FuncUnit => isMapped(n.stage)
       case n:PipeReg => isMapped(n.in)
       case n:UDCounter => 
-        n.prt.ctrlBox match {
-          case cb:MemoryCtrlBox => true
-          case cb:OuterCtrlBox if cb.udsm.udc == n => true
-          case cb:CtrlBox => mp.cfmap.isMapped(n)
+        n.ctrlBox match {
+          case None => true
+          case Some(cb:OuterCtrlBox) if cb.udsm == n.parent.get => true
+          case Some(cb:CtrlBox) => mp.cfmap.isMapped(n)
         }
       case n:Input[_,_] => mp.fimap.contains(n) || n.fanIns.size==1
-      case n:Output[_,_] => mp.fimap.contains(n) || n.fanOuts.size==1
+      case n:Output[_,_] => mp.fimap.contains(n)
       case n:SwitchBox => n.ios.exists(isMapped)
       case n:CtrlBox => isMapped(n.prt)
       case n:UpDownSM => isMapped(n.prt)
@@ -182,6 +87,14 @@ package object util {
       if (out.fanOuts.size==1) List(out.fanOuts.head) else Nil
     } { ins =>
       ins.map { _.asInstanceOf[Input[P, Module]] }.toList
+    }
+  }
+
+  def regsOf(x:Any):Set[ArchReg] = {
+    x match {
+      case x:Input[_,_] => collectIn[PipeReg](x).map{ _.reg }
+      case x:Output[_,_] => collectOut[PipeReg](x).map{ _.reg }
+      case _ => Set[ArchReg]()
     }
   }
 

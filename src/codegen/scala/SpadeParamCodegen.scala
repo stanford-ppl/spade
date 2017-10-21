@@ -102,10 +102,10 @@ class SpadeParamCodegen(implicit design: Spade) extends Codegen with ScalaCodege
     //}
     cu match {
       case cu:MemoryComputeUnit =>
-        emitln(s"override val d = ${cu.fustages.size}")
+        emitln(s"override val d = ${cu.stages.size}")
         //emitln(s"override val wd = ${cu.wastages.size}")
       case cu =>
-        emitln(s"override val d = ${cu.fustages.size}")
+        emitln(s"override val d = ${cu.stages.size}")
     }
   }
 
@@ -115,7 +115,7 @@ class SpadeParamCodegen(implicit design: Spade) extends Codegen with ScalaCodege
         emitln(s"override val w = ${wordWidth}")
         emitln(s"override val v = ${numLanes}")
         emitln(s"override val numCounters = ${pcu.param.numCtrs}")
-        emitln(s"override val numUDCs = ${pcu.param.numUDCs}")
+        emitln(s"override val numUDCs = ${pcu.ctrlBox.param.numUDCs}")
         emitRegs(pcu)
         emitStages(pcu)
         emitln(s"override val r = regColors.size")
@@ -128,7 +128,7 @@ class SpadeParamCodegen(implicit design: Spade) extends Codegen with ScalaCodege
         emitln(s"override val w = ${wordWidth}")
         emitln(s"override val v = ${numLanes}")
         emitln(s"override val numCounters = ${mcu.param.numCtrs}")
-        emitln(s"override val numUDCs = ${mcu.param.numUDCs}")
+        emitln(s"override val numUDCs = ${mcu.ctrlBox.param.numUDCs}")
         emitRegs(mcu)
         emitStages(mcu)
         emitln(s"override val r = regColors.size")
@@ -139,7 +139,7 @@ class SpadeParamCodegen(implicit design: Spade) extends Codegen with ScalaCodege
       emitBlock(s"case class GeneratedSwitchCUParams(override val numScalarIn:Int, override val numControlIn:Int, override val numControlOut:Int) extends SwitchCUParams") {
         emitln(s"override val w = ${wordWidth}")
         emitln(s"override val numCounters = ${ocu.param.numCtrs}")
-        emitln(s"override val numUDCs = ${ocu.param.numUDCs}")
+        emitln(s"override val numUDCs = ${ocu.ctrlBox.param.numUDCs}")
         emitln(s"override val numScalarOut = 0")
       }
     }
@@ -148,7 +148,7 @@ class SpadeParamCodegen(implicit design: Spade) extends Codegen with ScalaCodege
       emitBlock(s"case class GeneratedScalarCUParams(override val numScalarIn:Int, override val numScalarOut:Int, override val numControlIn:Int, override val numControlOut:Int) extends ScalarCUParams") {
         emitln(s"override val w = ${wordWidth}")
         emitln(s"override val numCounters = ${scu.param.numCtrs}")
-        emitln(s"override val numUDCs = ${scu.param.numUDCs}")
+        emitln(s"override val numUDCs = ${scu.ctrlBox.param.numUDCs}")
         emitRegs(scu)
         emitStages(scu)
         emitln(s"override val r = regColors.size")
@@ -211,10 +211,7 @@ class SpadeParamCodegen(implicit design: Spade) extends Codegen with ScalaCodege
   }
 
   def quote(n:Node):String = n match {
-    case n:EmptyStage => s"EmptyStage"
-    case n:WAStage => s"WAStage(numOprds=${n.fu.numOprds}, ops=${quote(n.fu.ops)})"
-    case n:RAStage => s"RAStage(numOprds=${n.fu.numOprds}, ops=${quote(n.fu.ops)})"
-    case n:FUStage => s"FUStage(numOprds=${n.fu.numOprds}, ops=${quote(n.fu.ops)})"
+    case n:Stage => s"FUStage(numOprds=${n.param.numOprds}, ops=${quote(n.param.ops)})"
     case n:ScalarComputeUnit =>
       val (x, y) = coordOf(n)
       x match {

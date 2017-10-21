@@ -14,7 +14,6 @@ import pirc.util._
 //) extends ComputeUnitParam() {
   //val numSRAMs = 1
   //val sramSize = 128
-  //val numUDCs = 0
   //val numRegs = 0
   //override val numLanes = 1
 

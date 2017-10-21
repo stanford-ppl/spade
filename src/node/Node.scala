@@ -14,7 +14,7 @@ class Node(implicit val spade:Spade) {
     case n: Node => super.equals(that) && id == n.id
     case _ => super.equals(that)
   }
-  val typeStr = this.getClass().getSimpleName()
+  def typeStr = this.getClass().getSimpleName()
   override def toString = s"${typeStr}${id}" 
   def index(i:Int)(implicit spade:Spade):this.type = { indexOf(this) = i; this }
   def index(implicit spade:Spade):Int = { indexOf(this) }

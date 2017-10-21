@@ -42,7 +42,7 @@ class MemoryController(param:MemoryControllerParam)(implicit spade:Spade) extend
   type CT = MemoryControllerConfig
 
   override val typeStr = "mc"
-  lazy val ctrlBox:MCCtrlBox = new MCCtrlBox()
+  lazy val ctrlBox:MCCtrlBox = Module(new MCCtrlBox(CtrlBoxParam()))
 
   lazy val woffset = sfifos.filter{ sb => nameOf(sb)=="woffset" }.head
   lazy val roffset = sfifos.filter{ sb => nameOf(sb)=="roffset" }.head

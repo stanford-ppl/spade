@@ -46,21 +46,21 @@ case class Top(override val param:TopParam=new TopParam())(implicit spade:Spade)
   /* --- Controller at specific coordinate --- */
   def cuAt(x:Int, y:Int) = param.pattern.cuAt(this)(x,y)
 
-  def pcuAt(x:Int, y:Int):PatternComputeUnit = new PatternComputeUnit(spade.pcuAt(x,y)).coord(x,y)
+  def pcuAt(x:Int, y:Int):PatternComputeUnit = Module(new PatternComputeUnit(spade.pcuAt(x,y))).coord(x,y)
 
-  def mcuAt(x:Int, y:Int):MemoryComputeUnit = new MemoryComputeUnit(spade.mcuAt(x,y)).coord(x,y)
+  def mcuAt(x:Int, y:Int):MemoryComputeUnit = Module(new MemoryComputeUnit(spade.mcuAt(x,y))).coord(x,y)
 
-  def scuAt(x:Int, y:Int):ScalarComputeUnit = new ScalarComputeUnit(spade.scuAt(x,y)).coord(x,y)
+  def scuAt(x:Int, y:Int):ScalarComputeUnit = Module(new ScalarComputeUnit(spade.scuAt(x,y))).coord(x,y)
 
-  def mcAt(x:Int, y:Int):MemoryController = new MemoryController(spade.mcAt(x,y)).coord(x,y)
+  def mcAt(x:Int, y:Int):MemoryController = Module(new MemoryController(spade.mcAt(x,y))).coord(x,y)
 
-  def ocuAt(x:Int, y:Int):OuterComputeUnit = new OuterComputeUnit(spade.ocuAt(x,y)).coord(x,y)
+  def ocuAt(x:Int, y:Int):OuterComputeUnit = Module(new OuterComputeUnit(spade.ocuAt(x,y))).coord(x,y)
 
   /* --- Submodule Instantiation --- */
 
-  lazy val ctrlBox:TopCtrlBox = TopCtrlBox()
+  lazy val ctrlBox:TopCtrlBox = Module(TopCtrlBox(CtrlBoxParam()))
 
-  val dram = DRAM(size=1024) 
+  val dram = Module(DRAM(size=1024))
 
   val cuArray:List[List[Controller]] = List.tabulate(numCols, numRows) { case (x, y) => cuAt(x, y) }
 
@@ -70,7 +70,7 @@ case class Top(override val param:TopParam=new TopParam())(implicit spade:Spade)
 
   val mcArray = List.tabulate(2, numRows+1) { case (x, y) => if (x==0) mcAt(-1, y) else mcAt(numCols, y) }
 
-  val sbArray:List[List[SwitchBox]] = List.tabulate(numCols+1, numRows+1) { case (x, y) => SwitchBox().coord(x,y) }
+  val sbArray:List[List[SwitchBox]] = List.tabulate(numCols+1, numRows+1) { case (x, y) => Module(SwitchBox()).coord(x,y) }
 
   val ocuArray = List.tabulate(numCols+1, numRows+1) { case (x, y) => ocuAt(x, y) }
 
@@ -139,5 +139,7 @@ case class Top(override val param:TopParam=new TopParam())(implicit spade:Spade)
     scus.foreach { _.config }
     mcs.foreach { _.config }
     ocus.foreach { _.config }
+
+    connectAll
   }
 }

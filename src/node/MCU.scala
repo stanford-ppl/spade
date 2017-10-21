@@ -14,8 +14,7 @@ case class PreloadMemoryComputeParam (
   override val vbufSize:Int = 16,
   override val numRegs:Int = 16,
   override val numCtrs:Int = 8,
-  override val muxSize:Int = 10,
-  override val numUDCs:Int = 5
+  override val muxSize:Int = 10
 ) extends MemoryComputeUnitParam (
   numVins = ConfigFactory.plasticineConf.vinPmu,
   numVouts = ConfigFactory.plasticineConf.voutPmu,
@@ -38,8 +37,7 @@ class MemoryComputeUnitParam(
   val numRegs:Int = 16,
   val numStages:Int = 8,
   val numCtrs:Int = 8,
-  val muxSize:Int = 10,
-  val numUDCs:Int = 0
+  val muxSize:Int = 10
 ) extends ComputeUnitParam() {
   val numSRAMs = 1
   val sramSize = 512 * 1024 / 4
@@ -75,7 +73,7 @@ class MemoryComputeUnit(override val param:MemoryComputeUnitParam=new MemoryComp
   import spademeta._
   import param._
 
-  lazy val ctrlBox:MemoryCtrlBox = new MemoryCtrlBox()
+  lazy val ctrlBox:MemoryCtrlBox = Module(new MemoryCtrlBox(CtrlBoxParam()))
 
   //private val _wastages:ListBuffer[WAStage] = ListBuffer.empty // Write Addr Stages
   //private val _rastages:ListBuffer[RAStage] = ListBuffer.empty // Read Addr Stages

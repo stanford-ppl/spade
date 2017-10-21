@@ -71,7 +71,7 @@ plasticine {
     //case cu:MemoryComputeUnit => cu.wastages ++ cu.rastages.headOption.map{ h => List(h) }.getOrElse(Nil)
     case cu:MemoryComputeUnit => cu.stages
     case cu:OuterComputeUnit => Nil
-    case cu:ComputeUnit => List(cu.fustages.head)
+    case cu:ComputeUnit => List(cu.stages.head)
   }
 
   /* Generate connections relates to register mapping of a cu */
@@ -156,8 +156,8 @@ plasticine {
           //cu.rastages.foreach { stage => sram.readAddrMux.inputs.foreach { _ <== (stage.fu.out, 0) } }
           //cu.wastages.foreach { stage => sram.writeAddrMux.inputs.foreach { _ <== (stage.fu.out, 0) } }
           cu.stages.foreach { stage => 
-            sram.readAddrMux.inputs.foreach { _ <== (stage.funcUnit.get.out, 0) }
-            sram.writeAddrMux.inputs.foreach { _ <== (stage.funcUnit.get.out, 0) }
+            sram.readAddrMux.inputs.foreach { _ <== (stage.funcUnit.out, 0) }
+            sram.writeAddrMux.inputs.foreach { _ <== (stage.funcUnit.out, 0) }
           }
         case _ =>
       }
@@ -194,9 +194,9 @@ plasticine {
     val top = spade.top
 
     /* FU Constrain  */
-    cu.fustages.foreach { stage =>
+    cu.stages.foreach { stage =>
       // All stage can read from any regs of its own stage, previous stage, and Const
-      stage.fu.operands.foreach{ oprd =>
+      stage.funcUnit.operands.foreach{ oprd =>
         oprd <-- Const().out // operand is constant
         cu.regs.foreach{ reg =>
           oprd <== stage.get(reg) // operand is from current register block
@@ -204,11 +204,11 @@ plasticine {
         }
       }
       // All stage can write to all regs of its stage
-      cu.regs.foreach{ reg => stage.get(reg) <== stage.fu.out }
+      cu.regs.foreach{ reg => stage.get(reg) <== stage.funcUnit.out }
     }
 
     forwardStages(cu).foreach { stage =>
-      stage.funcUnit.get.operands.foreach { oprd => 
+      stage.funcUnit.operands.foreach { oprd => 
         cu.ctrs.foreach{ oprd <== _.out }
         cu.srams.foreach { oprd <== _.readPort }
         cu.vfifos.foreach { oprd <== _.readPort }
@@ -408,7 +408,6 @@ plasticine {
         connectDataIO(prt)
         connectCtrl(prt)
       case prt:SwitchBox => 
-        prt.connectXbars
     }
   }
 

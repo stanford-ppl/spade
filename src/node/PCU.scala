@@ -11,8 +11,7 @@ case class PreloadPatternComputeParam (
   override val sbufSize:Int = 16,
   override val vbufSize:Int = 16,
   override val numCtrs:Int = 8,
-  override val muxSize:Int = 10,
-  override val numUDCs:Int = 5
+  override val muxSize:Int = 10
 ) extends PatternComputeUnitParam (
   numVins = ConfigFactory.plasticineConf.vinPcu,
   numVouts = ConfigFactory.plasticineConf.voutPcu,
@@ -32,8 +31,7 @@ case class SRAMAddrGenParam (
   override val numRegs:Int = 5,
   override val numStages:Int = 4,
   override val numCtrs:Int = 4,
-  override val muxSize:Int = 3,
-  override val numUDCs:Int = 5
+  override val muxSize:Int = 3
 ) extends PatternComputeUnitParam (
   reduction = false
 ) with PreLoadSpadeParam
@@ -52,7 +50,6 @@ class PatternComputeUnitParam (
   val numStages:Int = 8,
   val numCtrs:Int = 8,
   val muxSize:Int = 10,
-  val numUDCs:Int = 5,
   val reduction:Boolean = true
 ) extends ComputeUnitParam() {
   val numSRAMs:Int = 0
@@ -88,6 +85,6 @@ class PatternComputeUnit(override val param:PatternComputeUnitParam=new PatternC
   extends ComputeUnit(param) {
   override val typeStr = "pcu"
 
-  lazy val ctrlBox:InnerCtrlBox = new InnerCtrlBox()
+  lazy val ctrlBox:InnerCtrlBox = Module(new InnerCtrlBox(CtrlBoxParam()))
   override def config = param.config(this)
 }

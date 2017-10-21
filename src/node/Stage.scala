@@ -10,15 +10,20 @@ import scala.collection.mutable.Map
 case class PipeRegConfig(init:Option[AnyVal]) extends Configuration
 
 /* Phyiscal pipeline register */
-case class PipeReg(stage:Stage, reg:ArchReg)(implicit spade:Spade, override val prt:ComputeUnit) extends Primitive with Simulatable with Configurable {
+case class PipeReg(stage:Stage, reg:ArchReg)(implicit spade:Spade) extends Primitive with Simulatable with Configurable {
   import spademeta._
+  import stage.param._
+
+  override lazy val prt:ComputeUnit = collectUp[ComputeUnit](this).head
+
   override val typeStr = "pr"
   override def toString = s"pr(${quote(stage)},${quote(reg)})"
   type CT = PipeRegConfig
 
   val en = Input(Bit(), this, s"$this.en")
-  val in = Input(Bus(prt.param.numLanes, Word()), this, s"$this.in")
-  val out = Output(Bus(prt.param.numLanes, Word()), this, s"${this}.out")
+  val in = Input(Bus(stage.param.numLanes, Word()), this, s"$this.in")
+  val out = Output(Bus(stage.param.numLanes, Word()), this, s"${this}.out")
+
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
     implicit val mp = sim.mapping
@@ -62,13 +67,16 @@ case class PipeReg(stage:Stage, reg:ArchReg)(implicit spade:Spade, override val 
  * @param ops List of supported ops
  * @param stage which stage the FU locates
  * */
-case class FuncUnit(numOprds:Int, ops:List[Op], stage:Stage)(implicit spade:Spade, override val prt:ComputeUnit)
+case class FuncUnit(numOprds:Int, ops:List[Op], stage:Stage)(implicit spade:Spade)
   extends Primitive with Simulatable {
-
   import spademeta._
+  import stage.param._
+
+  override lazy val prt:ComputeUnit = collectUp[ComputeUnit](this).head
+
   override val typeStr = "fu"
-  val operands = List.tabulate(numOprds) { i => Input(Bus(prt.param.numLanes, Word()), this, s"$this.oprd[$i]") } 
-  val out = Output(Bus(prt.param.numLanes, Word()), this, s"$this.out")
+  val operands = List.tabulate(numOprds) { i => Input(Bus(numLanes, Word()), this, s"$this.oprd[$i]") } 
+  val out = Output(Bus(numLanes, Word()), this, s"$this.out")
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
 
@@ -116,6 +124,11 @@ case class FuncUnit(numOprds:Int, ops:List[Op], stage:Stage)(implicit spade:Spad
   }
 }
 
+case class StageParam(
+  numOprds:Int,
+  regs:List[ArchReg],
+  ops:List[Op]
+) extends SpadeParam
 case class StageConfig (
   par:Int,
   op:Op,
@@ -126,14 +139,14 @@ case class StageConfig (
  * Phyical stage. 1 column of FU and Pipeline Register block accross lanes. 
  * @param reg Logical registers in current register block
  * */
-class Stage(regs:List[ArchReg])(implicit spade:Spade, override val prt:ComputeUnit) extends Primitive 
-  with Configurable {
+class Stage(val param:StageParam)(implicit spade:Spade) extends Primitive with Configurable {
+  import param._
   import spademeta._
   type CT = StageConfig
 
-  val funcUnit:Option[FuncUnit] = None
+  val funcUnit = Module(FuncUnit(numOprds, ops, this))
   val _prs = Map[ArchReg, PipeReg]() // Mapping between logical register and physical register
-  regs.foreach { reg => _prs += (reg -> PipeReg(this, reg)) }
+  regs.foreach { reg => _prs += (reg -> Module(PipeReg(this, reg))) }
   def prs:List[PipeReg] = regs.map { r => _prs(r) }
   def get(reg:ArchReg):PipeReg = _prs(reg)
   var prev:Option[Stage] = None // changed in addStage in PController
@@ -144,24 +157,11 @@ class Stage(regs:List[ArchReg])(implicit spade:Spade, override val prt:ComputeUn
   def isNext(s:Stage) = s.next == Some(this)
   def before(s:Stage) = indexOf(this) < indexOf(s)
   def after(s:Stage) = indexOf(this) > indexOf(s)
-  override def index(i:Int)(implicit spade:Spade):this.type = { super.index(i); funcUnit.foreach(_.index(i)); this }
+  override def index(i:Int)(implicit spade:Spade):this.type = { super.index(i); funcUnit.index(i); this }
   override def index(implicit spade:Spade):Int = { super.index }
   override val typeStr = "st"
 }
-/* Dummy stage that only has register block */
-case class EmptyStage(regs:List[ArchReg])(implicit spade:Spade, override val prt:ComputeUnit) extends Stage(regs) {
-  override val typeStr = "etst"
-}
-/* Stage with Function unit */
-class FUStage(numOprds:Int, regs:List[ArchReg], ops:List[Op])(implicit spade:Spade, override val prt:ComputeUnit)
-  extends Stage(regs) {
-  def fu:FuncUnit = funcUnit.get 
-  override val funcUnit = Some(FuncUnit(numOprds, ops, this))
-}
-object FUStage {
-  def apply(numOprds:Int, regs:List[ArchReg], ops:List[Op])(implicit spade:Spade, prt:ComputeUnit):FUStage = 
-    new FUStage(numOprds, regs, ops) 
-}
+
 /* Reduction stage */
 /*
  * Create a list of reduction stages
@@ -169,18 +169,9 @@ object FUStage {
  * @param regs list of logical registers in the stage
  * @param ops reduction operations
  * */
-case class ReduceStage(numOprds:Int, regs:List[ArchReg], ops:List[Op])(implicit spade:Spade, override val prt:ComputeUnit) 
-  extends FUStage(numOprds, regs, ops) {
+case class ReduceStage(override val param:StageParam)(implicit spade:Spade) extends Stage(param) {
+  import param._
   override val typeStr = "rdst"
+  override lazy val prt:ComputeUnit = collectUp[ComputeUnit](this).head
   lazy val reduceIdx:Int = prt.rdstages.indexOf(this)
 }
-/* WriteAddr calculation stage */
-case class WAStage(numOprds:Int, regs:List[ArchReg], ops:List[Op])(implicit spade:Spade, override val prt:ComputeUnit) 
-  extends FUStage(numOprds, regs, ops) {
-  override val typeStr = "wast"
-}
-case class RAStage(numOprds:Int, regs:List[ArchReg], ops:List[Op])(implicit spade:Spade, override val prt:ComputeUnit) 
-  extends FUStage(numOprds, regs, ops) {
-  override val typeStr = "rast"
-}
-

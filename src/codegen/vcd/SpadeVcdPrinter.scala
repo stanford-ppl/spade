@@ -9,6 +9,7 @@ import pirc.util._
 
 import scala.collection.mutable.Map
 import scala.collection.mutable.ListBuffer
+import scala.language.reflectiveCalls
 
 trait SpadeVcdDeclarator { self:VcdPrinter =>
   val spadeDeclarator:SpadeVcdDeclarator = this
@@ -22,32 +23,22 @@ trait SpadeVcdDeclarator { self:VcdPrinter =>
   def tracked(s:Simulatable):Boolean = _tracking.contains(s)
   def declarator(self:SpadeVcdDeclarator):Traversal = _declarator
   private val _declarator = new Traversal {
-    override def visitNode (node:Node): Unit = {
+    override def traverseDown(node:Any):Unit = {
       if (visited.contains(node)) return
       node match {
         case node:ComputeUnit if tracked(node) => declare(node) {
-          declare("srams") { node.srams.foreach(visitNode) }
-          declare("ctrs") { node.ctrs.foreach(visitNode) }
-          declare("sfifos") { node.sfifos.foreach(visitNode) }
-          declare("vfifos") { node.vfifos.foreach(visitNode) }
-          declare("stages") { node.stages.foreach(visitNode) }
-          super.visitNode(node)
+          declare("srams") { node.srams.foreach(traverseDown) }
+          declare("ctrs") { node.ctrs.foreach(traverseDown) }
+          declare("sfifos") { node.sfifos.foreach(traverseDown) }
+          declare("vfifos") { node.vfifos.foreach(traverseDown) }
+          declare("stages") { node.stages.foreach(traverseDown) }
+          super.traverseDown(node)
         }
-        case node:CtrlBox if tracked(node) => declare(node) { super.visitNode(node) }
-        case node:Simulatable if tracked(node) => declare(node) { super.visitNode(node) }
-        case _ => super.visitNode(node)
+        case node:CtrlBox if tracked(node) => declare(node) { super.traverseDown(node) }
+        case node:Simulatable if tracked(node) => declare(node) { super.traverseDown(node) }
+        case _ => super.traverseDown(node)
       }
     }
-    override def traverse(implicit spade: Spade):Unit = {
-      import spade._
-      visitNode(top)
-      declare("pcus") { pcus.foreach(visitNode) }
-      declare("mcus") { mcus.foreach(visitNode) }
-      declare("scus") { scus.foreach(visitNode) }
-      declare("ocus") { ocus.foreach(visitNode) }
-      declare("mcs") { mcs.foreach(visitNode) }
-      declare("sbs") { sbs.foreach(visitNode) }
-    } 
   } 
 
   def declare(m:Module)(finPass: => Unit):Unit = {
@@ -89,7 +80,7 @@ class SpadeVcdPrinter(implicit sim:Simulator, spade: Spade) extends VcdPrinter {
   }
 
   val adder = new Traversal {
-    override def visitNode (node:Node): Unit = {
+    override def traverseDown (node:Any): Unit = {
       node match {
         case node:GlobalIO[_,_] =>
         case node:Simulatable if isMapped(node) => 
@@ -97,18 +88,16 @@ class SpadeVcdPrinter(implicit sim:Simulator, spade: Spade) extends VcdPrinter {
           spadeDeclarator.track(node)
         case _ =>
       }
-      super.visitNode(node)
+      super.traverseDown(node)
     }
   } 
 
   def addModule(m:Simulatable) = {
-    adder.visitNode(m)
+    adder.traverseDown(m)
   }
 
   def addAll = {
     adder.traverse
-    val sb = spade.asInstanceOf[SwitchNetwork].sbs.head
-    val out = sb.ctrlIO.outs.head
   }
 
 }

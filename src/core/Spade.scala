@@ -40,7 +40,10 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
     super[Design].reset
   }
 
-  def handle(e:Exception):Unit = throw e
+  def handle(e:Exception):Unit = {
+    logger.close
+    throw e
+  }
 
   def main(args: Array[String]): Unit = {
     info(s"args=[${args.mkString(", ")}]")
@@ -65,6 +68,7 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
   lazy val spadeParamCodegen = new SpadeParamCodegen()
 
   /* Debug */
+  lazy val logger = new Logger() { override lazy val stream = newStream(s"spade.log") }
   lazy val spadePrinter = new SpadePrinter()
   lazy val plasticineVecDotPrinter = new PlasticineVectorDotPrinter(SpadeConfig.openDot)
   lazy val plasticineScalDotPrinter = new PlasticineScalarDotPrinter(SpadeConfig.openDot)
