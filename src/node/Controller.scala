@@ -42,9 +42,9 @@ abstract class Controller(val param:ControllerParam)(implicit spade:Spade) exten
 
   override def connect:Unit = {
     super.connect
-    warn(cins.size < numControlFifos, s"pcu cins=${cins.size} numControlFifos=${numControlFifos}")
-    warn(sins.size < numScalarFifos, s"pcu sins=${sins.size} numScalarFifos=${numScalarFifos}")
-    warn(vins.size < numVectorFifos, s"pcu vins=${vins.size} numVectorFifos=${numVectorFifos}")
+    warn(cins.size < numControlFifos, s"${quote(this)} cins=${cins.size} numControlFifos=${numControlFifos}")
+    warn(sins.size < numScalarFifos, s"${quote(this)} sins=${sins.size} numScalarFifos=${numScalarFifos}")
+    warn(vins.size < numVectorFifos, s"${quote(this)} vins=${vins.size} numVectorFifos=${numVectorFifos}")
     vfifos = List.tabulate(vins.size) { i => Module(VectorMem(vfifoSize)).index(i) }
     fifos.foreach(_.writePortMux.addInputs(muxSize))
     srams.foreach(_.writePortMux.addInputs(1))

@@ -75,17 +75,19 @@ abstract class ComputeUnit(override val param:ComputeUnitParam)(implicit spade:S
 
   override def connect:Unit = {
     super.connect
-    warn(souts.size < numSouts, s"pcu souts=${souts.size} numSouts=${numSouts}")
-    warn(vouts.size < numVouts, s"pcu vouts=${vouts.size} numVouts=${numVouts}")
+    warn(souts.size < numSouts, s"${quote(this)} souts=${souts.size} numSouts=${numSouts}")
+    warn(vouts.size < numVouts, s"${quote(this)} vouts=${vouts.size} numVouts=${numVouts}")
     val numReduceStages = if (reduction) Math.ceil(Math.log(numLanes) / Math.log(2)).toInt else 0
-    val numFrontStages = numStages - (numReduceStages + 2)
+    val numFrontStages = if (reduction) numStages - (numReduceStages + 2) else numStages
     assert(numFrontStages >= 0, s"numFrontStages=$numFrontStages numStage=$numStages")
     addRegstages(numStage=numFrontStages, numOprds=3, ops)
     addRdstages(numStage=numReduceStages, numOprds=3, ops)
-    addRegstages(numStage=2, numOprds=3, ops)
+    if (reduction) addRegstages(numStage=2, numOprds=3, ops)
 
-    setColors
-    connectPipeline
+    if (stages.nonEmpty) {
+      setColors
+      connectPipeline
+    }
     connectSRAM
     connectCounters
   }

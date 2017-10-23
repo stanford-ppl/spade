@@ -73,7 +73,7 @@ class ScalarNetwork()(implicit spade:Spade) extends GridNetwork() {
   channelWidth("pos"->List("left", "right"), "src"->"pcu", "dst"->"sb") = 2 
 
   // switch to MC channel width
-  channelWidth("pos"->List("left", "right"), "src"->"sb", "dst"->"mc") = 1
+  channelWidth("pos"->List("left", "right"), "src"->"sb", "dst"->"mc") = 3
 
   // MC to switch channel width
   channelWidth("pos"->List("left", "right"), "src"->"mc", "dst"->"sb") = 1

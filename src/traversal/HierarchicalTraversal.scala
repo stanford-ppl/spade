@@ -58,11 +58,11 @@ trait HiearchicalTraversal {
     logger:Option[Logger]=None,
     visited:mutable.Set[Any] = mutable.Set.empty
   )(implicit ev:ClassTag[X]):Set[X] = {
-    def f(x:Any):Set[X] = {
+    def f(xx:Any):Set[X] = {
       visited += x
-      collect[X](x, visitFunc, logger, visited)
+      collect[X](xx, visitFunc, logger, visited)
     }
-    logger.foreach { _.emitBSln(s"collect($x)") }
+    logger.foreach { _.emitBSln(s"collect($x) ${visited.contains(x)}") }
     val res = x match {
       case x:X => Set[X](x)
       case x:Iterable[_] => x.flatMap(f).toSet
