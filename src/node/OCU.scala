@@ -3,7 +3,6 @@ package spade.node
 import spade._
 import spade.util._
 
-import pirc.enums._
 import pirc.util._
 
 case class OuterComputeUnitParam (
@@ -12,13 +11,14 @@ case class OuterComputeUnitParam (
   numCins:Int = 4,
   numScalarFifos:Int = 5,
   numRegs:Int = 0,
-  numStages:Int = 0,
   numCtrs:Int = 6,
   muxSize:Int = 10
 ) extends ComputeUnitParam() {
   val numVectorFifos:Int = 0
   val numControlFifos:Int = 4
   val numSRAMs:Int = 0
+  val numStages:Int = 0
+  val ops = Nil 
 
   val numVouts:Int = 0
   val numSouts:Int = 0
@@ -45,7 +45,4 @@ class OuterComputeUnit(override val param:OuterComputeUnitParam=new OuterCompute
 
   lazy val ctrlBox:OuterCtrlBox = Module(new OuterCtrlBox(CtrlBoxParam()))
 
-  override def connect:Unit = {
-    genConnections
-  }
 }

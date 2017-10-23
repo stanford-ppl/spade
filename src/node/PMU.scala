@@ -41,6 +41,7 @@ class PatternMemoryUnitParam(
 ) extends ComputeUnitParam() {
   val numSRAMs = 1
   val sramSize = 512 * 1024 / 4
+  val ops = fixOps ++ otherOps
   override lazy val numLanes = 1
 }
 
@@ -55,12 +56,8 @@ class PatternMemoryUnit(override val param:PatternMemoryUnitParam=new PatternMem
   def sram = srams.head
   override def connect:Unit = {
     super.connect
-    addRegstages(numStage=numStages, numOprds=3, fixOps ++ otherOps)
-    color(0 until numCtrs, CounterReg)
-    //color(7, ReadAddrReg).color(8, WriteAddrReg)
-    color(7 until 7 + numScalarFifos, ScalarInReg)
-    color(12 until 12 + numVectorFifos, VecInReg)
-    genConnections
+    vouts.foreach { _.ic <== sram.readPort }
+    souts.foreach { _.ic <== (sram.readPort,0) }
   }
 }
 

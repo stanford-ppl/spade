@@ -20,7 +20,6 @@ case class SwitchBox()(implicit spade:Spade) extends Routable {
     connectXbar(scalarIO)
     connectXbar(vectorIO)
     connectXbar(ctrlIO)
-    genConnections
   }
 
   /* --- Simulation  -----*/

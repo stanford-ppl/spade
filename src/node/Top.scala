@@ -99,6 +99,7 @@ case class Top(override val param:TopParam=new TopParam())(implicit spade:Spade)
   lazy val ocus:List[OuterComputeUnit]   = ctrlers.collect { case ocu:OuterComputeUnit   => ocu }
   lazy val mcs:List[MemoryController]    = ctrlers.collect { case mc:MemoryController    => mc }
 
+  lazy val low = Const(false)
   /* --- Network --- */
 
   lazy val scalarNetwork = new ScalarNetwork()
@@ -136,6 +137,5 @@ case class Top(override val param:TopParam=new TopParam())(implicit spade:Spade)
     scalarNetwork.connect
     ctrlNetwork.connect
     vectorNetwork.connect
-    this.genConnections
   }
 }

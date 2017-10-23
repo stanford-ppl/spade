@@ -294,8 +294,26 @@ abstract class StageCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends Ct
 
   /* ----- CONNECTION ----- */
   override def connect = {
-    siblingAndTree <== udcs.map(_.out)
     super.connect
+    siblingAndTree <== udcs.map(_.out)
+
+    /* Memory Control Connections */
+    prt.fifos.foreach { fifo =>
+      fifo.dequeueEnable <== prt.ctrs.map(_.done)
+      fifo.dequeueEnable <== en.out; 
+      fifo.enqueueEnable <== fifo.writePortMux.valid 
+      fifo.predicate <== spade.top.low.out 
+      this match {
+        case cb:InnerCtrlBox =>
+          fifo.predicate <== cb.fifoPredUnit.out
+        case _ =>
+          fifo.predicate <== spade.top.low.out
+      }
+    }
+    // Scalar FIFO can map registers
+    prt.sfifos.foreach { buf =>
+      buf.enqueueEnable <== prt.cfifos.map(_.readPort)
+    }
   }
 }
 
@@ -328,6 +346,25 @@ class InnerCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends StageCtrlBo
       fifoPredUnit.in <== (ctr.out, 0) 
     }
 
+    udcs.foreach { udc =>
+      udc.inc <== prt.cins.map{_.ic}
+      udc.dec <== done.out
+      udc.dec <== en.out
+    }
+    /* Memory Control Connections */
+
+    /* Control IO */
+    prt.couts.foreach { cout => 
+      cout.ic <== prt.fifos.map(_.notFull)
+      cout.ic <== doneDelay.out
+      cout.ic <== enDelay.out
+    }
+    prt.gouts.foreach { out =>
+      out.valid <== en.out
+      out.valid <== prt.ctrs.map(_.done)
+    }
+    /* Stage Control */
+    prt.stages.foreach { _.prs.foreach { _.en <== en.out } }
     super.connect
   }
 }
@@ -353,6 +390,17 @@ class OuterCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends StageCtrlBo
 
     en.in <== enAnd.out 
 
+    udcs.foreach { udc =>
+      udc.inc <== prt.cins.map{_.ic}
+      udc.dec <== childrenAndTree.out
+      udc.dec <== done.out
+    }
+    /* Control IO */
+    prt.couts.foreach { cout => 
+      cout.ic <== udsm.doneOut 
+      cout.ic <== en.out
+    }
+    prt.gouts.foreach { _.valid <== en.out }
     super.connect
   }
 }
@@ -383,6 +431,7 @@ class MemoryCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends CtrlBox(pa
 
   /* ----- CONNECTION ----- */
   override def connect = {
+    super.connect
     tokenInAndTree <== prt.cins.map(_.ic)
     //readAndGate <== readUDC.out
     readAndGate <== tokenInAndTree.out
@@ -394,7 +443,41 @@ class MemoryCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends CtrlBox(pa
     readDoneDelay.in <== readDone.out
     writeDoneDelay.in <== writeDone.out
 
-    super.connect
+    /* Memory Control Connections */
+    (prt.fifos).foreach { fifo => 
+      fifo.dequeueEnable <== readEn.out
+      fifo.dequeueEnable <== writeEn.out
+      fifo.enqueueEnable <== fifo.writePortMux.valid 
+      fifo.predicate <== spade.top.low.out
+    }
+    prt.srams.foreach { sram => 
+      sram.enqueueEnable <== prt.cfifos.map(_.readPort) 
+      sram.dequeueEnable <== prt.cfifos.map(_.readPort) 
+      //sram.dequeueEnable <== readDoneDelay.out 
+      //sram.enqueueEnable <== writeDoneDelay.out
+      //sram.writeEn <== writeEnDelay.out
+      //sram.readEn <== readEnDelay.out
+      sram.writeEn <== writeEn.out
+      sram.readEn <== readEn.out
+    }
+    writeFifoAndTree <== prt.fifos.map(_.notEmpty) :+ prt.sram.notFull
+    readFifoAndTree <== (prt.fifos.map(_.notEmpty) :+ prt.sram.notEmpty)
+
+    /* Control IO */
+    tokenInXbar.in <== prt.cins.map(_.ic)
+    prt.couts.foreach { cout => 
+      cout.ic <== prt.fifos.map(_.notFull)
+      cout.ic <== writeDone.out
+      cout.ic <== readDone.out
+    }
+    prt.gouts.foreach { _.valid <== readEnDelay.out }
+
+    /* Stage Control */
+    prt.stages.foreach { _.prs.foreach { pr =>
+      pr.en <== writeEn.out
+      pr.en <== readEn.out
+    } }
+
   }
 }
 
@@ -406,6 +489,13 @@ case class TopCtrlBox(override val param:CtrlBoxParam)(implicit spade:Spade) ext
   val command = Output(Bit(), this, s"command")
   val status = Input(Bit(), this, s"status")
 
+  override def connect = {
+    /* Control IO */
+    prt.cins.foreach { _.ic ==> status }
+    prt.couts.foreach { _.ic <== command}
+    prt.gouts.foreach { _.valid <== command }
+    super.connect
+  }
   /* ---------- SIMULATION -----------*/
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
@@ -429,6 +519,26 @@ class MCCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends CtrlBox(param)
   val state = Output(Bit(), this, s"${this}.state")
   val running = Output(Bit(), this, s"${this}.running")
   val count = Output(Word(), this, s"${this}.count")
+
+  override def connect = {
+    super.connect
+    prt.fifos.foreach { fifo => 
+      fifo.dequeueEnable <== en.out
+      fifo.enqueueEnable <== fifo.writePortMux.valid 
+      fifo.predicate <== spade.top.low.out
+    }
+    prt.vdata.dequeueEnable <== running
+    prt.sdata.dequeueEnable <== running
+    prt.fifos.foreach { fifo => fifo.predicate <== spade.top.low.out }
+
+    /* Control IO */
+    prt.couts.foreach { cout =>
+      cout.ic <== prt.fifos.map(_.notFull)
+      cout.ic <== rdone
+      cout.ic <== wdone
+    }
+    prt.gouts.foreach { _.valid <== running }
+  }
 
   /* ---------- SIMULATION -----------*/
   override def register(implicit sim:Simulator):Unit = {

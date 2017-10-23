@@ -41,6 +41,7 @@ abstract class Controller(val param:ControllerParam)(implicit spade:Spade) exten
   def ctrlBox:CtrlBox
 
   override def connect:Unit = {
+    super.connect
     warn(cins.size < numControlFifos, s"pcu cins=${cins.size} numControlFifos=${numControlFifos}")
     warn(sins.size < numScalarFifos, s"pcu sins=${sins.size} numScalarFifos=${numScalarFifos}")
     warn(vins.size < numVectorFifos, s"pcu vins=${vins.size} numVectorFifos=${numVectorFifos}")
@@ -48,6 +49,27 @@ abstract class Controller(val param:ControllerParam)(implicit spade:Spade) exten
     fifos.foreach(_.writePortMux.addInputs(muxSize))
     srams.foreach(_.writePortMux.addInputs(1))
 
-    super.connect
+    connectInputs
+  }
+
+  def connectInputs = {
+    // Xbar
+    cins.foreach { cin => 
+      cfifos.foreach { fifo => 
+        fifo.writePortMux.inputs.foreach { _ <== cin.ic }
+        fifo.writePortMux.valids.foreach { _ <== cin.valid }
+      } 
+    }
+    sins.foreach { sin => 
+      sfifos.foreach { fifo => 
+        fifo.writePortMux.inputs.foreach { _ <== sin.ic }
+        fifo.writePortMux.valids.foreach { _ <== sin.valid }
+      } 
+    }
+    // One to one
+    (vins, vfifos).zipped.foreach { case (vi, fifo) => 
+      fifo.writePortMux.inputs.foreach { _ <== vi.ic }
+      fifo.writePortMux.valids.foreach { _ <== vi.valid }
+    }
   }
 }

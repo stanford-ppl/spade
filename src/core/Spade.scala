@@ -50,7 +50,7 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
     try {
       reset
       setArgs(args)
-      top.config
+      top.connectAll
       endInfo(s"Finishing graph construction for ${this}")
       run
     } catch { 

@@ -4,7 +4,6 @@ import spade._
 import spade.util._
 
 import pirc.util._
-import pirc.enums._
 
 case class PreloadPatternComputeParam (
   override val cfifoSize:Int = 16,
@@ -54,6 +53,7 @@ class PatternComputeUnitParam (
 ) extends ComputeUnitParam() {
   val numSRAMs:Int = 0
   val sramSize:Int = 0
+  val ops = pirc.enums.ops
 }
 
 class PatternComputeUnit(override val param:PatternComputeUnitParam=new PatternComputeUnitParam())(implicit spade:Spade) 
@@ -63,14 +63,4 @@ class PatternComputeUnit(override val param:PatternComputeUnitParam=new PatternC
 
   lazy val ctrlBox:InnerCtrlBox = Module(new InnerCtrlBox(CtrlBoxParam()))
 
-  override def connect:Unit = {
-    super.connect
-    color(0 until numCtrs, CounterReg)
-    color(0, ReduceReg).color(1, AccumReg)
-    color(numRegs-numScalarFifos until numRegs, ScalarInReg)
-    color(numRegs-souts.size until numRegs, ScalarOutReg)
-    color(numRegs-numVectorFifos until numRegs, VecInReg)
-    color(numRegs-vouts.size until numRegs, VecOutReg)
-    genConnections
-  }
 }

@@ -34,6 +34,7 @@ class ScalarComputeUnitParam (
   val vfifoSize:Int = 0
   val numSRAMs:Int = 0
   val sramSize:Int = 0
+  val ops = pirc.enums.ops
   override lazy val numLanes:Int = 1
 }
 /* A spetial type of CU used for memory loader/storer */
@@ -43,13 +44,4 @@ class ScalarComputeUnit(override val param:ScalarComputeUnitParam=new ScalarComp
   override val typeStr = "scu"
   lazy val ctrlBox:InnerCtrlBox = Module(new InnerCtrlBox(CtrlBoxParam()))
 
-  override def connect:Unit = {
-    super.connect
-    color(1, AccumReg)
-    color(0 until numCtrs, CounterReg)
-    color(numRegs-numScalarFifos until numRegs, ScalarInReg)
-    color(numRegs-souts.size until numRegs, ScalarOutReg)
-    color(numRegs-numVectorFifos until numRegs, VecInReg)
-    genConnections
-  }
 }

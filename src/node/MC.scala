@@ -50,7 +50,6 @@ class MemoryController(param:MemoryControllerParam)(implicit spade:Spade) extend
     nameOf(sfifos(3)) = "wsize"
     nameOf(sfifos(4)) = "sdata"
     nameOf(vfifos(0)) = "vdata"
-    genConnections
   }
 
   override def register(implicit sim:Simulator):Unit = {
