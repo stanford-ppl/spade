@@ -51,7 +51,7 @@ package object util extends HiearchicalTraversal {
       case n:Controller => mp.cfmap.isMapped(n)
       case n:FuncUnit => isMapped(n.stage)
       case n:PipeReg => isMapped(n.in)
-      case n:UDCounter => 
+      case n:UpDownCounter => 
         n.ctrlBox match {
           case None => true
           case Some(cb:OuterCtrlBox) if cb.udsm == n.parent.get => true

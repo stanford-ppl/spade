@@ -30,15 +30,15 @@ object TokenDownLUT {
     TokenDownLUT(numIns).index(idx)
 }
 
-case class UDCounterConfig (
+case class UpDownCounterConfig (
   initVal:Int,
   name:String
 ) extends Configuration
 
-case class UDCounter()(implicit spade:Spade) extends Primitive with Simulatable 
+case class UpDownCounter()(implicit spade:Spade) extends Primitive with Simulatable 
 with Configurable {
   import spademeta._
-  type CT = UDCounterConfig
+  type CT = UpDownCounterConfig
   override val typeStr = "udc"
 
   /* ---------- IOs -----------*/
@@ -194,7 +194,7 @@ case class UpDownSM()(implicit spade:Spade) extends Primitive with Simulatable {
   val out = Output(Bit(), this, s"${this}.out")
   val count = Output(Word(), this, s"${this}.count")
   val done = Output(Bit(), this, s"${this}.done") // Initially low
-  val udc = Module(UDCounter()).index(-1)
+  val udc = Module(UpDownCounter()).index(-1)
 
   /* ---------- SIMULATION -----------*/
   override def register(implicit sim:Simulator):Unit = {
@@ -262,7 +262,7 @@ abstract class CtrlBox(val param:CtrlBoxParam)(implicit spade:Spade) extends Pri
   val fifoAndTree = Module(AndTree("fifoAndTree"))
   //val predicateUnits = ListBuffer[PredicateUnit]()
   lazy val delays = collectDown[Delay[Bit]](this)
-  lazy val udcs = collectDown[UDCounter](this).filter{ n => indexOf.get(n).nonEmpty }.toList.sortBy { _.index }
+  lazy val udcs = collectDown[UpDownCounter](this).filter{ n => indexOf.get(n).nonEmpty }.toList.sortBy { _.index }
 
   /* ----- CONNECTION ----- */
   override def connect = {
@@ -288,7 +288,7 @@ abstract class StageCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends Ct
   val done = Module(Delay(Bit(), 0, s"${quote(prt)}.done"))
 
   for (i <- 0 until numUDCs) { 
-    Module(UDCounter().index(i))
+    Module(UpDownCounter().index(i))
   }
   val siblingAndTree = AndTree("siblingAndTree") 
 
@@ -413,7 +413,7 @@ class MemoryCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends CtrlBox(pa
   val readFifoAndTree = Module(AndTree("readFifoAndTree"))
   val tokenInAndTree = Module(AndTree("tokenInAndTree"))
 
-  //val readUDC = UDCounter()
+  //val readUDC = UpDownCounter()
 
   val readAndGate = Module(AndGate(s"$prt.readAndGate"))
 

@@ -55,7 +55,7 @@ trait SpadeAlias {
   type PTDLUT     = TokenDownLUT
   type PTOLUT    = TokenOutLUT
   type PAT       = AndTree
-  type PUC       = UDCounter
+  type PUC       = UpDownCounter
   type PSB       = SwitchBox
   type PConst    = Const[_<:PortType]
   type PUDSM = UpDownSM
