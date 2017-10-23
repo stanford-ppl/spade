@@ -20,7 +20,7 @@ abstract class SN_LD(numRows:Int=2, numCols:Int=2, numArgIns:Int=3, numArgOuts:I
 
   override def pcuAt(i:Int, j:Int) = PreloadPatternComputeParam(numCtrs=12)
 
-  override def mcuAt(i:Int, j:Int) = PreloadMemoryComputeParam(numCtrs=12, numRegs=23)
+  override def pmuAt(i:Int, j:Int) = PreloadMemoryComputeParam(numCtrs=12, numRegs=23)
 
   override def scuAt(i:Int, j:Int) = PreloadScalarComputeParam()
 }
@@ -44,10 +44,10 @@ object SN16x8_LD extends SN_LD(numRows=16, numCols=8, numArgIns=12, numArgOuts=5
     channelWidth("src"->"sb", "dst"->"sb") = 12
 
     // switch to CU channel width
-    channelWidth("pos"->"center", "src"->"sb", "dst"->List("pcu", "mu", "mcu")) = 4
+    channelWidth("pos"->"center", "src"->"sb", "dst"->List("pcu", "mu", "pmu")) = 4
 
     // CU to Switch channel width
-    channelWidth("pos"->"center", "src"->List("pcu", "mu", "mcu"), "dst"->"sb") = 2
+    channelWidth("pos"->"center", "src"->List("pcu", "mu", "pmu"), "dst"->"sb") = 2
       
     // OCU to switch channel width
     channelWidth("pos"->"center", "src"->"ocu", "dst"->"sb") = 4

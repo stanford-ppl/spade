@@ -8,9 +8,15 @@ import spade._
 import spade.util._
 
 trait ControllerParam extends SpadeParam {
-  val cbufSize:Int
-  val sbufSize:Int
-  val vbufSize:Int
+  val cfifoSize:Int
+  val sfifoSize:Int
+  val vfifoSize:Int
+  val sramSize:Int
+  val numVectorFifos:Int
+  val numScalarFifos:Int
+  val numControlFifos:Int
+  val numSRAMs:Int
+  val muxSize:Int
 }
 
 class ControllerConfig (val name:String) extends Configuration
@@ -26,16 +32,22 @@ abstract class Controller(val param:ControllerParam)(implicit spade:Spade) exten
   lazy val ctrlIO:ControlIO[this.type] = ControlIO(this)
 
   var vfifos:List[VectorMem] = Nil
-  var sfifos:List[ScalarMem] = Nil
-  var cfifos:List[ControlMem] = Nil
-  def fifos:List[LocalMem] = cfifos ++ sfifos ++ vfifos
-  def mems:List[OnChipMem] = cfifos ++ sfifos ++ vfifos
-  def numControlBufs(num:Int):this.type = { cfifos = List.tabulate(num)  { i => Module(ControlMem(cbufSize)).index(i) }; this }
-  def numScalarBufs(num:Int):this.type = { sfifos = List.tabulate(num)  { i => Module(ScalarMem(sbufSize)).index(i) }; this }
-  def numScalarBufs:Int = sfifos.size
-  def numVecBufs(num:Int):this.type = { vfifos = List.tabulate(num) { i => Module(VectorMem(vbufSize)).index(i) }; this }
-  def numVecBufs:Int = vfifos.size
+  val sfifos:List[ScalarMem] = List.tabulate(numScalarFifos)  { i => Module(ScalarMem(sfifoSize)).index(i) }
+  val cfifos:List[ControlMem] = List.tabulate(numControlFifos)  { i => Module(ControlMem(cfifoSize)).index(i) }
+  val srams:List[SRAM] = List.tabulate(numSRAMs) { i => Module(SRAM(sramSize, spade.numLanes)).index(i) }
+  lazy val mems:List[OnChipMem] = vfifos ++ sfifos ++ cfifos ++ srams 
+  lazy val fifos:List[LocalMem] = vfifos ++ sfifos ++ cfifos
 
   def ctrlBox:CtrlBox
-  def config:Unit
+
+  override def connect:Unit = {
+    warn(cins.size < numControlFifos, s"pcu cins=${cins.size} numControlFifos=${numControlFifos}")
+    warn(sins.size < numScalarFifos, s"pcu sins=${sins.size} numScalarFifos=${numScalarFifos}")
+    warn(vins.size < numVectorFifos, s"pcu vins=${vins.size} numVectorFifos=${numVectorFifos}")
+    vfifos = List.tabulate(vins.size) { i => Module(VectorMem(vfifoSize)).index(i) }
+    fifos.foreach(_.writePortMux.addInputs(muxSize))
+    srams.foreach(_.writePortMux.addInputs(1))
+
+    super.connect
+  }
 }

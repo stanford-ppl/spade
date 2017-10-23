@@ -102,7 +102,7 @@ class SpadeNetworkCodegen(implicit design: Spade) extends Codegen with ScalaCode
     case n:OuterComputeUnit =>
       val (x, y) = coordOf(n)
       s"lcus($x)($y)"
-    case n:MemoryComputeUnit =>
+    case n:PatternMemoryUnit =>
       val (x, y) = coordOf(n)
       s"cus($x)($y)"
     case n:ComputeUnit =>

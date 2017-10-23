@@ -20,7 +20,7 @@ trait Routable extends Module with Simulatable {
   def gins = cins ++ sins ++ vins
   def gouts = couts ++ souts ++ vouts
 
-  def isMCU:Boolean = this.isInstanceOf[MemoryComputeUnit]
+  def isPMU:Boolean = this.isInstanceOf[PatternMemoryUnit]
   def isSCU:Boolean = this.isInstanceOf[ScalarComputeUnit]
   def isTop:Boolean = this.isInstanceOf[Top]
   def asCU:ComputeUnit = this.asInstanceOf[ComputeUnit]

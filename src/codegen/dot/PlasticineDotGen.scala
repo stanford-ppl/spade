@@ -39,7 +39,7 @@ abstract class PlasticineDotGen(fn:String, open:Boolean)(implicit design:Spade) 
 
   def color(prt:Routable):Color = prt match {
     case pscu:ScalarComputeUnit => Color("palevioletred1")
-    case pmcu:MemoryComputeUnit => Color("lightseagreen")
+    case ppmu:PatternMemoryUnit => Color("lightseagreen")
     //case pmu:PMU => Color("lightseagreen")
     case pocu:OuterComputeUnit => Color("orange")
     case pcu:PatternComputeUnit => Color("dodgerblue")

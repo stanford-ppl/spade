@@ -8,26 +8,16 @@ import pirc.util._
 import pirc.exceptions._
 
 case class MemoryControllerParam (
-  cbufSize:Int = 16,
-  sbufSize:Int = 16,
-  vbufSize:Int = 16,
-  muxSize:Int = 10
+  cfifoSize:Int = 16,
+  sfifoSize:Int = 16,
+  vfifoSize:Int = 16
 ) extends ControllerParam {
-  def config(mc:MemoryController)(implicit spade:Spade) = {
-    import mc.spademeta._
-    //assert(sins.size==2)
-    //assert(vins.size==1)
-    mc.numScalarBufs(5)
-    mc.numVecBufs(mc.vins.size)
-    mc.mems.foreach(_.writePortMux.addInputs(muxSize))
-    nameOf(mc.sfifos(0)) = "roffset"
-    nameOf(mc.sfifos(1)) = "woffset"
-    nameOf(mc.sfifos(2)) = "rsize"
-    nameOf(mc.sfifos(3)) = "wsize"
-    nameOf(mc.sfifos(4)) = "sdata"
-    nameOf(mc.vfifos(0)) = "vdata"
-    mc.genConnections
-  }
+  override val numScalarFifos = 5
+  override val numVectorFifos = 1
+  override val numControlFifos = 0
+  override val numSRAMs = 0
+  override val sramSize = 0
+  override val muxSize = 1
 }
 
 case class MemoryControllerConfig (
@@ -51,7 +41,17 @@ class MemoryController(param:MemoryControllerParam)(implicit spade:Spade) extend
   lazy val sdata = sfifos.filter{ vb => nameOf(vb)=="sdata" }.head
   lazy val vdata = vfifos.filter{ vb => nameOf(vb)=="vdata" }.head
   /* Parameters */
-  override def config = param.config(this)
+
+  override def connect:Unit = {
+    super.connect
+    nameOf(sfifos(0)) = "roffset"
+    nameOf(sfifos(1)) = "woffset"
+    nameOf(sfifos(2)) = "rsize"
+    nameOf(sfifos(3)) = "wsize"
+    nameOf(sfifos(4)) = "sdata"
+    nameOf(vfifos(0)) = "vdata"
+    genConnections
+  }
 
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._

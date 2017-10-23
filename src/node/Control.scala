@@ -358,7 +358,7 @@ class OuterCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends StageCtrlBo
 }
 
 class MemoryCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends CtrlBox(param) {
-  override lazy val prt:MemoryComputeUnit = collectUp[MemoryComputeUnit](this).head
+  override lazy val prt:PatternMemoryUnit = collectUp[PatternMemoryUnit](this).head
 
   val tokenInXbar = Module(Delay(Bit(), 0, s"$prt.tokenInXbar"))
   val writeFifoAndTree = Module(AndTree("writeFifoAndTree"))

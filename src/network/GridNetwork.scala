@@ -25,25 +25,25 @@ abstract class GridNetwork()(implicit spade:Spade) {
   val channelWidth = Table[String, String, Int](
     values=Map(
       "pos"->List("left", "right","center","top","bottom"), 
-      "src"->List("Top", "pcu", "ocu", "mcu", "mu", "scu", "mc", "sb"), 
-      "dst"->List("Top", "pcu", "ocu", "mcu", "mu", "scu", "mc", "sb"), 
+      "src"->List("Top", "pcu", "ocu", "pmu", "mu", "scu", "mc", "sb"), 
+      "dst"->List("Top", "pcu", "ocu", "pmu", "mu", "scu", "mc", "sb"), 
       "srcDir"->GridIO.eightDirections, 
       "dstDir"->GridIO.eightDirections
     ), 
     default=0
   )
 
-  lazy val pcuVins:Int = spade.pcus.headOption.map{ _.param.numVins }.getOrElse(0)
+  lazy val pcuVins:Int = spade.pcus.headOption.map{ _.param.numVectorFifos }.getOrElse(0)
   lazy val pcuVouts:Int = spade.pcus.headOption.map{ _.param.numVouts }.getOrElse(0)
-  lazy val pcuSins:Int = spade.pcus.headOption.map{ _.param.numSins }.getOrElse(0)
+  lazy val pcuSins:Int = spade.pcus.headOption.map{ _.param.numScalarFifos }.getOrElse(0)
   lazy val pcuSouts:Int = spade.pcus.headOption.map{ _.param.numSouts }.getOrElse(0)
 
-  lazy val mcuVins:Int = spade.mcus.headOption.map{ _.param.numVins }.getOrElse(0)
-  lazy val mcuVouts:Int = spade.mcus.headOption.map{ _.param.numVouts }.getOrElse(0)
-  lazy val mcuSins:Int = spade.mcus.headOption.map{ _.param.numSins }.getOrElse(0)
-  lazy val mcuSouts:Int = spade.mcus.headOption.map{ _.param.numSouts }.getOrElse(0)
+  lazy val pmuVins:Int = spade.pmus.headOption.map{ _.param.numVectorFifos }.getOrElse(0)
+  lazy val pmuVouts:Int = spade.pmus.headOption.map{ _.param.numVouts }.getOrElse(0)
+  lazy val pmuSins:Int = spade.pmus.headOption.map{ _.param.numScalarFifos }.getOrElse(0)
+  lazy val pmuSouts:Int = spade.pmus.headOption.map{ _.param.numSouts }.getOrElse(0)
 
-  lazy val ucuSins:Int = spade.dramAGs.flatten.headOption.map{ _.param.numSins }.getOrElse(0)
+  lazy val ucuSins:Int = spade.dramAGs.flatten.headOption.map{ _.param.numScalarFifos }.getOrElse(0)
   lazy val ucuSouts:Int = spade.dramAGs.flatten.headOption.map{ _.param.numSouts }.getOrElse(0)
 
   def roundUp(num:Double):Int = Math.ceil(num).toInt
@@ -53,7 +53,8 @@ abstract class GridNetwork()(implicit spade:Spade) {
 
   lazy val top = spade.top
   
-  def connect(out:Routable, outDir:String, in:Routable, inDir:String, pos:String) = {
+  def connect(out:Routable, outDir:String, in:Routable, inDir:String, pos:String):Unit = {
+    implicit val arch = spade // TODO: why is this needed
     val cw = channelWidth("pos"->pos, "src"->out.typeStr, "dst"->in.typeStr, "srcDir"->inDir, "dstDir"->outDir)
     (out, in) match {
       case (out:Top, in) =>
@@ -81,7 +82,7 @@ abstract class GridNetwork()(implicit spade:Spade) {
     }
   }
 
-  def config = {
+  def connect:Unit = {
     
     /** ----- Central Array Connection ----- **/
     for (y <- 0 until numRows) {
@@ -223,6 +224,7 @@ abstract class GridNetwork()(implicit spade:Spade) {
     }
 
     // Mark inputs and outputs order
+    implicit val arch = spade // TODO: why is this needed
     prts.foreach { prt =>
       io(prt).ins.zipWithIndex.foreach { case (in, idx) => in.index(idx) }
       io(prt).outs.zipWithIndex.foreach { case (out, idx) => out.index(idx) }

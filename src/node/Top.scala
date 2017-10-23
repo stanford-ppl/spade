@@ -20,10 +20,16 @@ class TopParam (
   val numRows:Int = 2,
   val numCols:Int = 2,
   val pattern:Pattern = MixAll,
-  val sbufSize:Int = 16,
-  val vbufSize:Int = 16
+  val sfifoSize:Int = 16
 ) extends ControllerParam {
-  val cbufSize:Int = 0
+  override val numVectorFifos = 0
+  override val numScalarFifos = numArgOuts
+  override val numControlFifos = 0
+  override val numSRAMs = 0
+  override val cfifoSize:Int = 0
+  override val vfifoSize = 0
+  override val sramSize = 0
+  override val muxSize:Int = 1
 }
 
 case class TopConfig (
@@ -48,7 +54,7 @@ case class Top(override val param:TopParam=new TopParam())(implicit spade:Spade)
 
   def pcuAt(x:Int, y:Int):PatternComputeUnit = Module(new PatternComputeUnit(spade.pcuAt(x,y))).coord(x,y)
 
-  def mcuAt(x:Int, y:Int):MemoryComputeUnit = Module(new MemoryComputeUnit(spade.mcuAt(x,y))).coord(x,y)
+  def pmuAt(x:Int, y:Int):PatternMemoryUnit = Module(new PatternMemoryUnit(spade.pmuAt(x,y))).coord(x,y)
 
   def scuAt(x:Int, y:Int):ScalarComputeUnit = Module(new ScalarComputeUnit(spade.scuAt(x,y))).coord(x,y)
 
@@ -88,7 +94,7 @@ case class Top(override val param:TopParam=new TopParam())(implicit spade:Spade)
   lazy val ctrlers:List[Controller]      = prts.collect    { case cl:Controller          => cl }
   lazy val cus:List[ComputeUnit]         = ctrlers.collect { case cu:ComputeUnit         => cu }
   lazy val pcus:List[PatternComputeUnit] = ctrlers.collect { case pcu:PatternComputeUnit => pcu }
-  lazy val mcus:List[MemoryComputeUnit]  = ctrlers.collect { case mcu:MemoryComputeUnit  => mcu }
+  lazy val pmus:List[PatternMemoryUnit]  = ctrlers.collect { case pmu:PatternMemoryUnit  => pmu }
   lazy val scus:List[ScalarComputeUnit]  = ctrlers.collect { case scu:ScalarComputeUnit  => scu }
   lazy val ocus:List[OuterComputeUnit]   = ctrlers.collect { case ocu:OuterComputeUnit   => ocu }
   lazy val mcs:List[MemoryController]    = ctrlers.collect { case mc:MemoryController    => mc }
@@ -123,23 +129,13 @@ case class Top(override val param:TopParam=new TopParam())(implicit spade:Spade)
     super.register
   }
 
-  def config:Unit = {
+  override def connect:Unit = {
     scalarNetwork.reset
     ctrlNetwork.reset
     vectorNetwork.reset
-    scalarNetwork.config
-    ctrlNetwork.config
-    vectorNetwork.config
-
+    scalarNetwork.connect
+    ctrlNetwork.connect
+    vectorNetwork.connect
     this.genConnections
-    sbs.foreach { _.genConnections }
-    pcus.foreach { _.config }
-    mcus.foreach { _.config }
-    //mus.foreach { _.config }
-    scus.foreach { _.config }
-    mcs.foreach { _.config }
-    ocus.foreach { _.config }
-
-    connectAll
   }
 }

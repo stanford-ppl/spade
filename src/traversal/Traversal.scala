@@ -25,7 +25,7 @@ trait Traversal extends HiearchicalTraversal{
   //def traverse(implicit spade: Spade):Unit = {
     //visitNode(spade.top)
     //spade.pcus.foreach(visitNode)
-    //spade.mcus.foreach(visitNode)
+    //spade.pmus.foreach(visitNode)
     //spade.scus.foreach(visitNode)
     //spade.ocus.foreach(visitNode)
     //spade.mcs.foreach(visitNode)

@@ -21,10 +21,10 @@ class VectorNetwork()(implicit spade:Spade) extends GridNetwork() {
   channelWidth("pos"->"center", "src"->List("pcu"), "dst"->"sb") = roundUp(pcuVouts / 4.0)
 
   // switch to MCU channel width
-  channelWidth("pos"->"center", "src"->"sb", "dst"->List("mcu")) = roundUp(mcuVins / 4.0) 
+  channelWidth("pos"->"center", "src"->"sb", "dst"->List("pmu")) = roundUp(pmuVins / 4.0) 
 
   // MCU to Switch channel width
-  channelWidth("pos"->"center", "src"->List("mcu"), "dst"->"sb") = roundUp(mcuVouts / 4.0)
+  channelWidth("pos"->"center", "src"->List("pmu"), "dst"->"sb") = roundUp(pmuVouts / 4.0)
 
   // switch to SAG channel width
   channelWidth("pos"->List("left", "right"), "src"->"sb", "dst"->"pcu") = 4 
@@ -55,10 +55,10 @@ class ScalarNetwork()(implicit spade:Spade) extends GridNetwork() {
   channelWidth("pos"->"center", "src"->List("pcu", "scu"), "dst"->"sb") = roundUp(pcuSouts / 4.0)
 
   // switch to MCU channel width
-  channelWidth("pos"->"center", "src"->"sb", "dst"->List("mcu")) = roundUp(mcuSins / 4.0) 
+  channelWidth("pos"->"center", "src"->"sb", "dst"->List("pmu")) = roundUp(pmuSins / 4.0) 
 
   // MCU to Switch channel width
-  channelWidth("pos"->"center", "src"->List("mcu"), "dst"->"sb") = roundUp(mcuSouts / 4.0)
+  channelWidth("pos"->"center", "src"->List("pmu"), "dst"->"sb") = roundUp(pmuSouts / 4.0)
   
   // switch to DAG channel width
   channelWidth("pos"->List("left", "right"), "src"->"sb", "dst"->"scu") = roundUp(ucuSins)
@@ -90,11 +90,11 @@ class ScalarNetwork()(implicit spade:Spade) extends GridNetwork() {
   //// switch to Top channel width
   channelWidth("pos"->List("top", "bottom"), "src"->"sb", "dst"->"Top") = 1
   
-  override def config = {
+  override def connect = {
     // Add ins and outs to Top
     io(top).addInAt("S", spade.topParam.numArgOuts)
     io(top).addOutAt("S", spade.topParam.numArgIns)
-    super.config
+    super.connect
   }
 }
 
@@ -107,10 +107,10 @@ class CtrlNetwork()(implicit spade:Spade) extends GridNetwork() {
   channelWidth("src"->"sb", "dst"->"sb") = 4
 
   // switch to CU channel width
-  channelWidth("pos"->"center", "src"->"sb", "dst"->List("pcu", "mu", "mcu", "scu")) = 1
+  channelWidth("pos"->"center", "src"->"sb", "dst"->List("pcu", "mu", "pmu", "scu")) = 1
 
   // CU to Switch channel width
-  channelWidth("pos"->"center", "src"->List("pcu", "mu", "mcu", "scu"), "dst"->"sb") = 2
+  channelWidth("pos"->"center", "src"->List("pcu", "mu", "pmu", "scu"), "dst"->"sb") = 2
 
   // DAG to switch channel width
   channelWidth("pos"->List("left", "right"), "src"->"scu", "dst"->"sb") = 1
@@ -142,10 +142,10 @@ class CtrlNetwork()(implicit spade:Spade) extends GridNetwork() {
   channelWidth("pos"->List("top", "bottom"), "src"->"Top", "dst"->"sb") = 1
   // switch to Top channel width
   channelWidth("pos"->List("top", "bottom"), "src"->"sb", "dst"->"Top") = 1
-  override def config = {
+  override def connect = {
     // Add ins and outs to Top
     io(top).addInAt("S", 1) // status 
     io(top).addOutAt("S", 1) // command
-    super.config
+    super.connect
   }
 }

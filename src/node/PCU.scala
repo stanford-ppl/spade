@@ -7,26 +7,26 @@ import pirc.util._
 import pirc.enums._
 
 case class PreloadPatternComputeParam (
-  override val cbufSize:Int = 16,
-  override val sbufSize:Int = 16,
-  override val vbufSize:Int = 16,
+  override val cfifoSize:Int = 16,
+  override val sfifoSize:Int = 16,
+  override val vfifoSize:Int = 16,
   override val numCtrs:Int = 8,
   override val muxSize:Int = 10
 ) extends PatternComputeUnitParam (
-  numVins = ConfigFactory.plasticineConf.vinPcu,
+  numVectorFifos = ConfigFactory.plasticineConf.vinPcu,
   numVouts = ConfigFactory.plasticineConf.voutPcu,
-  numSins = ConfigFactory.plasticineConf.sinPcu,
+  numScalarFifos = ConfigFactory.plasticineConf.sinPcu,
   numSouts = ConfigFactory.plasticineConf.soutPcu,
   numRegs  = ConfigFactory.plasticineConf.regsPcu,
   numStages = ConfigFactory.plasticineConf.comp
 ) with PreLoadSpadeParam
 
 case class SRAMAddrGenParam (
-  override val sbufSize:Int = 16,
-  override val vbufSize:Int = 16,
-  override val numVins:Int = 4,
+  override val sfifoSize:Int = 16,
+  override val vfifoSize:Int = 16,
+  override val numVectorFifos:Int = 4,
   override val numVouts:Int = 2,
-  override val numSins:Int = 4,
+  override val numScalarFifos:Int = 4,
   override val numSouts:Int = 2,
   override val numRegs:Int = 5,
   override val numStages:Int = 4,
@@ -37,54 +37,40 @@ case class SRAMAddrGenParam (
 ) with PreLoadSpadeParam
 
 class PatternComputeUnitParam (
-  val cbufSize:Int = 16,
-  val sbufSize:Int = 16,
-  val vbufSize:Int = 16,
-  val numVins:Int = 4,
+  val cfifoSize:Int = 16,
+  val sfifoSize:Int = 16,
+  val vfifoSize:Int = 16,
+  val numVectorFifos:Int = 4,
   val numVouts:Int = 4,
-  val numSins:Int = 4,
+  val numScalarFifos:Int = 4,
   val numSouts:Int = 4,
-  val numCins:Int = 2,
+  val numControlFifos:Int = 2,
   val numCouts:Int = 4,
   val numRegs:Int = 16,
   val numStages:Int = 8,
   val numCtrs:Int = 8,
   val muxSize:Int = 10,
-  val reduction:Boolean = true
+  override val reduction:Boolean = true
 ) extends ComputeUnitParam() {
   val numSRAMs:Int = 0
   val sramSize:Int = 0
-
-  def config(cu:PatternComputeUnit)(implicit spade:Spade) = {
-    val numReduceStages = if (reduction) Math.ceil(Math.log(numLanes) / Math.log(2)).toInt else 0
-    val numFrontStages = numStages - (numReduceStages + 2)
-    assert(numFrontStages >= 0, s"numFrontStages=$numFrontStages numStage=$numStages")
-    warn(cu.cins.size < numCins, s"pcu cins=${cu.cins.size} numCins=${numCins}")
-    warn(cu.sins.size < numSins, s"pcu sins=${cu.sins.size} numSins=${numSins}")
-    warn(cu.vins.size < numVins, s"pcu vins=${cu.vins.size} numVins=${numVins}")
-    warn(cu.souts.size < numSouts, s"pcu souts=${cu.souts.size} numSouts=${numSouts}")
-    warn(cu.vouts.size < numVouts, s"pcu vouts=${cu.vouts.size} numVouts=${numVouts}")
-    cu.addRegstages(numStage=numFrontStages, numOprds=3, ops)
-    cu.addRdstages(numStage=numReduceStages, numOprds=3, ops)
-    cu.addRegstages(numStage=2, numOprds=3, ops)
-    cu.numControlBufs(numCins)
-    cu.numScalarBufs(numSins)
-    cu.numVecBufs(cu.vins.size)
-    cu.mems.foreach(_.writePortMux.addInputs(muxSize))
-    cu.color(0 until numCtrs, CounterReg)
-    cu.color(0, ReduceReg).color(1, AccumReg)
-    cu.color(numRegs-cu.numScalarBufs until numRegs, ScalarInReg)
-    cu.color(numRegs-cu.souts.size until numRegs, ScalarOutReg)
-    cu.color(numRegs-cu.numVecBufs until numRegs, VecInReg)
-    cu.color(numRegs-cu.vouts.size until numRegs, VecOutReg)
-    cu.genConnections
-  }
 }
 
 class PatternComputeUnit(override val param:PatternComputeUnitParam=new PatternComputeUnitParam())(implicit spade:Spade) 
   extends ComputeUnit(param) {
+  import param._
   override val typeStr = "pcu"
 
   lazy val ctrlBox:InnerCtrlBox = Module(new InnerCtrlBox(CtrlBoxParam()))
-  override def config = param.config(this)
+
+  override def connect:Unit = {
+    super.connect
+    color(0 until numCtrs, CounterReg)
+    color(0, ReduceReg).color(1, AccumReg)
+    color(numRegs-numScalarFifos until numRegs, ScalarInReg)
+    color(numRegs-souts.size until numRegs, ScalarOutReg)
+    color(numRegs-numVectorFifos until numRegs, VecInReg)
+    color(numRegs-vouts.size until numRegs, VecOutReg)
+    genConnections
+  }
 }

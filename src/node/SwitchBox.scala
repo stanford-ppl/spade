@@ -15,9 +15,13 @@ case class SwitchBox()(implicit spade:Spade) extends Routable {
   def connectXbar[P<:PortType](gio:GridIO[P, this.type]) = {
     gio.ins.foreach { in => gio.outs.foreach { out => out.ic <== in.ic } }
   }
-  connectXbar(scalarIO)
-  connectXbar(vectorIO)
-  connectXbar(ctrlIO)
+  override def connect = {
+    super.connect
+    connectXbar(scalarIO)
+    connectXbar(vectorIO)
+    connectXbar(ctrlIO)
+    genConnections
+  }
 
   /* --- Simulation  -----*/
   override def register(implicit sim:Simulator):Unit = {

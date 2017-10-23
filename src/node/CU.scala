@@ -12,20 +12,12 @@ import scala.collection.mutable.ListBuffer
 trait ComputeUnitParam extends ControllerParam {
   val numRegs:Int
   val numCtrs:Int
-  val numSRAMs:Int
-  val sramSize:Int
   val numLanes:Int
   val numStages:Int
-  val numVins:Int
   val numVouts:Int
-  val numSins:Int
   val numSouts:Int
-  val numCins:Int
   val numCouts:Int
-  val cbufSize:Int
-  val sbufSize:Int
-  val vbufSize:Int
-  val muxSize:Int
+  val reduction:Boolean = false
 }
 
 /*
@@ -39,9 +31,7 @@ abstract class ComputeUnit(override val param:ComputeUnitParam)(implicit spade:S
   /* ---------- SUBMODULES -----------*/
   //override implicit val ctrler:ComputeUnit = this 
   val regs:List[ArchReg] = List.tabulate(numRegs) { ir => ArchReg().index(ir) }
-  val srams:List[SRAM] = List.tabulate(numSRAMs) { i => Module(SRAM(sramSize, spade.numLanes)).index(i) }
   val ctrs:List[Counter] = List.tabulate(numCtrs) { i => Module(Counter()).index(i) }
-  override def mems:List[OnChipMem] = super.mems ++ srams
   def vout = vouts.head
 
   protected val _regstages:ListBuffer[Stage] = ListBuffer.empty  // Regular Stages
@@ -80,6 +70,18 @@ abstract class ComputeUnit(override val param:ComputeUnitParam)(implicit spade:S
   override def register(implicit sim:Simulator):Unit = {
     import sim.util._
     super.register
+  }
+
+  override def connect:Unit = {
+    super.connect
+    warn(souts.size < numSouts, s"pcu souts=${souts.size} numSouts=${numSouts}")
+    warn(vouts.size < numVouts, s"pcu vouts=${vouts.size} numVouts=${numVouts}")
+    val numReduceStages = if (reduction) Math.ceil(Math.log(numLanes) / Math.log(2)).toInt else 0
+    val numFrontStages = numStages - (numReduceStages + 2)
+    assert(numFrontStages >= 0, s"numFrontStages=$numFrontStages numStage=$numStages")
+    addRegstages(numStage=numFrontStages, numOprds=3, ops)
+    addRdstages(numStage=numReduceStages, numOprds=3, ops)
+    addRegstages(numStage=2, numOprds=3, ops)
   }
 
 }

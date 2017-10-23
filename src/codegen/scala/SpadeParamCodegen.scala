@@ -101,7 +101,7 @@ class SpadeParamCodegen(implicit design: Spade) extends Codegen with ScalaCodege
       //emitln(s"stageTypes += ${quote(stage)}")
     //}
     cu match {
-      case cu:MemoryComputeUnit =>
+      case cu:PatternMemoryUnit =>
         emitln(s"override val d = ${cu.stages.size}")
         //emitln(s"override val wd = ${cu.wastages.size}")
       case cu =>
@@ -123,14 +123,14 @@ class SpadeParamCodegen(implicit design: Spade) extends Codegen with ScalaCodege
     }
     emitln(1)
 
-    mcus.headOption.foreach { mcu =>
+    pmus.headOption.foreach { pmu =>
       emitBlock(s"case class GeneratedPMUParams(override val numScalarIn:Int, override val numScalarOut:Int, override val numVectorIn:Int, override val numVectorOut:Int, override val numControlIn:Int, override val numControlOut:Int) extends PMUParams") {
         emitln(s"override val w = ${wordWidth}")
         emitln(s"override val v = ${numLanes}")
-        emitln(s"override val numCounters = ${mcu.param.numCtrs}")
-        emitln(s"override val numUDCs = ${mcu.ctrlBox.param.numUDCs}")
-        emitRegs(mcu)
-        emitStages(mcu)
+        emitln(s"override val numCounters = ${pmu.param.numCtrs}")
+        emitln(s"override val numUDCs = ${pmu.ctrlBox.param.numUDCs}")
+        emitRegs(pmu)
+        emitStages(pmu)
         emitln(s"override val r = regColors.size")
       }
     }
@@ -168,7 +168,7 @@ class SpadeParamCodegen(implicit design: Spade) extends Codegen with ScalaCodege
     cuArray.foreach { case row =>
       row.foreach { case cu =>
         val param = cu match {
-          case mcu:MemoryComputeUnit => 
+          case pmu:PatternMemoryUnit => 
             s"GeneratedPMUParams(numScalarIn=${cu.sins.size}, numScalarOut=${cu.souts.size}, numVectorIn=${cu.vins.size}, numVectorOut=${cu.vouts.size}, numControlIn=${cu.cins.size}, numControlOut=${cu.couts.size})"
           case cu:PatternComputeUnit => 
             s"GeneratedPCUParams(numScalarIn=${cu.sins.size}, numScalarOut=${cu.souts.size}, numVectorIn=${cu.vins.size}, numVectorOut=${cu.vouts.size}, numControlIn=${cu.cins.size}, numControlOut=${cu.couts.size})"
@@ -225,7 +225,7 @@ class SpadeParamCodegen(implicit design: Spade) extends Codegen with ScalaCodege
         case -1 => s"memoryChannelParams(0)($y)"
         case `numCols` => s"memoryChannelParams(1)($y)"
       }
-    case n:MemoryComputeUnit =>
+    case n:PatternMemoryUnit =>
       val (x, y) = coordOf(n)
       s"cuParams($x)($y)"
     case n:OuterComputeUnit =>

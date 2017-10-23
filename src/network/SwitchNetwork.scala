@@ -19,7 +19,7 @@ trait SwitchNetwork { self:Spade =>
     else new SRAMAddrGenParam()
   }
 
-  def mcuAt(x:Int, y:Int) = new MemoryComputeUnitParam()
+  def pmuAt(x:Int, y:Int) = new PatternMemoryUnitParam()
 
   def scuAt(x:Int, y:Int) = new ScalarComputeUnitParam()
 
@@ -37,7 +37,7 @@ trait SwitchNetwork { self:Spade =>
 
   /* --- alias to controllers */
   def cus = top.cus
-  def mcus = top.mcus
+  def pmus = top.pmus
   def pcus = top.pcus
   def scus = top.scus
   def ocus = top.ocus

@@ -14,14 +14,14 @@ sealed trait Pattern {
 case object Checkerboard extends Pattern {
   def cuAt(top:Top)(i:Int, j:Int):ComputeUnit = {
     if ((i+j) % 2 == 0) top.pcuAt(i,j) 
-    else top.mcuAt(i,j) 
+    else top.pmuAt(i,j) 
   }
 }
 case object MixAll extends Pattern {
   def cuAt(top:Top)(i:Int, j:Int):ComputeUnit = {
     if (i % 2 == 0) {
       if (j % 2 == 0) top.pcuAt(i,j)
-      else top.mcuAt(i,j)
+      else top.pmuAt(i,j)
     }
     else top.scuAt(i,j)
   }
@@ -29,9 +29,9 @@ case object MixAll extends Pattern {
 case object HalfHalf extends Pattern {
   def cuAt(top:Top)(i:Int, j:Int):ComputeUnit = {
     if (i % 2 == 0) {
-      if (j % 2 == 0) top.pcuAt(i,j) else top.mcuAt(i,j)
+      if (j % 2 == 0) top.pcuAt(i,j) else top.pmuAt(i,j)
     } else {
-      if (j % 2 == 0) top.mcuAt(i,j) else top.scuAt(i,j)
+      if (j % 2 == 0) top.pmuAt(i,j) else top.scuAt(i,j)
     }
   }
 }

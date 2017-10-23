@@ -68,8 +68,8 @@ plasticine {
   // input <== outputs: input can be configured to 1 of the outputs
   
   def forwardStages(cu:ComputeUnit) = cu match {
-    //case cu:MemoryComputeUnit => cu.wastages ++ cu.rastages.headOption.map{ h => List(h) }.getOrElse(Nil)
-    case cu:MemoryComputeUnit => cu.stages
+    //case cu:PatternMemoryUnit => cu.wastages ++ cu.rastages.headOption.map{ h => List(h) }.getOrElse(Nil)
+    case cu:PatternMemoryUnit => cu.stages
     case cu:OuterComputeUnit => Nil
     case cu:ComputeUnit => List(cu.stages.head)
   }
@@ -127,7 +127,7 @@ plasticine {
     }
 
     cu match {
-      case cu:MemoryComputeUnit =>
+      case cu:PatternMemoryUnit =>
         cu.vouts.foreach { _.ic <== cu.sram.readPort }
         cu.souts.foreach { _.ic <== (cu.sram.readPort,0) }
       case cu:ComputeUnit =>
@@ -152,7 +152,7 @@ plasticine {
       sram.writeAddrMux.inputs.foreach { _ <== (cu.ctrs.map(_.out), 0) }
       sram.writeAddrMux.inputs.foreach { _ <== cu.sfifos.map(_.readPort) }
       cu match {
-        case cu:MemoryComputeUnit =>
+        case cu:PatternMemoryUnit =>
           //cu.rastages.foreach { stage => sram.readAddrMux.inputs.foreach { _ <== (stage.fu.out, 0) } }
           //cu.wastages.foreach { stage => sram.writeAddrMux.inputs.foreach { _ <== (stage.fu.out, 0) } }
           cu.stages.foreach { stage => 
@@ -229,7 +229,7 @@ plasticine {
       case (cu:OuterComputeUnit, cb:OuterCtrlBox) => 
         cu.ctrs.foreach { cb.done.in <== _.done }
         cu.ctrs.filter { ctr => isInnerCounter(ctr) }.map(_.en <== cb.en.out)
-      case (cu:MemoryComputeUnit, cb:MemoryCtrlBox) => 
+      case (cu:PatternMemoryUnit, cb:MemoryCtrlBox) => 
         cu.ctrs.foreach { cb.readDone.in <== _.done }
         //cu.cins.foreach { cb.readDone.in <== _.ic }
         cu.ctrs.foreach { cb.writeDone.in <== _.done }
@@ -258,7 +258,7 @@ plasticine {
           udc.dec <== cb.childrenAndTree.out
           udc.dec <== cb.done.out
         }
-      case (cu:MemoryComputeUnit, cb:MemoryCtrlBox) => 
+      case (cu:PatternMemoryUnit, cb:MemoryCtrlBox) => 
         //cb.readUDC.inc <== cb.writeDone.out
         //cb.readUDC.dec <== cb.readDone.out
       case (mc:MemoryController, cb:CtrlBox) =>
@@ -272,7 +272,7 @@ plasticine {
     import spademeta._
     val low = Const(false)
     (cu, cu.ctrlBox) match {
-      case (cu:MemoryComputeUnit, cb:MemoryCtrlBox) => 
+      case (cu:PatternMemoryUnit, cb:MemoryCtrlBox) => 
         (cu.fifos).foreach { fifo => 
           fifo.dequeueEnable <== cb.readEn.out
           fifo.dequeueEnable <== cb.writeEn.out
@@ -326,7 +326,7 @@ plasticine {
     val spademeta: SpadeMetadata = spade
     import spademeta._
     (cu, cu.ctrlBox) match {
-      case (cu:MemoryComputeUnit, cb:MemoryCtrlBox) => 
+      case (cu:PatternMemoryUnit, cb:MemoryCtrlBox) => 
         //TODO: map enable once read and write stage can be shared
         //cu.rastages.foreach { _.prs.foreach { _.en <== cb.readEn.out } }
         //cu.wastages.foreach { _.prs.foreach { _.en <== cb.writeEn.out } }
@@ -363,7 +363,7 @@ plasticine {
           cout.ic <== cb.en.out
         }
         cu.gouts.foreach { _.valid <== cb.en.out }
-      case (cu:MemoryComputeUnit, cb:MemoryCtrlBox) => 
+      case (cu:PatternMemoryUnit, cb:MemoryCtrlBox) => 
         cb.tokenInXbar.in <== cu.cins.map(_.ic)
         cu.couts.foreach { cout => 
           cout.ic <== cu.fifos.map(_.notFull)

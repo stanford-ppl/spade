@@ -7,56 +7,49 @@ import pirc.util._
 import pirc.enums._
 
 case class PreloadScalarComputeParam(
-  override val sbufSize:Int = 16,
+  override val sfifoSize:Int = 16,
   override val numSouts:Int = 4,
   override val numRegs:Int = 16,
   override val numCtrs:Int = 6,
   override val muxSize:Int = 10
 ) extends ScalarComputeUnitParam(
-  numSins = ConfigFactory.plasticineConf.sinUcu,
+  numScalarFifos = ConfigFactory.plasticineConf.sinUcu,
   numStages = ConfigFactory.plasticineConf.stagesUcu
 ) with PreLoadSpadeParam
 
 class ScalarComputeUnitParam (
-  val cbufSize:Int = 16,
-  val sbufSize:Int = 16,
-  val numCins:Int = 3,
+  val cfifoSize:Int = 16,
+  val sfifoSize:Int = 16,
+  val numControlFifos:Int = 3,
   val numCouts:Int = 4,
-  val numSins:Int = 4,
+  val numScalarFifos:Int = 4,
   val numSouts:Int = 4,
   val numRegs:Int = 16,
   val numStages:Int = 6,
   val numCtrs:Int = 6,
   val muxSize:Int = 10
 ) extends ComputeUnitParam() {
-  val numVins:Int = 0
+  val numVectorFifos:Int = 0
   val numVouts:Int = 0
-  val vbufSize:Int = 0
+  val vfifoSize:Int = 0
   val numSRAMs:Int = 0
   val sramSize:Int = 0
   override lazy val numLanes:Int = 1
-
-  /* Parameters */
-  def config(cu:ScalarComputeUnit)(implicit spade:Spade) = {
-    cu.addRegstages(numStage=numStages, numOprds=3, fixOps ++ bitOps ++ otherOps)
-    warn(cu.cins.size < numCins, s"scu cins=${cu.cins.size} numCins=${numCins}")
-    warn(cu.sins.size < numSins, s"scu sins=${cu.sins.size} numSins=${numSins}")
-    warn(cu.souts.size < numSouts, s"scu souts=${cu.souts.size} numSouts=${numSouts}")
-    cu.numControlBufs(numCins)
-    cu.numScalarBufs(numSins)
-    cu.mems.foreach(_.writePortMux.addInputs(muxSize))
-    cu.color(1, AccumReg)
-    cu.color(0 until numCtrs, CounterReg)
-    cu.color(numRegs-cu.numScalarBufs until numRegs, ScalarInReg)
-    cu.color(numRegs-cu.souts.size until numRegs, ScalarOutReg)
-    cu.color(numRegs-cu.numVecBufs until numRegs, VecInReg)
-    cu.genConnections
-  }
 }
 /* A spetial type of CU used for memory loader/storer */
 class ScalarComputeUnit(override val param:ScalarComputeUnitParam=new ScalarComputeUnitParam())(implicit spade:Spade) 
   extends ComputeUnit(param) {
+  import param._
   override val typeStr = "scu"
   lazy val ctrlBox:InnerCtrlBox = Module(new InnerCtrlBox(CtrlBoxParam()))
-  override def config = param.config(this)
+
+  override def connect:Unit = {
+    super.connect
+    color(1, AccumReg)
+    color(0 until numCtrs, CounterReg)
+    color(numRegs-numScalarFifos until numRegs, ScalarInReg)
+    color(numRegs-souts.size until numRegs, ScalarOutReg)
+    color(numRegs-numVectorFifos until numRegs, VecInReg)
+    genConnections
+  }
 }
