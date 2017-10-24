@@ -51,7 +51,7 @@ class PatternMemoryUnit(override val param:PatternMemoryUnitParam=new PatternMem
   import spademeta._
   import param._
 
-  lazy val ctrlBox:MemoryCtrlBox = Module(new MemoryCtrlBox(CtrlBoxParam()))
+  val ctrlBox:MemoryCtrlBox = Module(new MemoryCtrlBox(CtrlBoxParam()))
 
   def sram = srams.head
   override def connect:Unit = {

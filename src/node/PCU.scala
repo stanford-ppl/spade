@@ -61,6 +61,6 @@ class PatternComputeUnit(override val param:PatternComputeUnitParam=new PatternC
   import param._
   override val typeStr = "pcu"
 
-  lazy val ctrlBox:InnerCtrlBox = Module(new InnerCtrlBox(CtrlBoxParam()))
+  val ctrlBox:InnerCtrlBox = Module(new InnerCtrlBox(CtrlBoxParam()))
 
 }

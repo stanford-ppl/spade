@@ -64,7 +64,7 @@ case class Top(override val param:TopParam=new TopParam())(implicit spade:Spade)
 
   /* --- Submodule Instantiation --- */
 
-  lazy val ctrlBox:TopCtrlBox = Module(TopCtrlBox(CtrlBoxParam()))
+  val ctrlBox:TopCtrlBox = Module(TopCtrlBox(CtrlBoxParam()))
 
   val dram = Module(DRAM(size=1024))
 

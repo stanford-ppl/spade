@@ -55,14 +55,16 @@ trait HiearchicalTraversal {
   def collect[X](
     x:Any, 
     visitFunc:Any => Iterable[Any], 
+    depth:Int,
     logger:Option[Logger]=None,
     visited:mutable.Set[Any] = mutable.Set.empty
   )(implicit ev:ClassTag[X]):Set[X] = {
     def f(xx:Any):Set[X] = {
       visited += x
-      collect[X](xx, visitFunc, logger, visited)
+      if (depth <= 0) Set[X]()
+      else collect[X](xx, visitFunc, depth - 1, logger, visited)
     }
-    logger.foreach { _.emitBSln(s"collect($x) ${visited.contains(x)}") }
+    logger.foreach { _.emitBSln(s"collect($x, depth=$depth)") }
     val res = x match {
       case x:X => Set[X](x)
       case x:Iterable[_] => x.flatMap(f).toSet
@@ -79,29 +81,33 @@ trait HiearchicalTraversal {
   def collectUp[X](
     x:Any, 
     visitFunc:Any => Iterable[Any]=visitUp, 
+    depth:Int = 10,
     logger:Option[Logger]=None,
     visited:mutable.Set[Any] = mutable.Set.empty
-  )(implicit ev:ClassTag[X]):Set[X] = collect(x, visitFunc, logger, visited)
+  )(implicit ev:ClassTag[X]):Set[X] = collect(x, visitFunc, depth, logger, visited)
 
   def collectDown[X](
     x:Any, 
     visitFunc:Any => Iterable[Any]=visitDown, 
+    depth:Int = 10,
     logger:Option[Logger]=None,
     visited:mutable.Set[Any] = mutable.Set.empty
-  )(implicit ev:ClassTag[X]):Set[X] = collect(x, visitFunc, logger, visited)
+  )(implicit ev:ClassTag[X]):Set[X] = collect(x, visitFunc, depth, logger, visited)
 
   def collectIn[X](
     x:Any, 
     visitFunc:Any => Iterable[Any]=visitIn, 
+    depth:Int = 15,
     logger:Option[Logger]=None,
     visited:mutable.Set[Any] = mutable.Set.empty
-  )(implicit ev:ClassTag[X]):Set[X] = collect(x, visitFunc, logger, visited)
+  )(implicit ev:ClassTag[X]):Set[X] = collect(x, visitFunc, depth, logger, visited)
 
   def collectOut[X](
     x:Any, 
     visitFunc:Any => Iterable[Any]=visitOut, 
+    depth:Int = 15,
     logger:Option[Logger]=None,
     visited:mutable.Set[Any] = mutable.Set.empty
-  )(implicit ev:ClassTag[X]):Set[X] = collect(x, visitFunc, logger, visited)
+  )(implicit ev:ClassTag[X]):Set[X] = collect(x, visitFunc, depth, logger, visited)
 
 }

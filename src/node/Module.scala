@@ -29,8 +29,7 @@ trait Module extends Node with Configurable {
   }
   def ios:List[IO[_<:PortType, Module]] = ins ++ outs
 
-  def connect:Unit = {
-  }
+  def connect:Unit = {}
 
   def connectAll:Unit = {
     connect

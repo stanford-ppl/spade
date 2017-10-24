@@ -42,6 +42,6 @@ class ScalarComputeUnit(override val param:ScalarComputeUnitParam=new ScalarComp
   extends ComputeUnit(param) {
   import param._
   override val typeStr = "scu"
-  lazy val ctrlBox:InnerCtrlBox = Module(new InnerCtrlBox(CtrlBoxParam()))
+  val ctrlBox:InnerCtrlBox = Module(new InnerCtrlBox(CtrlBoxParam()))
 
 }

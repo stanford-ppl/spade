@@ -27,9 +27,9 @@ abstract class Controller(val param:ControllerParam)(implicit spade:Spade) exten
   import spademeta._
   import param._
 
-  lazy val scalarIO:ScalarIO[this.type] = ScalarIO(this)
-  lazy val vectorIO:VectorIO[this.type] = VectorIO(this)
-  lazy val ctrlIO:ControlIO[this.type] = ControlIO(this)
+  val scalarIO:ScalarIO[this.type] = ScalarIO(this)
+  val vectorIO:VectorIO[this.type] = VectorIO(this)
+  val ctrlIO:ControlIO[this.type] = ControlIO(this)
 
   var vfifos:List[VectorMem] = Nil
   val sfifos:List[ScalarMem] = List.tabulate(numScalarFifos)  { i => Module(ScalarMem(sfifoSize)).index(i) }
