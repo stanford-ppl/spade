@@ -13,7 +13,7 @@ import sys.process._
 import scala.language.postfixOps
 import scala.language.existentials
 
-abstract class PlasticineDotGen(fn:String, open:Boolean)(implicit design:Spade) extends Codegen with DotCodegen {
+abstract class PlasticineDotGen(fn:String)(implicit design:Spade) extends Codegen with DotCodegen {
   import spademeta._
 
   def shouldRun = Config.debug
@@ -60,7 +60,7 @@ abstract class PlasticineDotGen(fn:String, open:Boolean)(implicit design:Spade) 
     }
   }
 
-  def print = {
+  def print:this.type = {
     emitBlock("digraph G") {
       val prts = mode match {
         case NoOCU =>
@@ -84,14 +84,17 @@ abstract class PlasticineDotGen(fn:String, open:Boolean)(implicit design:Spade) 
       }
     }
     close
-    if (open) { 
-      s"out/bin/run -c ${getPath} &".replace(".dot", "") !
-    }
+    this
   }
 
-  def print(mapping:Option[SpadeMap]):Unit = {
+  def print(mapping:Option[SpadeMap]):this.type = {
     this._mapping = mapping
     print
+    this
+  }
+
+  def open = {
+    s"out/bin/run -c ${getPath} &".replace(".dot", "") !
   }
 
   /*
@@ -220,22 +223,18 @@ abstract class PlasticineDotGen(fn:String, open:Boolean)(implicit design:Spade) 
 
 }
 
-class PlasticineCtrlDotPrinter(file:String, open:Boolean)(implicit design:Spade)
-  extends PlasticineDotGen(file, open) { 
-  def this(file:String)(implicit design:Spade) = this(file, false)
-  def this(open:Boolean)(implicit design:Spade) = this(SpadeConfig.spadeCtrlNetwork, open)
-  def this()(implicit design:Spade) = this(false)
+class PlasticineCtrlDotPrinter(file:String)(implicit design:Spade)
+  extends PlasticineDotGen(file) { 
+  def this()(implicit design:Spade) = this(SpadeConfig.spadeCtrlNetwork)
 
   val scale = 20
 
   def io(prt:Routable) = prt.ctrlIO
 }
 
-class PlasticineScalarDotPrinter(file:String, open:Boolean)(implicit design:Spade) 
-  extends PlasticineDotGen(file, open) { 
-  def this(file:String)(implicit design:Spade) = this(file, false)
-  def this(open:Boolean)(implicit design:Spade) = this(SpadeConfig.spadeScalarNetwork, open)
-  def this()(implicit design:Spade) = this(false)
+class PlasticineScalarDotPrinter(file:String)(implicit design:Spade) 
+  extends PlasticineDotGen(file) { 
+  def this()(implicit design:Spade) = this(SpadeConfig.spadeScalarNetwork)
   
   val scale = 15
 
@@ -243,11 +242,9 @@ class PlasticineScalarDotPrinter(file:String, open:Boolean)(implicit design:Spad
 
 }
 
-class PlasticineVectorDotPrinter(file:String, open:Boolean)(implicit design:Spade) 
-  extends PlasticineDotGen(file, open) { 
-  def this(file:String)(implicit design:Spade) = this(file, false)
-  def this(open:Boolean)(implicit design:Spade) = this(SpadeConfig.spadeVectorNetwork, open)
-  def this()(implicit design:Spade) = this(false)
+class PlasticineVectorDotPrinter(file:String)(implicit design:Spade) 
+  extends PlasticineDotGen(file) { 
+  def this()(implicit design:Spade) = this(SpadeConfig.spadeVectorNetwork)
   
   val scale = 15
 
