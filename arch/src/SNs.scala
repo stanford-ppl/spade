@@ -25,5 +25,5 @@ object SN1x1 extends SN(numRows=1, numCols=1, numArgIns=3, numArgOuts=3, pattern
 object SN1x2 extends SN(numRows=1, numCols=2, numArgIns=3, numArgOuts=3, pattern=Checkerboard) 
 object SN2x2 extends SN(numRows=2, numCols=2, numArgIns=3, numArgOuts=3, pattern=Checkerboard) 
 object SN2x3 extends SN(numRows=2, numCols=3, numArgIns=3, numArgOuts=3, pattern=Checkerboard) 
-object SN4x4 extends SN(numRows=4, numCols=4, numArgIns=3, numArgOuts=3, pattern=Checkerboard) 
-object SN8x8 extends SN(numRows=8, numCols=8, numArgIns=3, numArgOuts=3, pattern=Checkerboard) 
+object SN4x4 extends SN(numRows=4, numCols=4, numArgIns=5, numArgOuts=3, pattern=Checkerboard) 
+object SN8x8 extends SN(numRows=8, numCols=8, numArgIns=5, numArgOuts=3, pattern=Checkerboard) 
