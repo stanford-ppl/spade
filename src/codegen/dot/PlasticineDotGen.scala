@@ -236,7 +236,7 @@ class PlasticineScalarDotPrinter(file:String)(implicit design:Spade)
   extends PlasticineDotGen(file) { 
   def this()(implicit design:Spade) = this(SpadeConfig.spadeScalarNetwork)
   
-  val scale = 15
+  val scale = 20
 
   def io(prt:Routable) = prt.scalarIO
 

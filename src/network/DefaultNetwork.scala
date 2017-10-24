@@ -104,7 +104,7 @@ class CtrlNetwork()(implicit spade:Spade) extends GridNetwork() {
   def io(prt:Routable) = prt.ctrlIO
 
   // switch to switch channel width
-  channelWidth("src"->"sb", "dst"->"sb") = 4
+  channelWidth("src"->"sb", "dst"->"sb") = 6
 
   // switch to CU channel width
   channelWidth("pos"->"center", "src"->"sb", "dst"->List("pcu", "mu", "pmu", "scu")) = 1
