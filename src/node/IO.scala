@@ -117,6 +117,7 @@ class Input[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(implic
   private[spade] def <==(n:Output[Bus, Module], i:Int) = n.slice(i, this)
   private[spade] def <==(ns:Iterable[Output[Bus, Module]], i:Int) = ns.foreach(_.slice(i, this))
   private[spade] def <-- (n:Output[_, Module]) = n.broadcast(this.asBus)
+  private[spade] def <-- (ns:Iterable[Output[_, Module]]) = ns.foreach{_.broadcast(this.asBus)}
   def ms = s"${this}=fanIns[${_fanIns.mkString(",")}]"
   def canConnect(n:IO[_<:PortType, Module]):Boolean = {
     _fanIns.contains(n)

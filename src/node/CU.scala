@@ -169,9 +169,11 @@ abstract class ComputeUnit(override val param:ComputeUnitParam)(implicit spade:S
   def connectSRAM:Unit = {
     srams.foreach { sram =>
       sram.readAddrMux.inputs.foreach { _ <== (ctrs.map(_.out), 0) }// sram read/write addr can be from all counters
-      sram.readAddrMux.inputs.foreach { _ <== sfifos.map(_.readPort) }
+      sram.readAddrMux.inputs.foreach { _ <-- sfifos.map(_.readPort) }
+      sram.readAddrMux.inputs.foreach { _ <== vfifos.map(_.readPort) }
       sram.writeAddrMux.inputs.foreach { _ <== (ctrs.map(_.out), 0) }
-      sram.writeAddrMux.inputs.foreach { _ <== sfifos.map(_.readPort) }
+      sram.writeAddrMux.inputs.foreach { _ <-- sfifos.map(_.readPort) }
+      sram.writeAddrMux.inputs.foreach { _ <== vfifos.map(_.readPort) }
       stages.foreach { stage => 
         sram.readAddrMux.inputs.foreach { _ <== (stage.funcUnit.out, 0) }
         sram.writeAddrMux.inputs.foreach { _ <== (stage.funcUnit.out, 0) }

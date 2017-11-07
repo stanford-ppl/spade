@@ -190,10 +190,14 @@ case class SRAM(size:Int, banks:Int)(implicit spade:Spade, prt:Controller) exten
   type M = Array[Array[Word]]
   def wtp:Bus = Bus(Word())
   var memory:M = _
-  val readAddr = Input(Word(), this, s"${this}.ra")
-  val readAddrMux = Module(ValidMux(s"$this.raMux", Word())) //TODO: connect select for mux
-  val writeAddr = Input(Word(), this, s"${this}.wa")
-  val writeAddrMux = Module(ValidMux(s"$this.waMux", Word()))
+  //val readAddr = Input(Word(), this, s"${this}.ra")
+  //val readAddrMux = Module(ValidMux(s"$this.raMux", Word())) //TODO: connect select for mux
+  //val writeAddr = Input(Word(), this, s"${this}.wa")
+  //val writeAddrMux = Module(ValidMux(s"$this.waMux", Word()))
+  val readAddr = Input(Bus(Word()), this, s"${this}.ra")
+  val readAddrMux = Module(ValidMux(s"$this.raMux", Bus(Word())))
+  val writeAddr = Input(Bus(Word()), this, s"${this}.wa")
+  val writeAddrMux = Module(ValidMux(s"$this.waMux", Bus(Word())))
   val writeEn = Input(Bit(), this, s"${this}.we")
   val readEn = Input(Bit(), this, s"${this}.re")
   val readPort = Output(Bus(Word()), this, s"${this}.rp")
@@ -215,30 +219,19 @@ case class SRAM(size:Int, banks:Int)(implicit spade:Spade, prt:Controller) exten
       writeEn.v.default = false
       readEn.v.default = false
 
-      writePort.pv match {
-        case writePort:SingleValue =>
-          setMem { memory =>
-            If (writeEn.pv) {
-              writeAddr.pv.getInt.foreach { writeAddr =>
-                memory(writePtr.pv.toInt)(writeAddr) <<= writePort
+      setMem { memory =>
+        If (writeEn.pv) {
+          writePort.pv.value.zip(writeAddr.pv.value).zipWithIndex.foreach { 
+            case ((wp, wa), i) if i < config.wpar =>
+              wa.asSingle.getInt.foreach { wa =>
+                memory(writePtr.pv.toInt)(wa) <<= wp
               }
-              //DEBUG.v.update
-            }
+            case ((wp, wa), i) =>
           }
-        case writePort:ListValue =>
-          setMem { memory =>
-            If (writeEn.pv) {
-              writePort.foreach { 
-                case (writePort, i) if i < config.wpar =>
-                  writeAddr.pv.getInt.foreach { writeAddr =>
-                    memory(writePtr.pv.toInt)(writeAddr + i) <<= writePort
-                  }
-                case (writePort, i) =>
-              }
-              //DEBUG.v.update
-            }
-          }
+          //DEBUG.v.update
+        }
       }
+
       def calcReadAddr(ra:Int, i:Int) = config.banking match {
         case Diagonal(_,_) => throw PIRException(s"Not supporting diagonal banking at the moment")
         case Strided(stride, banks) => ra + i * stride
@@ -247,12 +240,12 @@ case class SRAM(size:Int, banks:Int)(implicit spade:Spade, prt:Controller) exten
       }
       readOut.v.set { v => 
         updateMemory(config)
-        v.foreach { 
-          case (ev, i) if i < config.rpar =>
-            readAddr.v.getInt.fold {
+        v.value.zip(readAddr.v.value).zipWithIndex.foreach {
+          case ((ev, ea), i) if i < config.rpar =>
+            ea.asSingle.getInt.fold {
               ev.asSingle <<= None
-            } { readAddr =>
-              ev <<= memory(readPtr.v.toInt)(calcReadAddr(readAddr, i))
+            } { ea =>
+              ev <<= memory(readPtr.v.toInt)(calcReadAddr(ea, i))
             }
           case _ =>
         }
