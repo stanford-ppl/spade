@@ -453,6 +453,8 @@ class MemoryCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends CtrlBox(pa
     prt.srams.foreach { sram => 
       sram.enqueueEnable <== prt.cfifos.map(_.readPort) 
       sram.dequeueEnable <== prt.cfifos.map(_.readPort) 
+      sram.enqueueEnable <== prt.ctrs.map(_.done) //TODO
+      sram.dequeueEnable <== prt.ctrs.map(_.done)
       //sram.dequeueEnable <== readDoneDelay.out 
       //sram.enqueueEnable <== writeDoneDelay.out
       //sram.writeEn <== writeEnDelay.out
