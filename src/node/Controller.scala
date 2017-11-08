@@ -47,9 +47,9 @@ abstract class Controller(val param:ControllerParam)(implicit spade:Spade) exten
     warn(vins.size < numVectorFifos, s"${quote(this)} vins=${vins.size} numVectorFifos=${numVectorFifos}")
     vfifos = List.tabulate(vins.size) { i => Module(VectorMem(vfifoSize)).index(i) }
     fifos.foreach(_.writePortMux.addInputs(muxSize))
-    srams.foreach(_.writePortMux.addInputs(1))
-    srams.foreach(_.writeAddrMux.addInputs(1))
-    srams.foreach(_.readAddrMux.addInputs(1))
+    srams.foreach(_.writePortMux.addInputs(muxSize))
+    srams.foreach(_.writeAddrMux.addInputs(muxSize))
+    srams.foreach(_.readAddrMux.addInputs(muxSize))
     connectInputs
   }
 
