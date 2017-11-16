@@ -133,7 +133,7 @@ case class StageConfig (
   par:Int,
   op:Op,
   isReduce:Boolean,
-  accumInput:Option[Input[_<:PortType, Module]]
+  accumInput:Option[Input[_<:PortType, Module]] // input to bypass during first iteration of accumulation
 ) extends Configuration
 /*
  * Phyical stage. 1 column of FU and Pipeline Register block accross lanes. 

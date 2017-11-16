@@ -177,7 +177,8 @@ case class SRAMConfig (
   bufferSize:Int, // number of buffers for multibuffer 
   notFullOffset:Int,
   backPressure:Boolean,
-  size:Int // size of each buffer 
+  size:Int,  // size of each buffer 
+  mode:MemMode
 ) extends OnChipMemConfig
 /** Physical SRAM 
  *  @param numPort: number of banks. Usually equals to number of lanes in CU */
@@ -190,10 +191,6 @@ case class SRAM(size:Int, banks:Int)(implicit spade:Spade, prt:Controller) exten
   type M = Array[Array[Word]]
   def wtp:Bus = Bus(Word())
   var memory:M = _
-  //val readAddr = Input(Word(), this, s"${this}.ra")
-  //val readAddrMux = Module(ValidMux(s"$this.raMux", Word())) //TODO: connect select for mux
-  //val writeAddr = Input(Word(), this, s"${this}.wa")
-  //val writeAddrMux = Module(ValidMux(s"$this.waMux", Word()))
   val readAddr = Input(Bus(Word()), this, s"${this}.ra")
   val readAddrMux = Module(ValidMux(s"$this.raMux", Bus(Word())))
   val writeAddr = Input(Bus(Word()), this, s"${this}.wa")
