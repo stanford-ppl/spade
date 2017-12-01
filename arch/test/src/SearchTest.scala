@@ -21,7 +21,7 @@ class SearchTest extends UnitTest { self =>
 
   "MinRoute" should "success" in {
     implicit val spade = SN8x8
-    spade.top.config
+    spade.top.connect
 
     val logger = new Logger {
       override lazy val stream = newStream(s"${Config.outDir}/SearchTest", s"MinRoute.log")
@@ -57,11 +57,11 @@ class SearchTest extends UnitTest { self =>
         logger=None//Some(logger)
       )
 
-      //new PlasticineCtrlDotPrinter(open=false).print(Some(map))
+      //new PlasticineCtrlDotPrinter().print(Some(map)).open
 
       //new PlasticineScalarDotPrinter().print(Some(map))
 
-      //new PlasticineVectorDotPrinter(open=false).print(Some(map))
+      //new PlasticineVectorDotPrinter().print(Some(map)).open
         
 
     }
@@ -87,7 +87,7 @@ class SearchTest extends UnitTest { self =>
 
   "SecondMinRoute" should "success" in {
     implicit val spade = SN8x8
-    spade.top.config
+    spade.top.connect
 
     val logger = new Logger {
       override lazy val stream = newStream(s"${Config.outDir}/SearchTest", s"SecondMinRoute.log")
@@ -111,11 +111,11 @@ class SearchTest extends UnitTest { self =>
 
         println(s"iter=$iter cost=$cost")
         if (iter != maxIter) {
-          //new PlasticineCtrlDotPrinter(open=false).print(Some(map))
+          //new PlasticineCtrlDotPrinter().print(Some(map)).open
           iter += 1
           throw new Exception(s"Not valid route")
         } else {
-          new PlasticineCtrlDotPrinter(open=true).print(Some(map))
+          new PlasticineCtrlDotPrinter().print(Some(map)).open
         }
         map
       }
@@ -147,7 +147,7 @@ class SearchTest extends UnitTest { self =>
 
   "SpanTest" should "success" taggedAs(ARCH) in {
     implicit val spade = SN8x8
-    spade.top.config
+    spade.top.connect
 
     val logger = new Logger {
       override lazy val stream = newStream(s"${Config.outDir}/SpanTest", s"SpanTest.log")
@@ -182,7 +182,7 @@ class SearchTest extends UnitTest { self =>
       nodes.foreach { case (n, c) =>
         map = map.setCF(n, DummyConfig())
       }
-      new PlasticineCtrlDotPrinter(open=true).print(Some(map))
+      new PlasticineCtrlDotPrinter().print(Some(map)).open
 
     }
 

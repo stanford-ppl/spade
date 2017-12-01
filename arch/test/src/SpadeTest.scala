@@ -23,7 +23,7 @@ class SpadeTest extends UnitTest { self =>
 
   "SpadeTest" should "success" in {
     implicit val arch = SN2x2
-    arch.top.config
+    arch.top.connect
     //arch = SN16x8_LD
     //arch = new SN(numRows=2, numCols=2, pattern=HalfHalf)
     val cu = arch.pcus.head
