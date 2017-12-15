@@ -12,12 +12,12 @@ case class PreloadPatternComputeParam (
   override val numCtrs:Int = 8,
   override val muxSize:Int = 10
 ) extends PatternComputeUnitParam (
-  numVectorFifos = ConfigFactory.plasticineConf.vinPcu,
-  numVouts = ConfigFactory.plasticineConf.voutPcu,
-  numScalarFifos = ConfigFactory.plasticineConf.sinPcu,
-  numSouts = ConfigFactory.plasticineConf.soutPcu,
-  numRegs  = ConfigFactory.plasticineConf.regsPcu,
-  numStages = ConfigFactory.plasticineConf.comp
+  numVectorFifos = ConfigFactory.plasticineConf.pcuVin,
+  numVouts = ConfigFactory.plasticineConf.pcuVout,
+  numScalarFifos = ConfigFactory.plasticineConf.pcuSin,
+  numSouts = ConfigFactory.plasticineConf.pcuSout,
+  numRegs  = ConfigFactory.plasticineConf.pcuRegs,
+  numStages = ConfigFactory.plasticineConf.pcuStages
 ) with PreLoadSpadeParam
 
 case class SRAMAddrGenParam (

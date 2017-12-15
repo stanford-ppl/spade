@@ -13,55 +13,66 @@ import scala.language.reflectiveCalls
 import scala.collection.mutable.ListBuffer
 import scala.reflect.runtime.universe._
 import pureconfig._
+import java.io.File
 
 // Common configuration generator 
 object ConfigFactory extends Logger {
 
   case class PlasticineConf(
-    sinUcu: Int,
-    stagesUcu: Int,
-    sinPcu: Int,
-    soutPcu:Int,
-    vinPcu: Int,
-    voutPcu: Int,
-    regsPcu: Int,
-    comp: Int,
-    sinPmu: Int,
-    soutPmu:Int,
-    vinPmu: Int,
-    voutPmu: Int,
-    regsPmu: Int,
-    rw: Int,
-    lanes: Int
+    scuSin:Int,
+    scuSout:Int,
+    scuStages:Int,
+    scuRegs:Int,
+    pcuVin:Int,
+    pcuVout:Int,
+    pcuSin:Int,
+    pcuSout:Int,
+    var pcuStages:Int, // Can be reset by PIRDSE
+    pcuRegs:Int,
+    pmuVin:Int,
+    pmuVout:Int,
+    pmuSin:Int,
+    pmuSout:Int,
+    var pmuStages:Int,
+    pmuRegs:Int,
+    lanes: Int,
+    wordWidth: Int
   )
 
-    val defaultPlasticine =  com.typesafe.config.ConfigFactory.parseString("""
+    lazy val defaultPlasticine = loadConfig[PlasticineConf](com.typesafe.config.ConfigFactory.parseString("""
 plasticine {
-  sin-ucu = 10
-  stages-ucu = 10
-  sin-pcu = 10
-  sout-pcu = 10
-  vin-pcu = 4
-  vout-pcu = 1
-  regs-pcu = 16
-  comp = 10
-  sin-pmu = 10
-  sout-pmu = 10
-  vin-pmu = 4
-  vout-pmu = 1
-  regs-pmu = 16
-  rw = 10
+  scu-sin = 8
+  scu-sout = 2
+  scu-stages = 5
+  scu-regs = 16
+  pcu-vin = 4
+  pcu-vout = 2
+  pcu-sin = 6
+  pcu-sout = 2
+  pcu-stages = 7
+  pcu-regs = 16
+  pmu-vin = 4
+  pmu-vout = 1
+  pmu-sin = 4
+  pmu-sout = 1
+  pmu-stages = 0
+  pmu-regs = 16
   lanes = 16
+  word-width = 32
 }
-  """)
+"""), "plasticine").right.get
 
-  lazy val mergedPlasticineConf = com.typesafe.config.ConfigFactory.load().withFallback(defaultPlasticine).resolve()
-
-  lazy val plasticineConf = loadConfig[PlasticineConf](mergedPlasticineConf, "plasticine") match {
-    case Right(config) => 
-      config
-    case Left(failures) =>
-      throw PIRException(s"Unable to load plasticine config!")
+  lazy val plasticineConf = {
+    val path = s"${Config.SPATIAL_HOME}/apps/resources/application.conf"
+    val config = loadConfig[PlasticineConf](com.typesafe.config.ConfigFactory.parseFile(new File(path)), "plasticine") match {
+      case Right(config) => 
+        info(s"Loading configuration from $path")
+        config
+      case Left(failures) =>
+        warn(s"Unable to load plasticine config from $path. Using default config")
+        defaultPlasticine
+    }
+    config
   }
 
 }

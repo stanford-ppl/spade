@@ -16,12 +16,12 @@ case class PreloadMemoryComputeParam (
   override val numCtrs:Int = 8,
   override val muxSize:Int = 10
 ) extends PatternMemoryUnitParam (
-  numVectorFifos = ConfigFactory.plasticineConf.vinPmu,
-  numVouts = ConfigFactory.plasticineConf.voutPmu,
-  numScalarFifos = ConfigFactory.plasticineConf.sinPmu,
-  numSouts = ConfigFactory.plasticineConf.soutPmu,
-  numRegs  = ConfigFactory.plasticineConf.regsPmu,
-  numStages = ConfigFactory.plasticineConf.rw
+  numVectorFifos = ConfigFactory.plasticineConf.pmuVin,
+  numVouts = ConfigFactory.plasticineConf.pmuVout,
+  numScalarFifos = ConfigFactory.plasticineConf.pmuSin,
+  numSouts = ConfigFactory.plasticineConf.pmuSout,
+  numRegs  = ConfigFactory.plasticineConf.pmuRegs,
+  numStages = ConfigFactory.plasticineConf.pmuStages
 ) with PreLoadSpadeParam
 
 class PatternMemoryUnitParam(
