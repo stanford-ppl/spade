@@ -102,9 +102,9 @@ case class Top(override val param:TopParam=new TopParam())(implicit spade:Spade)
   lazy val low = Const(false)
   /* --- Network --- */
 
-  lazy val scalarNetwork = new ScalarNetwork()
-  lazy val vectorNetwork = new VectorNetwork()
-  lazy val ctrlNetwork = new CtrlNetwork()
+  lazy val scalarNetwork = spade.scalarNetwork
+  lazy val vectorNetwork = spade.vectorNetwork 
+  lazy val ctrlNetwork = spade.ctrlNetwork 
 
   /* --- properties -- */
   def diameter = Math.max(

@@ -41,13 +41,13 @@ object SN16x8_LD extends SN_LD(numRows=16, numCols=8, numArgIns=12, numArgOuts=5
   override def ctrlNetwork = new CtrlNetwork() {
 
     // switch to switch channel width
-    channelWidth("src"->"sb", "dst"->"sb") = 12
+    channelWidth("src"->"sb", "dst"->"sb") = 8
 
     // switch to CU channel width
-    channelWidth("pos"->"center", "src"->"sb", "dst"->List("pcu", "mu", "pmu")) = 4
+    channelWidth("pos"->"center", "src"->"sb", "dst"->List("pcu", "pmu")) = 3
 
     // CU to Switch channel width
-    channelWidth("pos"->"center", "src"->List("pcu", "mu", "pmu"), "dst"->"sb") = 2
+    channelWidth("pos"->"center", "src"->List("pcu", "pmu"), "dst"->"sb") = 2
       
     // OCU to switch channel width
     channelWidth("pos"->"center", "src"->"ocu", "dst"->"sb") = 4
