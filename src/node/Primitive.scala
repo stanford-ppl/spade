@@ -67,12 +67,12 @@ object Delay {
     (implicit spade:Spade, ev:TypeTag[P]):Delay[P] = new Delay(tp, Some(delay))
 }
 
-abstract class MuxLike[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade) extends Primitive with Simulatable {
+abstract class MuxLike[P<:PortType](tp:P, ts: => String)(implicit spade:Spade) extends Primitive with Simulatable {
   import spademeta._
 
   override lazy val prt:Controller = collectUp[Controller](this).head
 
-  override val typeStr = name.getOrElse("mux")
+  override def typeStr = ts 
   val sel = Input(Word(), this, s"${this}.sel")
   val out = Output(tp.clone, this, s"${this}.out")
   val _inputs = ListBuffer[Input[P, MuxLike[P]]]()
@@ -89,7 +89,7 @@ abstract class MuxLike[P<:PortType](name:Option[String], tp:P)(implicit spade:Sp
   }
 }
 
-case class Mux[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade) extends MuxLike(name, tp) {
+class Mux[P<:PortType](tp:P, ts: => String)(implicit spade:Spade) extends MuxLike(tp, ts) {
 
   override def register(implicit sim:Simulator):Unit = {
     super.register
@@ -98,11 +98,11 @@ case class Mux[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade) ext
   }
 }
 object Mux {
-  def apply[P<:PortType](name:String, tp:P)(implicit spade:Spade):Mux[P] = Mux(Some(name), tp)
-  def apply[P<:PortType](tp:P)(implicit spade:Spade):Mux[P] = Mux(None, tp)
+  def apply[P<:PortType](ts: => String, tp:P)(implicit spade:Spade):Mux[P] = new Mux(tp, ts)
+  def apply[P<:PortType](tp:P)(implicit spade:Spade):Mux[P] = new Mux(tp, "mux")
 }
 
-case class ValidMux[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade) extends MuxLike(name, tp) {
+class ValidMux[P<:PortType](tp:P, ts: => String)(implicit spade:Spade) extends MuxLike(tp, ts) {
   val valid = Output(Bit(), this, s"${this}.valid")
   val _valids = ListBuffer[Input[Bit, ValidMux[P]]]()
   def valids = _valids.toList
@@ -119,6 +119,6 @@ case class ValidMux[P<:PortType](name:Option[String], tp:P)(implicit spade:Spade
   }
 }
 object ValidMux {
-  def apply[P<:PortType](name:String, tp:P)(implicit spade:Spade):ValidMux[P] = ValidMux(Some(name), tp)
-  def apply[P<:PortType](tp:P)(implicit spade:Spade):ValidMux[P] = ValidMux(None, tp)
+  def apply[P<:PortType](ts: => String, tp:P)(implicit spade:Spade):ValidMux[P] = new ValidMux(tp, ts)
+  def apply[P<:PortType](tp:P)(implicit spade:Spade):ValidMux[P] = new ValidMux(tp, "mux")
 }

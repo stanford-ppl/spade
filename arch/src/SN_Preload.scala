@@ -34,14 +34,18 @@ object SN8x8_LD extends SN_LD(numRows=8, numCols=8, numArgIns=12, numArgOuts=5, 
 }
 
 object SN16x8_LD extends SN_LD(numRows=16, numCols=8, numArgIns=12, numArgOuts=5, pattern=Checkerboard) {
+  override def vectorNetwork = new VectorNetwork() {
+    // switch to switch channel width
+    channelWidth("src"->"sb", "dst"->"sb") = 4
+  }
   override def scalarNetwork = new ScalarNetwork() {
     // switch to switch channel width
-    channelWidth("src"->"sb", "dst"->"sb") = 6
+    channelWidth("src"->"sb", "dst"->"sb") = 4
   }
   override def ctrlNetwork = new CtrlNetwork() {
 
     // switch to switch channel width
-    channelWidth("src"->"sb", "dst"->"sb") = 8
+    channelWidth("src"->"sb", "dst"->"sb") = 4
 
     // switch to CU channel width
     channelWidth("pos"->"center", "src"->"sb", "dst"->List("pcu", "pmu")) = 3

@@ -91,7 +91,7 @@ trait OnChipMemConfig extends MemoryConfig {
   val notFullOffset:Int
 }
 
-abstract class OnChipMem(implicit spade:Spade, ctrler:Controller) extends Primitive with Memory {
+abstract class OnChipMem(implicit spade:Spade) extends Primitive with Memory {
   type CT <: OnChipMemConfig
   import spademeta._
   type P<:PortType

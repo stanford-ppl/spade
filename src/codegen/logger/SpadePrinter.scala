@@ -17,40 +17,15 @@ class SpadePrinter(implicit design: Spade) extends Codegen with HiearchicalTrave
     node match {
       case n:Input[_,_] => emitln(n.ms)
       case n:Output[_,_] => emitln(n.mt)
-      case n => emitBlock(s"$n") { super.traverseDown(n) }
+      case n:Module => emitBlock(s"$n") { 
+        emitln(s"parent=${n.parent}")
+        super.traverseDown(n)
+      }
     }
   }
 
   addPass {
     traverseDown(design.top)
-    //design.top.ctrlers.foreach { ctrler => emitBlock(s"${ctrler}") {
-      //emitIO(ctrler)
-      //ctrler.sfifos.foreach { s => emitModule(s) }
-      //ctrler match {
-        //case top:Top =>
-        //case mc:MemoryController =>
-        //case cu:ComputeUnit =>
-          //cu.srams.foreach { s => emitModule(s) }
-          //cu.fifos.foreach { s => emitModule(s) }
-          //cu.ctrs.foreach{ c => emitModule(c) }
-          //cu.stages.foreach { s =>
-            //emitBlock(s"${quote(s)}") {
-              //emitln(s"ops=[${s.funcUnit.ops.mkString(",")}]")
-              //s.funcUnit.operands.foreach { oprd =>
-                //emitln(s"${oprd.ms}")
-              //}
-              //val res = s.funcUnit.out
-              //emitln(s"${res.mt}")
-              //emitBlock(s"prs") {
-                //s.prs.foreach { pr => emitln(s"${pr.in.ms}"); emitln(s"${pr.out.mt}") }
-              //}
-            //}
-          //}
-          //emitModule(cu.ctrlBox, emitCtrlBox(cu.ctrlBox))
-        //}
-      //}
-    //}
-    //design.top.sbs.foreach { sb => emitIO(sb) }
   }
 
   def emitIO(prt:GridIO[_<:PortType, _<:Routable]):Unit = {

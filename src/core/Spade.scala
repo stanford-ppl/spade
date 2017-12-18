@@ -3,6 +3,7 @@ package spade
 import spade.node._
 import spade.util._
 import spade.codegen._
+import spade.pass._
 
 import pirc._
 import pirc.util._
@@ -63,6 +64,9 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
   /* Analysis */
   //TODO: Area model
 
+  /* Passes */
+  lazy val areaModel = new AreaModel()
+
   /* Codegen */
   lazy val spadeNetworkCodegen = new SpadeNetworkCodegen()
   lazy val spadeParamCodegen = new SpadeParamCodegen()
@@ -75,6 +79,9 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
   lazy val plasticineCtrlDotPrinter = new PlasticineCtrlDotPrinter()
 
   override def run = {
+    // Pass
+    passes += areaModel 
+
     // Debug
     passes += spadePrinter 
     passes += plasticineVecDotPrinter 
