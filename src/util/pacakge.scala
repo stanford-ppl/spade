@@ -91,9 +91,19 @@ package object util extends HiearchicalTraversal {
   }
 
   def regsOf(x:Any):Set[ArchReg] = {
+    def vi(x:Any):Iterable[Any] = x match {
+      case x: Counter => Set() 
+      case x: FuncUnit => Set() 
+      case x => visitIn(x) 
+    }
+    def vo(x:Any):Iterable[Any] = x match {
+      case x: Counter => Set() 
+      case x: FuncUnit => Set() 
+      case x => visitOut(x) 
+    }
     x match {
-      case x:Input[_,_] => collectIn[PipeReg](x).map{ _.reg }
-      case x:Output[_,_] => collectOut[PipeReg](x).map{ _.reg }
+      case x:Input[_,_] => collectIn[PipeReg](x, visitFunc=vi _).map{ _.reg }
+      case x:Output[_,_] => collectOut[PipeReg](x, visitFunc=vo _).map{ _.reg }
       case _ => Set[ArchReg]()
     }
   }
