@@ -7,27 +7,24 @@ import scala.collection.mutable
 object SpadeConfig extends GlobalConfig {
 
   // Properties go here
-  var test:Boolean = register("test", false) { v => test = v == "true" }
-  var codegen:Boolean = register("codegen", false) { v => codegen = v == "true" }
-  var genDot:Boolean = register("dot", true) { v => genDot = v == "true" }
-  var simulate:Boolean = register("simulate", false) { v => simulate = v == "true" }
-  var verbose:Boolean = register("verbose", false) { v => verbose = v == "true" }
-  var waveform:Boolean = register("waveform", true) { v => waveform = v == "true" }
-  var simulationTimeOut:Int = register("time-out", 100) { v => simulationTimeOut = v.toInt }
+  var test:Boolean = register("test", false) { test = _ }
+  var codegen:Boolean = register("codegen", false) { codegen = _ }
+  var genDot:Boolean = register("dot", true) { genDot = _ }
+  var simulate:Boolean = register("simulate", false) { simulate = _ }
+  var verbose:Boolean = register("verbose", false) { verbose = _ }
+  var waveform:Boolean = register("waveform", true) { waveform = _ }
+  var simulationTimeOut:Int = register("time-out", 100) { simulationTimeOut = _ }
 
-  var quick = getProperty("pir.quick", "false") == "true"
-  var outDir = getProperty("pir.outDir", "out")
-
-  var spadeFile = getProperty("spadefile", "Spade.log")
+  var spadeFile:String = register("spadefile", "Spade.log") { spadeFile = _ }
   //var pisaFile = getProperty("pir.pisafile", "pisa.json")
-  var spadeVectorNetwork = getProperty("spade_vector_network", "VecNetwork.dot")
-  var spadeScalarNetwork = getProperty("spade_scalar_network", "ScalNetwork.dot")
-  var spadeCtrlNetwork = getProperty("spade_ctrl_network", "CtrlNetwork.dot")
-  var spadeArgInOut = getProperty("spade_arginout", "ArgInOut.dot")
-  var spadeCtr = getProperty("spade_ctr", "PCtr.dot")
+  var spadeVectorNetwork:String = register("spade_vector_network", "VecNetwork.dot") { spadeVectorNetwork = _ }
+  var spadeScalarNetwork:String = register("spade_scalar_network", "ScalNetwork.dot") { spadeScalarNetwork = _ }
+  var spadeCtrlNetwork:String = register("spade_ctrl_network", "CtrlNetwork.dot") { spadeCtrlNetwork = _ }
+  var spadeArgInOut:String = register("spade_arginout", "ArgInOut.dot") { spadeArgInOut = _ }
+  var spadeCtr:String = register("spade_ctr", "PCtr.dot") { spadeCtr = _ }
 
   def debug = Config.debug
-  var debugCodegen:Boolean = debug && register("debug-codegen", true) { v => debugCodegen = v == "true" }
-  var openDot:Boolean = register("open", false) { v => openDot = v == "true" }
+  var debugCodegen:Boolean = debug && register("debug-codegen", true) { debugCodegen = _ }
+  var openDot:Boolean = register("open", false) { openDot = _ }
   
 }
