@@ -46,10 +46,10 @@ trait SwitchNetwork { self:Spade =>
   def ctrlers = top.ctrlers
   def sbs = top.sbs
 
-  val cuArray = top.cuArray
-  val dramAGs = top.dramAGs 
-  val sramAGs = top.sramAGs 
-  val mcArray = top.mcArray 
-  val sbArray = top.sbArray
-  val ocuArray = top.ocuArray 
+  def cuArray = top.cuArray
+  def dramAGs = top.dramAGs 
+  def sramAGs = top.sramAGs 
+  def mcArray = top.mcArray 
+  def sbArray = top.sbArray
+  def ocuArray = top.ocuArray 
 }
