@@ -11,7 +11,8 @@ import scala.language.existentials
 
 
 abstract class GridNetwork()(implicit spade:Spade) {
-  import spade.top._
+  lazy val top = spade.top
+  import top._
 
   implicit def self:GridNetwork = this
 
@@ -51,8 +52,6 @@ abstract class GridNetwork()(implicit spade:Spade) {
   lazy val numRows = cuArray.head.length
   lazy val numCols = cuArray.length
 
-  lazy val top = spade.top
-  
   def connect(out:Routable, outDir:String, in:Routable, inDir:String, pos:String):Unit = {
     implicit val arch = spade // TODO: why is this needed
     val cw = channelWidth("pos"->pos, "src"->out.typeStr, "dst"->in.typeStr, "srcDir"->inDir, "dstDir"->outDir)

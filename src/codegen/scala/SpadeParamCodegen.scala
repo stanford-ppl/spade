@@ -12,8 +12,9 @@ class SpadeParamCodegen(implicit design: Spade) extends Codegen with ScalaCodege
   def shouldRun = Config.codegen
   import spademeta._
   import design.topParam._
-  import design.top._
-  import design.top
+
+  lazy val top = design.top
+  import top._
 
   val traitName = s"GeneratedParams"
   lazy val dir = sys.env("PLASTICINE_HOME") + "/src/main/scala/spade/gen"

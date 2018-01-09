@@ -11,6 +11,7 @@ import pirc.util._
 import scala.language.implicitConversions
 import scala.collection.mutable.Map
 import scala.collection.mutable.ListBuffer
+import java.io._
 
 trait SpadeParam {
   lazy val wordWidth = 32
@@ -31,7 +32,7 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
 
   lazy val simulatable = ListBuffer[Simulatable]()
 
-  lazy val top = Top(topParam)
+  var top:Top = _ 
 
   var nextSym = 0
   def nextId = {val temp = nextSym; nextSym +=1; temp}
@@ -39,6 +40,7 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
   override def reset = {
     super[SpadeMetadata].reset
     super[Design].reset
+    top = null
   }
 
   def handle(e:Exception):Unit = {
@@ -46,14 +48,37 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
     throw e
   }
 
+  def initDesign = {
+    if (SpadeConfig.loadDesign) loadDesign else newDesign
+  }
+
+  def newDesign = {
+    top = Top(topParam)
+    top.connectAll
+  }
+
+  def loadDesign = {
+    val path = s"${outDir}${File.separator}${name}.spade"
+    val ois = new ObjectInputStream(new FileInputStream(path))
+    top = ois.readObject.asInstanceOf[Top]
+  }
+
+  def saveDesign = {
+    val path = s"${outDir}${File.separator}${name}.spade"
+    val oos = new ObjectOutputStream(new FileOutputStream(path))
+    oos.writeObject(top)
+    oos.close
+  }
+
   def main(args: Array[String]): Unit = {
     info(s"args=[${args.mkString(", ")}]")
     try {
       reset
       setArgs(args)
-      top.connectAll
+      initDesign
       endInfo(s"Finishing graph construction for ${this}")
       run
+      if (SpadeConfig.saveDesign) saveDesign
     } catch { 
       case e:Exception =>
         errmsg(e)

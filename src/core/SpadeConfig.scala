@@ -6,6 +6,9 @@ import scala.collection.mutable
 
 object SpadeConfig extends GlobalConfig {
 
+  var saveDesign:Boolean = register("save-spade", default=false, info="Save IR into a file") { saveDesign = _ }
+  var loadDesign:Boolean = register("load-spade", default=false, info="Load IR from a file") { loadDesign = _ }
+
   // Properties go here
   var test:Boolean = register("test", false) { test = _ }
   var codegen:Boolean = register("codegen", false) { codegen = _ }
