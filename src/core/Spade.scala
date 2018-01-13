@@ -34,9 +34,6 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
 
   var top:Top = _ 
 
-  var nextSym = 0
-  def nextId = {val temp = nextSym; nextSym +=1; temp}
-  
   override def reset = {
     super[SpadeMetadata].reset
     super[Design].reset
