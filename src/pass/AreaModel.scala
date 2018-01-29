@@ -6,11 +6,9 @@ import spade.node._
 import pirc._
 import pirc.util._
 
-class AreaModel(implicit design: Spade) extends Pass with Logger {
+class AreaModel(implicit design: Spade) extends Pass {
   def shouldRun = true 
   import spademeta._
-
-  override lazy val stream = newStream(s"AreaModel.log")
 
   addPass {
     val numLanes = design.numLanes
@@ -24,12 +22,12 @@ class AreaModel(implicit design: Spade) extends Pass with Logger {
       if (numCols < 3) row(0) else row(1)
     }
 
-    dprintln(s"numLanes=$numLanes")
-    dprintln(s"numRows=$numRows")
-    dprintln(s"numCols=$numCols")
-    dprintln(s"controlSwitch=${switch.cins.size} x ${switch.couts.size}")
-    dprintln(s"scalarSwitch=${switch.sins.size} x ${switch.souts.size}")
-    dprintln(s"vectorSwitch=${switch.vins.size} x ${switch.vouts.size}")
+    dbg(s"numLanes=$numLanes")
+    dbg(s"numRows=$numRows")
+    dbg(s"numCols=$numCols")
+    dbg(s"controlSwitch=${switch.cins.size} x ${switch.couts.size}")
+    dbg(s"scalarSwitch=${switch.sins.size} x ${switch.souts.size}")
+    dbg(s"vectorSwitch=${switch.vins.size} x ${switch.vouts.size}")
   }
 
 }
