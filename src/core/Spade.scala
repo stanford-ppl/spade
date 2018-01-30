@@ -102,17 +102,17 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
 
   override def run = {
     // Pass
-    passes += areaModel 
+    addPass(areaModel)
 
     // Debug
-    passes += spadePrinter 
-    passes += plasticineVecDotPrinter 
-    passes += plasticineScalDotPrinter 
-    passes += plasticineCtrlDotPrinter 
+    addPass(spadePrinter)
+    addPass(plasticineVecDotPrinter)
+    addPass(plasticineScalDotPrinter)
+    addPass(plasticineCtrlDotPrinter)
 
     // Codegen
-    passes += spadeNetworkCodegen 
-    passes += spadeParamCodegen 
+    addPass(spadeNetworkCodegen)
+    addPass(spadeParamCodegen)
 
     super.run
 
