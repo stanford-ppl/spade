@@ -33,7 +33,7 @@ case class SRAMAddrGenParam (
   override val muxSize:Int = 3
 ) extends PatternComputeUnitParam (
   reduction = false
-) with PreLoadSpadeParam
+)
 
 class PatternComputeUnitParam (
   val cfifoSize:Int = 16,
