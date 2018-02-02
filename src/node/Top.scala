@@ -64,18 +64,24 @@ case class Top(override val param:TopParam=new TopParam())(implicit spade:Spade)
 
   /* --- Submodule Instantiation --- */
 
+ // Top level Control Box, generate control input and output from host
   val ctrlBox:TopCtrlBox = Module(TopCtrlBox(CtrlBoxParam()))
 
   val dram = Module(DRAM(size=1024))
 
+  // 2D CU array
   val cuArray:List[List[Controller]] = List.tabulate(numCols, numRows) { case (x, y) => cuAt(x, y) }
 
+  // Dram Address Generator on left and right side of the array
   val dramAGs = List.tabulate(2, numRows+1) { case (x, y) => if (x==0) scuAt(-1, y) else scuAt(numCols, y) }
 
+  // Sram address generator specialized for off chip load and store
   val sramAGs = List.tabulate(2, numRows+1) { case (x, y) => if (x==0) pcuAt(-1, y) else pcuAt(numCols, y) }
 
+  // Memory controllers on two side
   val mcArray = List.tabulate(2, numRows+1) { case (x, y) => if (x==0) mcAt(-1, y) else mcAt(numCols, y) }
 
+  // Switch box array
   val sbArray:List[List[SwitchBox]] = List.tabulate(numCols+1, numRows+1) { case (x, y) => Module(SwitchBox()).coord(x,y) }
 
   val ocuArray = List.tabulate(numCols+1, numRows+1) { case (x, y) => ocuAt(x, y) }

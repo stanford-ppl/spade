@@ -24,6 +24,7 @@ trait PreLoadSpadeParam extends SpadeParam {
 
 trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork {
   implicit def spade:this.type = this
+  val spademeta:SpadeMetadata = this
 
   override def toString = getClass().getSimpleName().replace("$", "")
 
@@ -70,10 +71,14 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
   /* Codegen */
   lazy val spadeNetworkCodegen = new SpadeNetworkCodegen()
   lazy val spadeParamCodegen = new SpadeParamCodegen()
+  lazy val spadeControlCodegen = new SpadeControlCodegen()
 
   /* Debug */
   lazy val logger = new Logger() { override lazy val stream = newStream(s"spade.log") }
+  // Printing of Plasticine IR connection in Text
   lazy val spadePrinter = new SpadePrinter()
+  // Debugging dot graph of plasticine network topology.
+  // After generation use bin/dot out/ArchName/DotFileName to open the graph
   lazy val plasticineVecDotPrinter = new PlasticineVectorDotPrinter()
   lazy val plasticineScalDotPrinter = new PlasticineScalarDotPrinter()
   lazy val plasticineCtrlDotPrinter = new PlasticineCtrlDotPrinter()
@@ -90,6 +95,7 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
 
     // Codegen
     passes += spadeNetworkCodegen 
+    passes += spadeParamCodegen 
     passes += spadeParamCodegen 
 
     super.run
