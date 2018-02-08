@@ -212,7 +212,7 @@ abstract class PlasticineDotGen(fn:String)(implicit design:Spade) extends Codege
     }
   }
 
-  addPass {
+  override def runPass = {
     print
   }
 

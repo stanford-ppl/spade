@@ -24,7 +24,7 @@ class SpadePrinter(implicit design: Spade) extends Codegen with HiearchicalTrave
     }
   }
 
-  addPass {
+  override def runPass = {
     traverseDown(design.top)
   }
 

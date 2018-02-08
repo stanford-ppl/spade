@@ -60,7 +60,7 @@ class ConfigCodegen(implicit design: Spade) extends Codegen with ScalaCodegen wi
     emitBEln
   }
 
-  addPass(canRun=true, runCount=1) {
+  override def runPass = {
     emitHeader
     emitAppObject
     emitSplit {

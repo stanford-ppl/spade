@@ -43,7 +43,7 @@ class SpadeParamCodegen(implicit design: Spade) extends Codegen with ScalaCodege
     emitln(1)
   }
 
-  addPass {
+  override def runPass {
     emitHeader
     emitSplit(emitParams)
     emitTopParams

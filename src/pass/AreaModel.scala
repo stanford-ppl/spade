@@ -10,7 +10,7 @@ class AreaModel(implicit design: Spade) extends Pass {
   def shouldRun = true 
   import spademeta._
 
-  addPass {
+  override def runPass = {
     val numLanes = design.numLanes
     val numRows = design.top.param.numRows
     val numCols = design.top.param.numCols

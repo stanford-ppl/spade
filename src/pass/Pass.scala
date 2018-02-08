@@ -3,9 +3,11 @@ package spade.pass
 import spade._
 import spade.node._
 
+import pirc._
+
 import scala.collection.mutable
 
-abstract class Pass(implicit val design:Spade) extends pirc.pass.Pass {
+abstract class Pass(implicit val design:Spade) extends pirc.Pass {
 
   lazy val spademeta: SpadeMetadata = design
 
