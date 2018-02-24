@@ -45,43 +45,19 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
     throw e
   }
 
-  def initDesign = {
-    if (SpadeConfig.loadDesign) loadDesign else newDesign
-  }
+  def load = SpadeConfig.loadDesign
+  def save = SpadeConfig.saveDesign
+
+  val designPath = s"${outDir}${File.separator}${name}.spade"
+
+  def loadDesign = top = loadFromFile[Top](designPath)
 
   def newDesign = {
     top = Top(topParam)
     top.connectAll
   }
 
-  def loadDesign = {
-    val path = s"${outDir}${File.separator}${name}.spade"
-    val ois = new ObjectInputStream(new FileInputStream(path))
-    top = ois.readObject.asInstanceOf[Top]
-  }
-
-  def saveDesign = {
-    val path = s"${outDir}${File.separator}${name}.spade"
-    val oos = new ObjectOutputStream(new FileOutputStream(path))
-    oos.writeObject(top)
-    oos.close
-  }
-
-  def main(args: Array[String]): Unit = {
-    info(s"args=[${args.mkString(", ")}]")
-    try {
-      reset
-      setArgs(args)
-      initDesign
-      endInfo(s"Finishing graph construction for ${this}")
-      run
-      if (SpadeConfig.saveDesign) saveDesign
-    } catch { 
-      case e:Exception =>
-        errmsg(e)
-        handle(e)
-    }
-  }
+  def saveDesign:Unit = saveToFile(top, designPath)
 
   /* Analysis */
   //TODO: Area model
@@ -100,7 +76,9 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
   lazy val plasticineScalDotPrinter = new PlasticineScalarDotPrinter()
   lazy val plasticineCtrlDotPrinter = new PlasticineCtrlDotPrinter()
 
-  override def run = {
+  override def initSession = {
+    super.initSession
+    import session._
     // Pass
     addPass(areaModel)
 
@@ -113,9 +91,10 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
     // Codegen
     addPass(spadeNetworkCodegen)
     addPass(spadeParamCodegen)
+  }
 
-    super.run
-
+  override def runSession = {
+    super.runSession
     if (SpadeConfig.openDot) {
       plasticineVecDotPrinter.open
       plasticineScalDotPrinter.open
