@@ -12,8 +12,8 @@ import scala.collection.mutable.ListBuffer
 
 class ConfigCodegen(implicit design: Spade) extends Codegen with ScalaCodegen with MultiFileCodegen {
   def shouldRun = Config.codegen
-  var mapping:SpadeMap = _
-  def init(mapping:SpadeMap) = this.mapping = mapping
+  var mapping:SpadeMapLike = _
+  def init(mapping:SpadeMapLike) = this.mapping = mapping
   lazy val maps = mapping // This is hacky but I'm lazy ...
   import maps._
   import design._

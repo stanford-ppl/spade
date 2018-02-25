@@ -10,9 +10,10 @@ import pirc.util._
 
 import scala.collection.mutable.ListBuffer
 
-trait SimUtil extends Logger with SpadeMap {
+trait SimUtil extends Logger {
   def quote(n:Any):String
-  var mapping:SpadeMap = _
+  var mapping:SpadeMapLike = _
+  implicit lazy val mp:SpadeMapLike = mapping
   def fimap = mapping.fimap
   def cfmap = mapping.cfmap
   def rst:Boolean

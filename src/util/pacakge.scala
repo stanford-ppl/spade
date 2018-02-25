@@ -41,7 +41,7 @@ package object util extends HiearchicalTraversal {
     }
   }
 
-  def isMapped(node:Node)(implicit mp: SpadeMap):Boolean = {
+  def isMapped(node:Node)(implicit mp: SpadeMapLike):Boolean = {
     node match {
       case n:Primitive if !isMapped(n.prt) => return false
       case n =>
@@ -74,7 +74,7 @@ package object util extends HiearchicalTraversal {
     }
   }
 
-  def fanInOf[P<:PortType](in:Input[P,Module])(implicit mp:SpadeMap):Option[Output[P,Module]] = {
+  def fanInOf[P<:PortType](in:Input[P,Module])(implicit mp:SpadeMapLike):Option[Output[P,Module]] = {
     mp.fimap.get(in).fold { 
       if (in.fanIns.size==1) Some(in.fanIns.head) else None
     } { out =>
@@ -82,7 +82,7 @@ package object util extends HiearchicalTraversal {
     }
   }
 
-  def fanOutOf[P<:PortType](out:Output[P,Module])(implicit mp:SpadeMap):List[Input[P,Module]] = {
+  def fanOutOf[P<:PortType](out:Output[P,Module])(implicit mp:SpadeMapLike):List[Input[P,Module]] = {
     mp.fimap.get(out).fold { 
       if (out.fanOuts.size==1) List(out.fanOuts.head) else Nil
     } { ins =>

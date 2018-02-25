@@ -18,8 +18,8 @@ abstract class PlasticineDotGen(fn:String)(implicit design:Spade) extends Codege
 
   def shouldRun = Config.debug
 
-  private var _mapping:Option[SpadeMap] = None
-  def mapping:Option[SpadeMap] = _mapping
+  private var _mapping:Option[SpadeMapLike] = None
+  def mapping:Option[SpadeMapLike] = _mapping
 
   val scale:Int
 
@@ -87,7 +87,7 @@ abstract class PlasticineDotGen(fn:String)(implicit design:Spade) extends Codege
     this
   }
 
-  def print(mapping:Option[SpadeMap]):this.type = {
+  def print(mapping:Option[SpadeMapLike]):this.type = {
     this._mapping = mapping
     print
     this

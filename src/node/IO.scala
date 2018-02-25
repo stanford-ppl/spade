@@ -255,7 +255,7 @@ class GlobalInput[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(
   val valid:Output[Bit, this.type] = Output(Bit(), this, s"$this.valid")
   val ic:Output[P, this.type] = Output(tp.clone, this, s"$this.ic")
   override def register(implicit sim:Simulator):Unit = {
-    fanInOf(this).foreach { out => 
+    fanInOf(this)(sim.mp).foreach { out => 
       ic := out.asGlobal.ic
       valid := out.asGlobal.valid
     }

@@ -20,7 +20,7 @@ package object spade {
   type GridNetwork = spade.network.GridNetwork
 
   /* config */
-  type SpadeMap = spade.config.SpadeMap
+  type SpadeMapLike = spade.config.SpadeMapLike
 
   /* util */
   type SpadeMetadata = spade.util.SpadeMetadata
