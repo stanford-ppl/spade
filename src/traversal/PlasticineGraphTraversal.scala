@@ -24,7 +24,7 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
   type Edge = (IO[_<:PortType, Module], IO[_<:PortType, Module])
   type FE = (PO, PI) 
   type BE = (PI, PO)
-  type M <: SpadeMap
+  type M = SpadeMapLike
 
   def setConfig[E<:Edge](map:M, path:List[(S, E)]):M = {
     var mp = map
@@ -43,11 +43,11 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
           }
           (out, in, outFrom)
       }
-      mp = mp.setFI(in, out).asInstanceOf[M] //TODO: fix this?
+      mp = mp.set[FIMap](in, out)
       out match {
         case out:GlobalOutput[_,_] =>
           outFrom.foreach { outFrom => // Config SwitchBox
-            mp = mp.setFI(out.ic, outFrom.ic).asInstanceOf[M]
+            mp = mp.set[FIMap](out.ic, outFrom.ic)
           }
         case _ =>
       }

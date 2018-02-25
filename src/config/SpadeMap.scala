@@ -1,7 +1,6 @@
 package spade.config
 
 import spade.node._
-import spade.util.typealias._
 
 import prism.collection.immutable._
 
@@ -11,15 +10,13 @@ import scala.language.existentials
 import SpadeMap._
 
 trait SpadeMapLike { self:Product =>
-  type S
+  type S <: SpadeMapLike
   val fimap:FIMap
-  val cfmap:CFMap
+  val cfmap:ConfigMap
 
-  def setFI(k:FIMap.K, v:FIMap.V):S = set[FIMap.K, FIMap.V, FIMap](k,v)
-
-  def set[K,V,M<:MapLike[K,V,_,M]:ClassTag](k:K, v:V):S = {
+  def set[M<:MapLike[_,_,_,M]:ClassTag](k:Any, v:Any):S = {
     val args = productIterator.toList.map{
-      case map:M => map + (k -> v) 
+      case map:M => map + (k.asInstanceOf[map.K] -> v.asInstanceOf[map.V]) 
       case map => map
     }
     val constructor = this.getClass.getConstructors()(0) 
@@ -28,9 +25,9 @@ trait SpadeMapLike { self:Product =>
 }
 case class SpadeMap (
   fimap:FIMap,
-  cfmap:CFMap
+  cfmap:ConfigMap
 ) extends SpadeMapLike { type S = SpadeMap }
 object SpadeMap {
-  def empty:SpadeMap = SpadeMap(FIMap.empty, CFMap.empty) 
+  def empty:SpadeMap = SpadeMap(FIMap.empty, ConfigMap.empty) 
 }
 
