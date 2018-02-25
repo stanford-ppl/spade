@@ -212,7 +212,5 @@ abstract class ComputeUnit(override val param:ComputeUnitParam)(implicit spade:S
         ctrs.filter { ctr => isInnerCounter(ctr) }.map(_.en <== cb.writeEn.out)
     }
   }
-
-
 }
 
