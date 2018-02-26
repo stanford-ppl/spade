@@ -21,6 +21,7 @@ trait SpadeMetadata extends Metadata {
   object networkOf extends OneToOneMap[GlobalIO[_<:PortType, _], GridNetwork] with MetadataMap
 
   /* Name of nodes */
-  object nameOf extends OneToOneMap[Node, String] with MetadataMap
+ //TODO
+  object nameOf extends OneToOneMap[Any, String] with MetadataMap
 
 }

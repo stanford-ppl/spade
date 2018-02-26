@@ -25,6 +25,7 @@ trait PreLoadSpadeParam extends SpadeParam {
 
 trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork {
   implicit def spade:this.type = this
+  val spademeta:SpadeMetadata = this
 
   override def toString = getClass().getSimpleName().replace("$", "")
 
