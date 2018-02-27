@@ -139,7 +139,7 @@ case class StageConfig (
  * Phyical stage. 1 column of FU and Pipeline Register block accross lanes. 
  * @param reg Logical registers in current register block
  * */
-class Stage(val param:StageParam)(implicit spade:Spade) extends Primitive with Configurable {
+class Stage(val param:StageParam)(implicit design:Spade) extends Primitive with Configurable {
   import param._
   import spademeta._
   type CT = StageConfig
@@ -157,8 +157,8 @@ class Stage(val param:StageParam)(implicit spade:Spade) extends Primitive with C
   def isNext(s:Stage) = s.next == Some(this)
   def before(s:Stage) = indexOf(this) < indexOf(s)
   def after(s:Stage) = indexOf(this) > indexOf(s)
-  override def index(i:Int)(implicit spade:Spade):this.type = { super.index(i); funcUnit.index(i); this }
-  override def index(implicit spade:Spade):Int = { super.index }
+  override def index(i:Int)(implicit design:Spade):this.type = { super.index(i); funcUnit.index(i); this }
+  override def index(implicit design:Spade):Int = { super.index }
   override val typeStr = "st"
 }
 
@@ -169,7 +169,7 @@ class Stage(val param:StageParam)(implicit spade:Spade) extends Primitive with C
  * @param regs list of logical registers in the stage
  * @param ops reduction operations
  * */
-case class ReduceStage(override val param:StageParam)(implicit spade:Spade) extends Stage(param) {
+case class ReduceStage(override val param:StageParam)(implicit design:Spade) extends Stage(param) {
   import param._
   override val typeStr = "rdst"
   override lazy val prt:ComputeUnit = collectUp[ComputeUnit](this).head

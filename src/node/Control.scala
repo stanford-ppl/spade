@@ -281,7 +281,7 @@ abstract class CtrlBox(val param:CtrlBoxParam)(implicit spade:Spade) extends Pri
 abstract class StageCtrlBox(param:CtrlBoxParam)(implicit spade:Spade) extends CtrlBox(param) {
   import param._
   import spademeta._
-  override lazy val prt:ComputeUnit = collectUp[ComputeUnit](this, logger=Some(spade.logger)).head
+  override lazy val prt:ComputeUnit = collectUp[ComputeUnit](this).head
 
   /* ---------- SUBMODULES -----------*/
   val en = Module(Delay(Bit(), 0, s"${quote(prt)}.en"))

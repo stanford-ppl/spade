@@ -19,7 +19,7 @@ trait PortType extends Value {
 }
 trait SingleType extends PortType with SingleValue
 /* Three types of pin */
-case class Bit()(implicit spade:Spade) extends SingleType {
+case class Bit()(implicit design:Spade) extends SingleType {
   override val typeStr = "b"
   def clone(name:Option[String]):this.type = {
     val ntp = name match {
@@ -30,7 +30,7 @@ case class Bit()(implicit spade:Spade) extends SingleType {
     ntp.asInstanceOf[this.type]
   }
 }
-case class Word(wordWidth:Int)(implicit spade:Spade) extends SingleType {
+case class Word(wordWidth:Int)(implicit design:Spade) extends SingleType {
   override val typeStr = "w"
   def clone(name:Option[String]):this.type = {
     val ntp = name match {
@@ -42,12 +42,12 @@ case class Word(wordWidth:Int)(implicit spade:Spade) extends SingleType {
   }
 }
 object Word {
-  def apply()(implicit spade:Spade):Word = Word(spade.wordWidth)
-  def apply(name:String)(implicit spade:Spade):Word = {
-    new Word(spade.wordWidth) { override def toString = name }
+  def apply()(implicit design:Spade):Word = Word(design.wordWidth)
+  def apply(name:String)(implicit design:Spade):Word = {
+    new Word(design.wordWidth) { override def toString = name }
   }
 }
-case class Bus(busWidth:Int, elemTp:PortType)(implicit spade:Spade) extends PortType with ListValue {
+case class Bus(busWidth:Int, elemTp:PortType)(implicit design:Spade) extends PortType with ListValue {
   override val typeStr = "u"
   override def io_= (io:IO[_, Module]) = {
     super.io_= (io)
@@ -63,14 +63,14 @@ case class Bus(busWidth:Int, elemTp:PortType)(implicit spade:Spade) extends Port
   }
 }
 object Bus {
-  def apply(elemTp:PortType)(implicit spade:Spade):Bus = Bus(spade.numLanes, elemTp)
+  def apply(elemTp:PortType)(implicit design:Spade):Bus = Bus(design.numLanes, elemTp)
 }
 
 /* 
  * An input port of a module that can be recofigured to other's output ports
  * fanIns stores the list of ports the input port can configured to  
  * */
-abstract class IO[P<:PortType, +S<:Module](val tp:P, val src:S)(implicit spade:Spade) extends Node with Val[P] {
+abstract class IO[P<:PortType, +S<:Module](val tp:P, val src:S)(implicit design:Spade) extends Node with Val[P] {
   import spademeta._
   src.addIO(this)
   tp.io = this
@@ -104,7 +104,7 @@ abstract class IO[P<:PortType, +S<:Module](val tp:P, val src:S)(implicit spade:S
 }
 
 /* Input pin. Can only connects to output of the same level */
-class Input[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(implicit spade:Spade) extends IO[P, S](tp, src) { 
+class Input[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(implicit design:Spade) extends IO[P, S](tp, src) { 
   import spademeta._
   type O = Output[P, Module]
   // List of connections that can map to
@@ -163,13 +163,13 @@ class Input[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(implic
   }
 }
 object Input {
-  def apply[P<:PortType, S<:Module](t:P, s:S)(implicit spade:Spade):Input[P, S] = new Input[P, S](t, s, None)
-  def apply[P<:PortType, S<:Module](t:P, s:S, sf: =>String)(implicit spade:Spade):Input[P, S] = 
+  def apply[P<:PortType, S<:Module](t:P, s:S)(implicit design:Spade):Input[P, S] = new Input[P, S](t, s, None)
+  def apply[P<:PortType, S<:Module](t:P, s:S, sf: =>String)(implicit design:Spade):Input[P, S] = 
     new Input[P, S](t,s, Some(sf _))
 } 
 
 /* Output pin. Can only connects to input of the same level */
-class Output[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(implicit spade:Spade) extends IO[P, S](tp, src) { 
+class Output[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(implicit design:Spade) extends IO[P, S](tp, src) { 
   import spademeta._
   type I = Input[P, Module]
   val _fanOuts = ListBuffer[I]()
@@ -231,8 +231,8 @@ class Output[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(impli
   }
 } 
 object Output {
-  def apply[P<:PortType, S<:Module](t:P, s:S)(implicit spade:Spade):Output[P, S] = new Output[P,S](t, s, None)
-  def apply[P<:PortType, S<:Module](t:P, s:S, sf: =>String)(implicit spade:Spade):Output[P, S] = 
+  def apply[P<:PortType, S<:Module](t:P, s:S)(implicit design:Spade):Output[P, S] = new Output[P,S](t, s, None)
+  def apply[P<:PortType, S<:Module](t:P, s:S, sf: =>String)(implicit design:Spade):Output[P, S] = 
     new Output[P, S](t,s, Some(sf _))
 }
 
@@ -249,7 +249,7 @@ trait GlobalIO[P<:PortType, +S<:Module] extends IO[P, S] with Simulatable {
 }
 
 /* Input pin of network element. Has an innernal output */
-class GlobalInput[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(implicit spade:Spade)
+class GlobalInput[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(implicit design:Spade)
   extends Input(tp, src, sf) with GlobalIO[P,S] { 
   import spademeta._
   val valid:Output[Bit, this.type] = Output(Bit(), this, s"$this.valid")
@@ -273,13 +273,13 @@ class GlobalInput[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(
   }
 }
 object GlobalInput {
-  def apply[P<:PortType, S<:Module](t:P, s:S)(implicit spade:Spade):GlobalInput[P, S] = new GlobalInput[P, S](t, s, None)
-  def apply[P<:PortType, S<:Module](t:P, s:S, sf: =>String)(implicit spade:Spade):GlobalInput[P, S] = 
+  def apply[P<:PortType, S<:Module](t:P, s:S)(implicit design:Spade):GlobalInput[P, S] = new GlobalInput[P, S](t, s, None)
+  def apply[P<:PortType, S<:Module](t:P, s:S, sf: =>String)(implicit design:Spade):GlobalInput[P, S] = 
     new GlobalInput[P, S](t,s, Some(sf _))
 } 
 
 /* Output pin. Can only connects to input of the same level */
-class GlobalOutput[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(implicit spade:Spade) 
+class GlobalOutput[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])(implicit design:Spade) 
   extends Output(tp, src, sf) with GlobalIO[P, S] { 
   import spademeta._
   val valid:Input[Bit, this.type] = Input(Bit(), this, s"$this.valid")
@@ -300,12 +300,12 @@ class GlobalOutput[P<:PortType, +S<:Module](tp:P, src:S, sf: Option[()=>String])
   }
 } 
 object GlobalOutput {
-  def apply[P<:PortType, S<:Module](t:P, s:S)(implicit spade:Spade):GlobalOutput[P, S] = new GlobalOutput[P,S](t, s, None)
-  def apply[P<:PortType, S<:Module](t:P, s:S, sf: =>String)(implicit spade:Spade):GlobalOutput[P, S] = 
+  def apply[P<:PortType, S<:Module](t:P, s:S)(implicit design:Spade):GlobalOutput[P, S] = new GlobalOutput[P,S](t, s, None)
+  def apply[P<:PortType, S<:Module](t:P, s:S, sf: =>String)(implicit design:Spade):GlobalOutput[P, S] = 
     new GlobalOutput[P, S](t,s, Some(sf _))
 }
 
-case class Slice[PI<:PortType, PO<:PortType](intp:PI, outtp:PO, i:Int)(implicit spade:Spade) extends Simulatable {
+case class Slice[PI<:PortType, PO<:PortType](intp:PI, outtp:PO, i:Int)(implicit design:Spade) extends Simulatable {
   override val typeStr = "slice"
   val in = Input(intp.clone(), this, s"${this}.in")
   val out = Output(outtp.clone(), this, s"${this}.out")
@@ -325,14 +325,14 @@ case class Slice[PI<:PortType, PO<:PortType](intp:PI, outtp:PO, i:Int)(implicit 
 }
 
 object Slice {
-  def apply[P<:PortType](intp:P, fout:Output[Bus,Module], i:Int)(implicit spade:Spade):Slice[Bus, P] = {
+  def apply[P<:PortType](intp:P, fout:Output[Bus,Module], i:Int)(implicit design:Spade):Slice[Bus, P] = {
     val slice = new Slice(fout.tp, intp, i) {
       override def toString = s"$fout.slice($i)"
     }
     slice.in <== fout
     slice
   }
-  def apply[P<:PortType](outtp:P, fin:Input[Bus,Module], i:Int)(implicit spade:Spade):Slice[P, Bus] = {
+  def apply[P<:PortType](outtp:P, fin:Input[Bus,Module], i:Int)(implicit design:Spade):Slice[P, Bus] = {
     val slice = new Slice(outtp, fin.tp, i) {
       override def toString = s"$fin.slice($i)"
     }
@@ -341,7 +341,7 @@ object Slice {
   }
 }
 
-case class BroadCast[P<:PortType](bout:Output[P,Module], bintp:Bus)(implicit spade:Spade) extends Simulatable {
+case class BroadCast[P<:PortType](bout:Output[P,Module], bintp:Bus)(implicit design:Spade) extends Simulatable {
   override val typeStr = "broadcast"
   override def toString = s"${bintp.io}.broadcast"
   val in:Input[P, this.type] = Input(bout.tp.clone(), this, s"${this}.in")
@@ -359,30 +359,30 @@ trait GridIO[P <:PortType, +NE<:Routable] extends Node {
 
   def src:NE
   def tp:P
-  def inputs(num:Int)(implicit spade:Spade, nt:GridNetwork):List[GlobalInput[P, NE]] = 
+  def inputs(num:Int)(implicit design:Spade, nt:GridNetwork):List[GlobalInput[P, NE]] = 
     List.tabulate(num) { i => val in = GlobalInput(tp, src); networkOf(in) = nt; in }
-  def outputs(num:Int)(implicit spade:Spade, nt:GridNetwork):List[GlobalOutput[P, NE]] = 
+  def outputs(num:Int)(implicit design:Spade, nt:GridNetwork):List[GlobalOutput[P, NE]] = 
     List.tabulate(num) { i => val out = GlobalOutput(tp, src); networkOf(out) = nt; out }
-  def addInAt(dir:String, num:Int)(implicit spade:Spade, nt:GridNetwork):List[GlobalInput[P, NE]] = { 
+  def addInAt(dir:String, num:Int)(implicit design:Spade, nt:GridNetwork):List[GlobalInput[P, NE]] = { 
     val ibs = inputs(num)
     inMap.getOrElseUpdate(dir, ListBuffer.empty) ++= ibs
     ibs
   }
-  def addOutAt(dir:String, num:Int)(implicit spade:Spade, nt:GridNetwork):List[GlobalOutput[P, NE]] = {
+  def addOutAt(dir:String, num:Int)(implicit design:Spade, nt:GridNetwork):List[GlobalOutput[P, NE]] = {
     val obs = outputs(num)
     outMap.getOrElseUpdate(dir, ListBuffer.empty) ++= obs
     obs
   }
-  def addIOAt(dir:String, num:Int)(implicit spade:Spade, nt:GridNetwork):NE = {
+  def addIOAt(dir:String, num:Int)(implicit design:Spade, nt:GridNetwork):NE = {
     addInAt(dir,num)
     addOutAt(dir,num)
     src
   }
-  def addIns(num:Int)(implicit spade:Spade, nt:GridNetwork):NE = { 
+  def addIns(num:Int)(implicit design:Spade, nt:GridNetwork):NE = { 
     addInAt("N", num)
     src
   }
-  def addOuts(num:Int)(implicit spade:Spade, nt:GridNetwork):NE = {
+  def addOuts(num:Int)(implicit design:Spade, nt:GridNetwork):NE = {
     addOutAt("N", num)
     src
   }
@@ -414,7 +414,7 @@ object GridIO {
   def diagDirections = {"NW":: "NE":: "SE":: "SW" :: Nil}
 }
 
-case class ControlIO[+N<:Routable](src:N)(implicit spade:Spade) extends GridIO[ControlIO.P, N] {
+case class ControlIO[+N<:Routable](src:N)(implicit design:Spade) extends GridIO[ControlIO.P, N] {
   override def toString = s"${src}.ctrlIO"
   override def tp = Bit()
 }
@@ -422,7 +422,7 @@ object ControlIO {
   type P = Bit 
 }
 
-case class ScalarIO[+N<:Routable](src:N)(implicit spade:Spade) extends GridIO[ScalarIO.P, N] {
+case class ScalarIO[+N<:Routable](src:N)(implicit design:Spade) extends GridIO[ScalarIO.P, N] {
   override def toString = s"${src}.scalarIO"
   override def tp = Word()
 }
@@ -430,9 +430,9 @@ object ScalarIO {
   type P = Word
 }
 
-case class VectorIO[+N<:Routable](src:N)(implicit spade:Spade) extends GridIO[VectorIO.P, N] {
+case class VectorIO[+N<:Routable](src:N)(implicit design:Spade) extends GridIO[VectorIO.P, N] {
   override def toString = s"${src}.vectorIO"
-  override def tp = Bus(spade.numLanes, Word())
+  override def tp = Bus(design.numLanes, Word())
 }
 object VectorIO {
   type P = Bus

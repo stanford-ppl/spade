@@ -25,8 +25,8 @@ trait GridPattern extends Pattern {
  *
  * */
 case class Checkerboard (
-  pcuParam:PCUParam,
-  pmuParam:PMUParam
+  pcuParam:PCUParam=PCUParam(),
+  pmuParam:PMUParam=PMUParam()
 ) extends GridPattern {
   def cuAt(i:Int, j:Int):CUParam = {
     if ((i+j) % 2 == 0) pcuParam else pmuParam 
@@ -42,8 +42,8 @@ case class Checkerboard (
  *
  * */
 case class ColumnStrip (
-  pcuParam:PCUParam,
-  pmuParam:PMUParam
+  pcuParam:PCUParam=PCUParam(),
+  pmuParam:PMUParam=PMUParam()
 ) extends GridPattern {
   def cuAt(i:Int, j:Int):CUParam = {
     if (j % 2 == 0) pcuParam else pmuParam 
@@ -59,8 +59,8 @@ case class ColumnStrip (
  *
  * */
 case class RowStrip (
-  pcuParam:PCUParam,
-  pmuParam:PMUParam
+  pcuParam:PCUParam=PCUParam(),
+  pmuParam:PMUParam=PMUParam()
 ) extends GridPattern {
   def cuAt(i:Int, j:Int):CUParam = {
     if (i % 2 == 0) pcuParam else pmuParam 
@@ -76,9 +76,9 @@ case class RowStrip (
  *
  * */
 case class MixAll (
-  pcuParam:PCUParam,
-  pmuParam:PMUParam,
-  scuParam:SCUParam
+  pcuParam:PCUParam=PCUParam(),
+  pmuParam:PMUParam=PMUParam(),
+  scuParam:SCUParam=SCUParam()
 ) extends GridPattern {
   def cuAt(i:Int, j:Int):CUParam = {
     if (i % 2 == 0) {
@@ -97,9 +97,9 @@ case class MixAll (
  *
  * */
 case class HalfAndHalf (
-  pcuParam:PCUParam,
-  pmuParam:PMUParam,
-  scuParam:SCUParam
+  pcuParam:PCUParam=PCUParam(),
+  pmuParam:PMUParam=PMUParam(),
+  scuParam:SCUParam=SCUParam()
 ) extends GridPattern {
   def cuAt(i:Int, j:Int):CUParam = {
     if (i % 2 == 0) if (j % 2 == 0) pcuParam else pmuParam

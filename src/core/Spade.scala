@@ -24,7 +24,6 @@ trait PreLoadSpadeParam extends SpadeParam {
 }
 
 trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork {
-  implicit def spade:this.type = this
   val spademeta:SpadeMetadata = this
 
   override def toString = getClass().getSimpleName().replace("$", "")
@@ -39,10 +38,11 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
     super[SpadeMetadata].reset
     super[Design].reset
     top = null
+    newTop = null
   }
 
   def handle(e:Exception):Unit = {
-    logger.close
+    //logger.close
     throw e
   }
 
@@ -51,56 +51,57 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
 
   val designPath = s"${outDir}${File.separator}${name}.spade"
 
-  def loadDesign = top = loadFromFile[Top](designPath)
+  var newTop:spade.newnode.Top = _
+  lazy val newTopParam:spade.newnode.TopParam = newnode.MeshTopParam()()
+  def loadDesign = newTop = loadFromFile[spade.newnode.Top](designPath)
 
   def newDesign = {
-    top = Top(topParam)
-    top.connectAll
+    newTop = spade.newnode.Factory.create(newTopParam)
   }
 
-  def saveDesign:Unit = saveToFile(top, designPath)
+  def saveDesign:Unit = saveToFile(newTop, designPath)
 
   /* Analysis */
   //TODO: Area model
 
   /* Passes */
-  lazy val areaModel = new AreaModel()
+  //lazy val areaModel = new AreaModel()
 
   /* Codegen */
-  lazy val spadeNetworkCodegen = new SpadeNetworkCodegen()
-  lazy val spadeParamCodegen = new SpadeParamCodegen()
+  //lazy val spadeNetworkCodegen = new SpadeNetworkCodegen()
+  //lazy val spadeParamCodegen = new SpadeParamCodegen()
 
   /* Debug */
-  lazy val logger = new Logger() { override lazy val stream = newStream(s"spade.log") }
-  lazy val spadePrinter = new SpadePrinter()
-  lazy val plasticineVecDotPrinter = new PlasticineVectorDotPrinter()
-  lazy val plasticineScalDotPrinter = new PlasticineScalarDotPrinter()
-  lazy val plasticineCtrlDotPrinter = new PlasticineCtrlDotPrinter()
+  //lazy val logger = new Logger() { override lazy val stream = newStream(s"spade.log") }
+  //lazy val spadePrinter = new SpadePrinter()
+  //lazy val plasticineVecDotPrinter = new PlasticineVectorDotPrinter()
+  //lazy val plasticineScalDotPrinter = new PlasticineScalarDotPrinter()
+  //lazy val plasticineCtrlDotPrinter = new PlasticineCtrlDotPrinter()
 
   override def initSession = {
     super.initSession
     import session._
     // Pass
-    addPass(areaModel)
+    //addPass(areaModel)
 
     // Debug
-    addPass(spadePrinter)
-    addPass(plasticineVecDotPrinter)
-    addPass(plasticineScalDotPrinter)
-    addPass(plasticineCtrlDotPrinter)
+    //addPass(spadePrinter)
+    //addPass(plasticineVecDotPrinter)
+    //addPass(plasticineScalDotPrinter)
+    //addPass(plasticineCtrlDotPrinter)
 
     // Codegen
-    addPass(spadeNetworkCodegen)
-    addPass(spadeParamCodegen)
+    //addPass(spadeNetworkCodegen)
+    //addPass(spadeParamCodegen)
   }
 
   override def runSession = {
     super.runSession
-    if (SpadeConfig.openDot) {
-      plasticineVecDotPrinter.open
-      plasticineScalDotPrinter.open
-      plasticineCtrlDotPrinter.open
-    }
+    //if (SpadeConfig.openDot) {
+      //plasticineVecDotPrinter.open
+      //plasticineScalDotPrinter.open
+      //plasticineCtrlDotPrinter.open
+    //}
   }
 
 }

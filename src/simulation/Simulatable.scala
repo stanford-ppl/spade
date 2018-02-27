@@ -7,7 +7,7 @@ import spade.util._
 import pirc.util._
 
 trait Simulatable extends Module with Evaluation {
-  spade.simulatable += this
+  //spade.simulatable += this
 
   final def registerAll(implicit sim:Simulator):Unit = {
     register

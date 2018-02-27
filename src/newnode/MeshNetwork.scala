@@ -3,42 +3,48 @@ package spade.newnode
 import spade._
 import prism.node._
 import pirc.enums._
-import pirc.collection.mutable.Table
+import prism.collection.mutable.Table
 
 import scala.language.reflectiveCalls
 import scala.reflect._
 
-import scala.collection.mutable._
+import scala.collection.mutable
 
-case class MeshTopParam (
-  numRows:Int,
-  numCols:Int,
-  pattern:GridPattern,
-  argFringeParam:ArgFringeParam,
-  networkParams:List[MeshNetworkParam[_<:BundleType]]
+case class MeshTopParam(
+  numRows:Int=2,
+  numCols:Int=2,
+  pattern:GridPattern=Checkerboard(),
+  argFringeParam:ArgFringeParam=ArgFringeParam()
+)(
+  val networkParams:List[MeshNetworkParam[_<:BundleType]] = List(
+    MeshNetworkParam[Bit](numRows,numCols,pattern,argFringeParam),
+    MeshNetworkParam[Word](numRows,numCols,pattern,argFringeParam),
+    MeshNetworkParam[Vector](numRows,numCols,pattern,argFringeParam)
+  )
 ) extends TopParam
 case class MeshTop(param:MeshTopParam)(implicit design:Spade) extends Top(param) {
   import param._
-  val networks = networkParams.map { param => new MeshNetwork(param) }
 
+  @transient val networks = block { implicit design => networkParams.map { param => new MeshNetwork(param) } }
+
+  val argBundles = networks.map(_.argBundle)
   val argFringe = {
-    val bundles = networks.map(_.argBundle._1)
-    Module(ArgFringe(argFringeParam, bundles))
+    Module(ArgFringe(argFringeParam, argBundles))
   }
 
-  val cuArray = List.tabulate(numCols, numRows) { case (i,j) => 
-    val param = pattern.cuAt(i,j)
-    val bundles = networks.map(_.cuBundles(i)(j)._1)
-    param match {
-      case param:PCUParam => Module(PCU(param, bundles))
-      case param:PMUParam => Module(PMU(param, bundles))
-      case param:SCUParam => Module(SCU(param, bundles))
+  val cuBundles = networks.map(_.cuBundles)
+  val cuArray = block { implicit design =>
+    List.tabulate(numCols, numRows) { case (i,j) => 
+      val param = pattern.cuAt(i,j)
+      Module(Factory.create(param, cuBundles.map(_(i)(j))))
     }
   }
 
-  val switchArray = List.tabulate(numCols + 1, numRows + 1) { case (i,j) => 
-    val bundles = networks.map(_.switchBundles(i)(j)._1)
-    Module(SwitchBox(bundles))
+  val sbBundles = networks.map(_.switchBundle)
+  val switchArray = block { implicit design =>
+    List.tabulate(numCols + 1, numRows + 1) { case (i,j) => 
+      Module(SwitchBox(sbBundles.map(_(i)(j))))
+    }
   }
 }
 
@@ -46,26 +52,41 @@ case class MeshNetworkParam[B<:BundleType:ClassTag] (
   numRows:Int,
   numCols:Int,
   pattern:GridPattern,
-  argFringeParam:ArgFringeParam,
-  channelWidth:Table[String, String, Int] // Column, Row, Value
-)
+  argFringeParam:ArgFringeParam
+) extends Parameter {
+  val channelWidth = Table[String, String, Int](
+    values=Map(
+      "pos"->List("left", "right","center","top","bottom"), 
+      "src"->List("arg", "pcu", "ocu", "pmu", "mu", "scu", "mc", "switch"), 
+      "dst"->List("arg", "pcu", "ocu", "pmu", "mu", "scu", "mc", "switch"), 
+      "srcDir"->GridBundle.eightDirections, 
+      "dstDir"->GridBundle.eightDirections
+    ), 
+    default=0
+  )
+}
 class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit design:Spade) {
   import param._
 
   type Node = (GridBundle[B], String)
 
-  val argBundle = (GridBundle[B](), "arg")
-  val cuBundles = List.tabulate(numCols, numRows) { case (i,j) => 
-    val name = pattern.cuAt(i,j) match {
-      case param:PCUParam => "pcu"
-      case param:PMUParam => "pmu"
-      case param:SCUParam => "scu"
+  val argBundle = GridBundle[B]()
+  val arg = (argBundle, "arg")
+  val cuArray = block{ implicit design =>
+    List.tabulate(numCols, numRows) { case (i,j) => 
+      val name = pattern.cuAt(i,j) match {
+        case param:PCUParam => "pcu"
+        case param:PMUParam => "pmu"
+        case param:SCUParam => "scu"
+      }
+      (GridBundle[B](), name)
     }
-    (GridBundle[B](), name)
   }
-  val switchBundles = List.tabulate(numCols + 1, numRows + 1) { case (i,j) => 
-    (GridBundle[B](), "switch")
+  val cuBundles = cuArray.map(_.map(_._1))
+  val sbArray = block { implicit design =>
+    List.tabulate(numCols + 1, numRows + 1) { case (i,j) => (GridBundle[B](), "switch") }
   }
+  val switchBundle = sbArray.map(_.map(_._1))
 
   def connect(outNode:Node, outDir:String, inNode:Node, inDir:String, pos:String)(implicit design:Spade):Unit = {
     val (out, outType) = outNode
@@ -91,8 +112,8 @@ class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit de
 
 
   if (isScalar[B]) {
-    argBundle._1.addInAt("S", argFringeParam.numArgOuts)
-    argBundle._1.addOutAt("S", argFringeParam.numArgIns)
+    argBundle.addInAt("S", argFringeParam.numArgOuts)
+    argBundle.addOutAt("S", argFringeParam.numArgIns)
   }
 
   /** ----- Central Array Connection ----- **/
@@ -102,38 +123,38 @@ class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit de
       // CU to CU (Horizontal)
       if (x!=numCols-1) {
         // W -> E
-        connect(cuBundles(x)(y), "E", cuBundles(x+1)(y), "W", "center")
+        connect(cuArray(x)(y), "E", cuArray(x+1)(y), "W", "center")
         // E -> W
-        connect(cuBundles(x+1)(y), "W", cuBundles(x)(y), "E", "center")
+        connect(cuArray(x+1)(y), "W", cuArray(x)(y), "E", "center")
       }
       //// CU to CU (Vertical)
       if (y!=numRows-1) {
         // S -> N
-        connect(cuBundles(x)(y), "N", cuBundles(x)(y+1), "S", "center")
+        connect(cuArray(x)(y), "N", cuArray(x)(y+1), "S", "center")
         // N -> S 
-        connect(cuBundles(x)(y+1), "S", cuBundles(x)(y), "N", "center")
+        connect(cuArray(x)(y+1), "S", cuArray(x)(y), "N", "center")
       }
 
 
       /* ----- CU to SB Connection ----- */
       // NW (top left)
-      connect(cuBundles(x)(y), "NW", switchBundles(x)(y+1), "SE", "center")
+      connect(cuArray(x)(y), "NW", sbArray(x)(y+1), "SE", "center")
       // NE (top right)
-      connect(cuBundles(x)(y), "NE", switchBundles(x+1)(y+1), "SW", "center")
+      connect(cuArray(x)(y), "NE", sbArray(x+1)(y+1), "SW", "center")
       // SW (bottom left)
-      connect(cuBundles(x)(y), "SW", switchBundles(x)(y), "NE", "center")
+      connect(cuArray(x)(y), "SW", sbArray(x)(y), "NE", "center")
       // SE (bottom right)
-      connect(cuBundles(x)(y), "SE", switchBundles(x+1)(y), "NW", "center")
+      connect(cuArray(x)(y), "SE", sbArray(x+1)(y), "NW", "center")
 
       // SB to CU
       // NW (top left)
-      connect(switchBundles(x)(y+1), "SE", cuBundles(x)(y), "NW", "center")
+      connect(sbArray(x)(y+1), "SE", cuArray(x)(y), "NW", "center")
       // NE (top right)
-      connect(switchBundles(x+1)(y+1), "SW", cuBundles(x)(y), "NE", "center")
+      connect(sbArray(x+1)(y+1), "SW", cuArray(x)(y), "NE", "center")
       // SW (bottom left)
-      connect(switchBundles(x)(y), "NE", cuBundles(x)(y), "SW", "center")
+      connect(sbArray(x)(y), "NE", cuArray(x)(y), "SW", "center")
       // SE (bottom right)
-      connect(switchBundles(x+1)(y), "NW", cuBundles(x)(y), "SE", "center")
+      connect(sbArray(x+1)(y), "NW", cuArray(x)(y), "SE", "center")
     }
   }
 
@@ -144,41 +165,41 @@ class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit de
       // SB to SB (Horizontal)
       if (x!=numCols) {
         // W -> E 
-        connect(switchBundles(x)(y), "E", switchBundles(x+1)(y), "W", "center")
+        connect(sbArray(x)(y), "E", sbArray(x+1)(y), "W", "center")
         // E -> W
-        connect(switchBundles(x+1)(y), "W", switchBundles(x)(y), "E", "center")
+        connect(sbArray(x+1)(y), "W", sbArray(x)(y), "E", "center")
       }
       // SB to SB (Vertical)
       if (y!=numRows) {
         // S -> N
-        connect(switchBundles(x)(y), "N", switchBundles(x)(y+1), "S", "center")
+        connect(sbArray(x)(y), "N", sbArray(x)(y+1), "S", "center")
         // N -> S 
-        connect(switchBundles(x)(y+1), "S", switchBundles(x)(y), "N", "center")
+        connect(sbArray(x)(y+1), "S", sbArray(x)(y), "N", "center")
       }
 
       // Top to SB
       // Top Switches
       if (y==numRows) {
         // S -> N
-        connect(switchBundles(x)(y), "N", argBundle, "S", "top") // bottom up 
+        connect(sbArray(x)(y), "N", arg, "S", "top") // bottom up 
         // N -> S
-        connect(argBundle, "S", switchBundles(x)(y), "N", "top") // top down
+        connect(arg, "S", sbArray(x)(y), "N", "top") // top down
       }
       // Bottom Switches
       if (y==0) {
         // N -> S
-        connect(switchBundles(x)(y), "S", argBundle, "N", "bottom") // top down 
+        connect(sbArray(x)(y), "S", arg, "N", "bottom") // top down 
         // S -> N
-        connect(argBundle, "N", switchBundles(x)(y), "S", "bottom") // bottom up
+        connect(arg, "N", sbArray(x)(y), "S", "bottom") // bottom up
       }
 
 
       ///* ---- OCU and SB connection ----*/
       //// OCU to SB 
-      //connect(ocuArray(x)(y), "W", switchBundles(x)(y), "E", "center")
+      //connect(ocuArray(x)(y), "W", sbArray(x)(y), "E", "center")
 
       //// SB to OCU
-      //connect(switchBundles(x)(y), "E", ocuArray(x)(y), "W", "center")
+      //connect(sbArray(x)(y), "E", ocuArray(x)(y), "W", "center")
     }
   }
 
@@ -189,40 +210,40 @@ class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit de
       ///* ---- DramAddrGen and SwitchBox connection ---- */
       //if (x==0) {
         //// DAG to SB (W -> E) (left side)
-        //connect(dramAGs(x)(y), "E", switchBundles(0)(y), "W", "left")
+        //connect(dramAGs(x)(y), "E", sbArray(0)(y), "W", "left")
         //// SB to DAG (E -> W) (left side)
-        //connect(switchBundles(0)(y), "W", dramAGs(x)(y), "E", "left")
+        //connect(sbArray(0)(y), "W", dramAGs(x)(y), "E", "left")
       //} else {
         //// DAG to SB (E -> W) (right side)
-        //connect(dramAGs(x)(y), "W", switchBundles(numCols)(y), "E", "right")
+        //connect(dramAGs(x)(y), "W", sbArray(numCols)(y), "E", "right")
         //// SB to DAG (W -> E) (right side)
-        //connect(switchBundles(numCols)(y), "E", dramAGs(x)(y), "W", "right")
+        //connect(sbArray(numCols)(y), "E", dramAGs(x)(y), "W", "right")
       //}
 
       ///* ---- SramAddrGen and SwitchBox connection ---- */
       //if (x==0) {
         //// SAG to SB (W -> E) (left side)
-        //connect(sramAGs(x)(y), "E", switchBundles(0)(y), "W", "left")
+        //connect(sramAGs(x)(y), "E", sbArray(0)(y), "W", "left")
         //// SB to SAG (E -> W) (left side)
-        //connect(switchBundles(0)(y), "W", sramAGs(x)(y), "E", "left")
+        //connect(sbArray(0)(y), "W", sramAGs(x)(y), "E", "left")
       //} else {
         //// SAG to SB (E -> W) (right side)
-        //connect(sramAGs(x)(y), "W", switchBundles(numCols)(y), "E", "right")
+        //connect(sramAGs(x)(y), "W", sbArray(numCols)(y), "E", "right")
         //// SB to SAG (W -> E) (right side)
-        //connect(switchBundles(numCols)(y), "E", sramAGs(x)(y), "W", "right")
+        //connect(sbArray(numCols)(y), "E", sramAGs(x)(y), "W", "right")
       //}
 
       ///* ---- MC and SwitchBox connection ---- */
       //if (x==0) {
         //// MC to SB (W -> E) (left side)
-        //connect(mcArray(x)(y), "E", switchBundles(0)(y), "W", "left")
+        //connect(mcArray(x)(y), "E", sbArray(0)(y), "W", "left")
         //// SB to MC (E -> W) (left side)
-        //connect(switchBundles(0)(y), "W", mcArray(x)(y), "E", "left")
+        //connect(sbArray(0)(y), "W", mcArray(x)(y), "E", "left")
       //} else {
         //// MC to SB (E -> W) (right side)
-        //connect(mcArray(x)(y), "W", switchBundles(numCols)(y), "E", "right")
+        //connect(mcArray(x)(y), "W", sbArray(numCols)(y), "E", "right")
         //// SB to MC (W -> E) (right side)
-        //connect(switchBundles(numCols)(y), "E", mcArray(x)(y), "W", "right")
+        //connect(sbArray(numCols)(y), "E", mcArray(x)(y), "W", "right")
       //}
 
       ///* ---- MC and DramAddrGen connection ---- */

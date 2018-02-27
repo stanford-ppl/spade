@@ -4,14 +4,14 @@ import spade.node._
 import spade._
 
 import pirc.enums._
-import pirc.collection.mutable._
+import prism.collection.mutable._
 
 import scala.language.implicitConversions
 import scala.language.existentials
 
 
-abstract class GridNetwork()(implicit spade:Spade) {
-  lazy val top = spade.top
+abstract class GridNetwork()(implicit design:Spade) {
+  lazy val top = design.top
   import top._
 
   implicit def self:GridNetwork = this
@@ -34,18 +34,18 @@ abstract class GridNetwork()(implicit spade:Spade) {
     default=0
   )
 
-  lazy val pcuVins:Int = spade.pcus.headOption.map{ _.param.numVectorFifos }.getOrElse(0)
-  lazy val pcuVouts:Int = spade.pcus.headOption.map{ _.param.numVouts }.getOrElse(0)
-  lazy val pcuSins:Int = spade.pcus.headOption.map{ _.param.numScalarFifos }.getOrElse(0)
-  lazy val pcuSouts:Int = spade.pcus.headOption.map{ _.param.numSouts }.getOrElse(0)
+  lazy val pcuVins:Int = design.pcus.headOption.map{ _.param.numVectorFifos }.getOrElse(0)
+  lazy val pcuVouts:Int = design.pcus.headOption.map{ _.param.numVouts }.getOrElse(0)
+  lazy val pcuSins:Int = design.pcus.headOption.map{ _.param.numScalarFifos }.getOrElse(0)
+  lazy val pcuSouts:Int = design.pcus.headOption.map{ _.param.numSouts }.getOrElse(0)
 
-  lazy val pmuVins:Int = spade.pmus.headOption.map{ _.param.numVectorFifos }.getOrElse(0)
-  lazy val pmuVouts:Int = spade.pmus.headOption.map{ _.param.numVouts }.getOrElse(0)
-  lazy val pmuSins:Int = spade.pmus.headOption.map{ _.param.numScalarFifos }.getOrElse(0)
-  lazy val pmuSouts:Int = spade.pmus.headOption.map{ _.param.numSouts }.getOrElse(0)
+  lazy val pmuVins:Int = design.pmus.headOption.map{ _.param.numVectorFifos }.getOrElse(0)
+  lazy val pmuVouts:Int = design.pmus.headOption.map{ _.param.numVouts }.getOrElse(0)
+  lazy val pmuSins:Int = design.pmus.headOption.map{ _.param.numScalarFifos }.getOrElse(0)
+  lazy val pmuSouts:Int = design.pmus.headOption.map{ _.param.numSouts }.getOrElse(0)
 
-  lazy val ucuSins:Int = spade.dramAGs.flatten.headOption.map{ _.param.numScalarFifos }.getOrElse(0)
-  lazy val ucuSouts:Int = spade.dramAGs.flatten.headOption.map{ _.param.numSouts }.getOrElse(0)
+  lazy val ucuSins:Int = design.dramAGs.flatten.headOption.map{ _.param.numScalarFifos }.getOrElse(0)
+  lazy val ucuSouts:Int = design.dramAGs.flatten.headOption.map{ _.param.numSouts }.getOrElse(0)
 
   def roundUp(num:Double):Int = Math.ceil(num).toInt
 
@@ -53,7 +53,7 @@ abstract class GridNetwork()(implicit spade:Spade) {
   lazy val numCols = cuArray.length
 
   def connect(out:Routable, outDir:String, in:Routable, inDir:String, pos:String):Unit = {
-    implicit val arch = spade // TODO: why is this needed
+    implicit val arch = design // TODO: why is this needed
     val cw = channelWidth("pos"->pos, "src"->out.typeStr, "dst"->in.typeStr, "srcDir"->inDir, "dstDir"->outDir)
     (out, in) match {
       case (out:Top, in) =>
@@ -74,7 +74,7 @@ abstract class GridNetwork()(implicit spade:Spade) {
   }
 
   def reset = {
-    spade.prts.foreach { prt =>
+    design.prts.foreach { prt =>
       io(prt).ins.foreach { _.disconnect }
       io(prt).outs.foreach { _.disconnect }
       io(prt).clearIO
@@ -223,7 +223,7 @@ abstract class GridNetwork()(implicit spade:Spade) {
     }
 
     // Mark inputs and outputs order
-    implicit val arch = spade // TODO: why is this needed
+    implicit val arch = design // TODO: why is this needed
     prts.foreach { prt =>
       io(prt).ins.zipWithIndex.foreach { case (in, idx) => in.index(idx) }
       io(prt).outs.zipWithIndex.foreach { case (out, idx) => out.index(idx) }
