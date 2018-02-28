@@ -9,5 +9,6 @@ trait SpadeWorld {
   type N = SpadeNode
   type P = Module
   type A = Bundle[_]
+  type D = SpadeDesign
 }
 

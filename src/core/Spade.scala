@@ -14,18 +14,16 @@ import scala.collection.mutable.Map
 import scala.collection.mutable.ListBuffer
 import java.io._
 
-trait Spade extends Compiler {
+trait Spade extends Compiler with SpadeWorld {
 
   override def toString = getClass().getSimpleName().replace("$", "")
 
   val configs = List(Config, SpadeConfig)
 
-  var top:SpadeDesign = _ 
   lazy val spademeta:SpadeMetadata = top.spademeta
 
   override def reset = {
     super[Compiler].reset
-    top = null
   }
 
   def handle(e:Exception):Unit = {
@@ -39,13 +37,10 @@ trait Spade extends Compiler {
   val designPath = s"${outDir}${File.separator}${name}.spade"
 
   lazy val topParam = MeshDesignParam()()
-  def loadDesign = top = loadFromFile[SpadeDesign](designPath)
 
   def newDesign = {
     top = Factory.create(topParam)
   }
-
-  def saveDesign:Unit = saveToFile(top, designPath)
 
   /* Analysis */
   //TODO: Area model
@@ -58,7 +53,6 @@ trait Spade extends Compiler {
   //lazy val spadeParamCodegen = new SpadeParamCodegen()
 
   /* Debug */
-  //lazy val logger = new Logger() { override lazy val stream = newStream(s"spade.log") }
   //lazy val spadePrinter = new SpadePrinter()
   //lazy val plasticineVecDotPrinter = new PlasticineVectorDotPrinter()
   //lazy val plasticineScalDotPrinter = new PlasticineScalarDotPrinter()
@@ -67,7 +61,9 @@ trait Spade extends Compiler {
   override def initSession = {
     super.initSession
     import session._
+
     // Pass
+    addPass(new SpadeIRPrinter(s"spade.txt"))
     //addPass(areaModel)
 
     // Debug

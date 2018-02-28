@@ -45,8 +45,8 @@ abstract class OnChipMem(param:OnChipMemParam)(implicit design:Design) extends M
   val notFull = Input[Bit](s"notFull")
   val counter = Module(BufferCounter(), "counter")
 
-  counter.inc <== enqueueEnable
-  counter.dec <== dequeueEnable 
+  counter.inc <== enqueueEnable.ic
+  counter.dec <== dequeueEnable.ic
   notFull <== counter.notFull
   notEmpty <== counter.notEmpty
 }
@@ -163,7 +163,7 @@ abstract class CU(val param:CUParam, nios:List[NetworkBundle[_]])(implicit desig
   }
   //// Memory Connection
   vio.foreach { vio =>
-    (vio.inputs.zip(vectorFifos)).foreach { case (input, fifo) => fifo.writePort <== input }
+    (vio.inputs.zip(vectorFifos)).foreach { case (input, fifo) => fifo.writePort <== input.ic }
   }
   sio.foreach { sio =>
     scalarFifos.foreach { fifo => fifo.writePort <== sio.inputs }

@@ -4,6 +4,7 @@ import spade._
 
 import prism.node._
 import prism.enums._
+import prism.util._
 
 import scala.language.reflectiveCalls
 import scala.reflect._
@@ -26,6 +27,7 @@ class OutputEdge[B<:BundleType:ClassTag](val src:Bundle[B])(implicit design:Desi
 }
 
 abstract class Bundle[B<:BundleType:ClassTag](implicit src:Module, design:Design) extends SpadeNode with Atom[SpadeNode] {
+  setParent(src)
   val in:InputEdge[B] = new InputEdge(this)
   val out:OutputEdge[B] = new OutputEdge(this) 
 }
@@ -35,21 +37,28 @@ abstract class Port[B<:BundleType:ClassTag](implicit src:Module, design:Design) 
   val internal:DirectedEdge[_<:Edge]
   def ic = internal
 
-  def connected:List[Port[B]] = external.connected.map(_.src.asInstanceOf[Port[B]])
+  type PT <: Port[B]
+  def connected:List[PT] = external.connected.map(_.src.asInstanceOf[PT])
   def isConnected:Boolean = external.isConnected
-  def isConnectedTo(p:Port[_]) = external.connected.contains(p.external)
-  def connect(p:Port[B]):Unit = external.connect(p.external)
-  def disconnectFrom(e:Port[_]):Unit = external.disconnectFrom(e.external)
+  def isConnectedTo(p:PT) = external.connected.contains(p.external)
+  def connect(p:PT):Unit = external.connect(p.external)
+  def disconnectFrom(e:PT):Unit = external.disconnectFrom(e.external)
 }
 case class Input[B<:BundleType:ClassTag](name:String)(implicit src:Module, design:Design) extends Port[B] {
+  type PT = Output[B]
   override val external:InputEdge[B] = in
   override val internal:OutputEdge[B] = out
   override def ic:OutputEdge[B] = internal
-  def <== (p:Bundle[B]):Unit = p match {
-    case p:Port[B] => connect(p) 
-    case p:Wire[B] => ic.connect(p.in)
+  def <== (p:OutputEdge[B]):Unit = external.connect(p)
+  def <== (p:PT):Unit = connect(p)
+  def <== (p:Wire[B]):Unit = ic.connect(p.in)
+  def <== (ps:List[Bundle[B]]):Unit = ps.foreach { p => 
+    p match {
+      case p:PT => <==(p)
+      case p:Wire[B] => <==(p)
+      case p => err(s"$this cannot connect to $p")
+    }
   }
-  def <== (ps:List[Bundle[B]]):Unit = ps.foreach { p => <==(p) }
   def slice[T<:BundleType:ClassTag](idx:Int)(implicit module:Module, design:Design):Bundle[T] = {
     val sl = Module(Slice[T,B](idx), s"$this.slice($idx)")(module, design)
     this <== sl.out
@@ -57,6 +66,7 @@ case class Input[B<:BundleType:ClassTag](name:String)(implicit src:Module, desig
   }
 }
 case class Output[B<:BundleType:ClassTag](name:String)(implicit src:Module, design:Design) extends Port[B] {
+  type PT = Input[B]
   override val external:OutputEdge[B] = out 
   override val internal:InputEdge[B] = in
   override def ic:InputEdge[B] = internal
