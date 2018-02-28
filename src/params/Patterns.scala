@@ -1,4 +1,4 @@
-package spade.newnode
+package spade.params
                           
 import spade._
 import prism.node._

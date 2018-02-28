@@ -7,12 +7,12 @@ import pirc._
 
 import scala.collection.mutable
 
-abstract class Pass(implicit val design:Spade) extends pirc.Pass {
+abstract class SpadePass(implicit val compiler:Spade) extends pirc.Pass {
 
-  lazy val spademeta: SpadeMetadata = design
+  lazy val spademeta: SpadeMetadata = compiler.top.spademeta
 
   def quote(n:Any):String = n match {
-    case n:Node => spade.util.quote(n)
+    case n:SpadeNode => spade.util.quote(n)
     case _ => n.toString
   }
 

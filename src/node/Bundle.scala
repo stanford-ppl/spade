@@ -1,6 +1,7 @@
-package spade.newnode
+package spade.node
 
 import spade._
+
 import prism.node._
 import pirc.enums._
 
@@ -80,21 +81,16 @@ case class Slice[I<:BundleType:ClassTag, O<:BundleType:ClassTag](idx:Int)(implic
   val out = Output[O](s"out")
 }
 
-sealed trait BundleType extends Enum
-trait Bit extends BundleType
-trait Word extends BundleType
-trait Vector extends BundleType
-
 abstract class NetworkBundle[B<:BundleType:ClassTag]()(implicit design:Design) extends Module {
   def inputs:List[Input[B]]
   def outputs:List[Output[B]]
 
-  val isControl = newnode.isControl[B]
-  val isScalar = newnode.isScalar[B]
-  val isVector = newnode.isVector[B]
-  val asControl = newnode.asControl(this)
-  val asScalar = newnode.asScalar(this)
-  val asVector = newnode.asVector(this)
+  val isControl = util.isControl[B]
+  val isScalar = util.isScalar[B]
+  val isVector = util.isVector[B]
+  val asControl = util.asControl(this)
+  val asScalar = util.asScalar(this)
+  val asVector = util.asVector(this)
 }
 case class GridBundle[B<:BundleType:ClassTag]()(implicit design:Design) extends NetworkBundle[B] {
   import GridBundle._

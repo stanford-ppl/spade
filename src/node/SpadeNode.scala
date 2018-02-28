@@ -1,6 +1,7 @@
-package spade.newnode
+package spade.node
 
 import spade._
+import spade.params._
 import prism.node._
 import pirc.enums._
 
@@ -37,9 +38,6 @@ object Modules {
   }
 }
 
-trait OnChipMemParam extends Parameter { 
-  val size:Int // Total capacity
-}
 abstract class OnChipMem(param:OnChipMemParam)(implicit design:Design) extends Module {
   val dequeueEnable = Input[Bit](s"deqEn")
   val enqueueEnable = Input[Bit](s"deqEn")
@@ -60,9 +58,6 @@ case class BufferCounter()(implicit sapde:Design) extends Module {
   val notEmpty = Output[Bit](s"notEmpty")
 }
 
-case class SRAMParam(
-  size:Int
-) extends OnChipMemParam
 case class SRAM(param:SRAMParam)(implicit design:Design) extends OnChipMem(param) {
   val writePort = Input[Vector](s"writePort")
   val writeAddr = Input[Vector](s"writeAddr")
@@ -70,9 +65,6 @@ case class SRAM(param:SRAMParam)(implicit design:Design) extends OnChipMem(param
   val readPort = Output[Vector](s"readPort")
 }
 
-case class FIFOParam(
-  size:Int
-) extends OnChipMemParam
 case class FIFO[B<:BundleType:ClassTag](param:FIFOParam)(implicit design:Design) extends OnChipMem(param) {
   val writePort = Input[B](s"writePort")
   val readPort = Output[B](s"readPort")
@@ -98,67 +90,18 @@ case class UpDownCounter()(implicit sapde:Design) extends Module {
   val count = Input[Vector](s"readAddr")
 }
 
-case class PipeRegParam(
-  colors:Set[RegColor]=Set.empty
-) extends Parameter {
-  def color(c:RegColor) = colors += c
-  def is(c:RegColor) = colors.contains(c)
-}
 case class PipeReg(param:PipeRegParam)(implicit design:Design) extends Module {
   val in = Input[Vector](s"in")
   val out = Output[Vector](s"out")
 }
-case class FuncUnitParam(
-  numOperands:Int = 3
-) extends Parameter
 case class FuncUnit(param:FuncUnitParam)(implicit design:Design) extends Module {
   val operands = List.tabulate(param.numOperands)(i => Input[Vector](s"operand[$i]"))
   val out = Output[Vector]("out")
 }
 
-case class StageParam(
-  funcUnitParam:FuncUnitParam=FuncUnitParam(),
-  pipeRegParams:List[PipeRegParam],
-  reductionIdx:Option[Int] // If the stage can perform reduction, which stage of the reduction can it perform. 
-) extends Parameter
 case class Stage(param:StageParam)(implicit design:Design) extends Module {
   val funcUnit = Module(FuncUnit(param.funcUnitParam), "funcUnit")
   val pipeRegs = Modules("pipeReg",param.pipeRegParams.map { param => PipeReg(param) })
-}
-
-case class DefaultSIMDParam (
-  numStages:Int,
-  numLanes:Int,
-  numRegs:Int
-) extends SIMDParam {
-  val numReductionStages = (Math.log(numLanes) / Math.log(2)).toInt
-  val numNonReductionStages = numStages - numReductionStages
-  val reductionIndices = List.tabulate(numStages){ i =>
-    if (i >= numNonReductionStages) Some(i - numNonReductionStages) else None
-  }
-  def set(cu:CU):Unit = {
-    import cu.param._
-    pipeRegParams.slice(0, numCtrs).map(_.color(CounterReg))
-    if (numReductionStages > 0) {
-      pipeRegParams(0).color(ReduceReg) 
-      pipeRegParams(1).color(AccumReg) 
-    }
-    pipeRegParams.takeRight(numScalarFifos).map(_.color(ScalarInReg))
-    pipeRegParams.takeRight(numSouts).map(_.color(ScalarOutReg))
-    pipeRegParams.takeRight(numVectorFifos).map(_.color(VecInReg))
-    pipeRegParams.takeRight(numVouts).map(_.color(VecOutReg))
-  }
-}
-
-trait SIMDParam extends Parameter {
-  val numLanes:Int
-  val numRegs:Int
-  val reductionIndices:List[Option[Int]]
-  def set(cu:CU):Unit
-  val pipeRegParams = List.tabulate(numRegs) { ir => PipeRegParam() }
-  lazy val stageParams = reductionIndices.map { reductionIdx =>
-    StageParam(pipeRegParams=pipeRegParams, reductionIdx=reductionIdx)
-  }
 }
 
 case class SIMDUnit(param:SIMDParam)(implicit design:Design) extends Module {
@@ -176,32 +119,6 @@ case class SIMDUnit(param:SIMDParam)(implicit design:Design) extends Module {
 
 }
 
-trait CUParam extends Parameter {
-  // Memory
-  val numSrams:Int
-  val sramParam:SRAMParam
-  val numControlFifos:Int
-  val controlFifoParam:FIFOParam
-  val numScalarFifos:Int
-  val scalarFifoParam:FIFOParam
-  val vectorFifoParam:FIFOParam
-  val numCtrs:Int
-  val simdParam:SIMDParam
-
-  // -----   Derived parameters
-  var cu:CU = _
-  def set(cu:CU):Unit = {
-    this.cu = cu
-    simdParam.set(cu)
-  }
-  lazy val numCins = cu.cio.fold(0) { _.inputs.size }
-  lazy val numSins = cu.sio.fold(0) { _.inputs.size }
-  lazy val numVins = cu.vio.fold(0) { _.inputs.size }
-  lazy val numCouts = cu.cio.fold(0) { _.outputs.size }
-  lazy val numSouts = cu.sio.fold(0) { _.outputs.size }
-  lazy val numVouts = cu.sio.fold(0) { _.outputs.size }
-  lazy val numVectorFifos = numVins
-}
 abstract class CU(val param:CUParam, nios:List[NetworkBundle[_]])(implicit design:Design) extends Routable(nios) {
   param.set(this) // Compute derived parameters
   import param._
@@ -258,56 +175,12 @@ abstract class CU(val param:CUParam, nios:List[NetworkBundle[_]])(implicit desig
 
 }
 
-case class PCUParam (
-  numControlFifos:Int=6,
-  numScalarFifos:Int=6,
-  controlFifoParam:FIFOParam=FIFOParam(size=4),
-  scalarFifoParam:FIFOParam=FIFOParam(size=4),
-  vectorFifoParam:FIFOParam=FIFOParam(size=4),
-  numCtrs:Int=6,
-  simdParam:SIMDParam=DefaultSIMDParam(numStages=6, numLanes=16, numRegs=16)
-) extends CUParam {
-  val numSrams:Int = 0
-  val sramParam:SRAMParam = SRAMParam(0)
-}
 case class PCU(override val param:CUParam, nios:List[NetworkBundle[_]])(implicit design:Design) extends CU(param, nios)
 
-case class SCUParam (
-  numControlFifos:Int=6,
-  numScalarFifos:Int=6,
-  controlFifoParam:FIFOParam=FIFOParam(size=4),
-  scalarFifoParam:FIFOParam=FIFOParam(size=4),
-  vectorFifoParam:FIFOParam=FIFOParam(size=4),
-  numCtrs:Int=6,
-  simdParam:SIMDParam=DefaultSIMDParam(numStages=6, numLanes=1, numRegs=16)
-) extends CUParam {
-  val numSrams:Int = 0
-  val sramParam:SRAMParam = SRAMParam(0)
-}
 case class SCU(override val param:CUParam, nios:List[NetworkBundle[_]])(implicit design:Design) extends CU(param, nios)
 
-case class PMUParam (
-  numControlFifos:Int=6,
-  numScalarFifos:Int=6,
-  controlFifoParam:FIFOParam=FIFOParam(size=4),
-  scalarFifoParam:FIFOParam=FIFOParam(size=4),
-  vectorFifoParam:FIFOParam=FIFOParam(size=4),
-  sramParam:SRAMParam=SRAMParam(size=256),
-  numCtrs:Int=6
-) extends CUParam {
-  val numSrams:Int = 1 
-  val simdParam = DefaultSIMDParam(
-    numStages=0,
-    numLanes=0,
-    numRegs=0
-  )
-}
 case class PMU(override val param:CUParam, nios:List[NetworkBundle[_]])(implicit design:Design) extends CU(param, nios)
 
-case class ArgFringeParam(
-  numArgIns:Int=6,
-  numArgOuts:Int=4
-) extends Parameter
 case class ArgFringe(param:ArgFringeParam, nios:List[NetworkBundle[_]])(implicit design:Design) extends Routable(nios) {
 }
 

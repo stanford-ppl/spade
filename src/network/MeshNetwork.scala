@@ -1,7 +1,10 @@
-package spade.newnode
+package spade.network
 
 import spade._
-import prism.node._
+import spade.node._
+import spade.params._
+import spade.util._
+
 import pirc.enums._
 import prism.collection.mutable.Table
 
@@ -10,19 +13,7 @@ import scala.reflect._
 
 import scala.collection.mutable
 
-case class MeshDesignParam(
-  numRows:Int=2,
-  numCols:Int=2,
-  pattern:GridPattern=Checkerboard(),
-  argFringeParam:ArgFringeParam=ArgFringeParam()
-)(
-  val networkParams:List[MeshNetworkParam[_<:BundleType]] = List(
-    MeshNetworkParam[Bit](numRows,numCols,pattern,argFringeParam),
-    MeshNetworkParam[Word](numRows,numCols,pattern,argFringeParam),
-    MeshNetworkParam[Vector](numRows,numCols,pattern,argFringeParam)
-  )
-) extends DesignParam
-case class MeshDesign(param:MeshDesignParam) extends Design(param) {
+case class MeshDesign(param:MeshDesignParam) extends SpadeDesign(param) {
   import param._
 
   @transient val networks = networkParams.map { param => new MeshNetwork(param) }
@@ -44,23 +35,6 @@ case class MeshDesign(param:MeshDesignParam) extends Design(param) {
   }
 }
 
-case class MeshNetworkParam[B<:BundleType:ClassTag] (
-  numRows:Int,
-  numCols:Int,
-  pattern:GridPattern,
-  argFringeParam:ArgFringeParam
-) extends Parameter {
-  val channelWidth = Table[String, String, Int](
-    values=Map(
-      "pos"->List("left", "right","center","top","bottom"), 
-      "src"->List("arg", "pcu", "ocu", "pmu", "mu", "scu", "mc", "switch"), 
-      "dst"->List("arg", "pcu", "ocu", "pmu", "mu", "scu", "mc", "switch"), 
-      "srcDir"->GridBundle.eightDirections, 
-      "dstDir"->GridBundle.eightDirections
-    ), 
-    default=0
-  )
-}
 class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit design:Design) {
   import param._
 
@@ -106,6 +80,9 @@ class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit de
   if (isScalar[B]) {
     argBundle.addInAt("S", argFringeParam.numArgOuts)
     argBundle.addOutAt("S", argFringeParam.numArgIns)
+  } else if (isControl[B]) {
+    argBundle.addInAt("S", 1) //status
+    argBundle.addOutAt("S", 1) //command
   }
 
   /** ----- Central Array Connection ----- **/

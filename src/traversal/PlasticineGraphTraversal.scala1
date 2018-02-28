@@ -4,6 +4,7 @@ import spade._
 import spade.node._
 import spade.config._
 import spade.util._
+import pirc.enums._
 
 import pirc._
 import pirc.util._
@@ -18,10 +19,10 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
 
   type S = Routable
   type C = Int
-  type PIO = IO[_<:PortType, Module] 
-  type PI = Input[_<:PortType, Module]
-  type PO = Output[_<:PortType, Module]
-  type Edge = (IO[_<:PortType, Module], IO[_<:PortType, Module])
+  type PIO = Bundle[_<:BundleType] 
+  type PI = Input[_<:BundleType]
+  type PO = Output[_<:BundleType]
+  type Edge = (PIO, PIO)
   type FE = (PO, PI) 
   type BE = (PI, PO)
   type M = SpadeMapLike

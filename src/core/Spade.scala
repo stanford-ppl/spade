@@ -1,9 +1,10 @@
 package spade
 
-import spade.node._
 import spade.util._
 import spade.codegen._
 import spade.pass._
+import spade.params._
+import spade.node._
 
 import pirc._
 import pirc.util._
@@ -13,33 +14,18 @@ import scala.collection.mutable.Map
 import scala.collection.mutable.ListBuffer
 import java.io._
 
-trait SpadeParam {
-  lazy val wordWidth = 32
-  lazy val numLanes = 16
-  lazy val clockFrequency:Int = 1000000000 //Hz
-}
-
-trait PreLoadSpadeParam extends SpadeParam {
-  override lazy val numLanes = ConfigFactory.plasticineConf.lanes
-}
-
-trait Spade extends Compiler with SpadeMetadata with SpadeParam with SwitchNetwork {
-  val spademeta:SpadeMetadata = this
+trait Spade extends Compiler {
 
   override def toString = getClass().getSimpleName().replace("$", "")
 
   val configs = List(Config, SpadeConfig)
 
-  lazy val simulatable = ListBuffer[Simulatable]()
-
-  var top:Top = _ 
-  val nextId = 0 //TODO
+  var top:SpadeDesign = _ 
+  lazy val spademeta:SpadeMetadata = top.spademeta
 
   override def reset = {
-    super[SpadeMetadata].reset
     super[Compiler].reset
     top = null
-    newTop = null
   }
 
   def handle(e:Exception):Unit = {
@@ -52,15 +38,14 @@ trait Spade extends Compiler with SpadeMetadata with SpadeParam with SwitchNetwo
 
   val designPath = s"${outDir}${File.separator}${name}.spade"
 
-  var newTop:spade.newnode.Design = _
-  lazy val newTopParam:spade.newnode.DesignParam = newnode.MeshDesignParam()()
-  def loadDesign = newTop = loadFromFile[spade.newnode.Design](designPath)
+  lazy val topParam = MeshDesignParam()()
+  def loadDesign = top = loadFromFile[SpadeDesign](designPath)
 
   def newDesign = {
-    newTop = spade.newnode.Factory.create(newTopParam)
+    top = Factory.create(topParam)
   }
 
-  def saveDesign:Unit = saveToFile(newTop, designPath)
+  def saveDesign:Unit = saveToFile(top, designPath)
 
   /* Analysis */
   //TODO: Area model

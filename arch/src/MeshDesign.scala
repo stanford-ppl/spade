@@ -1,7 +1,7 @@
 package arch
 
 import spade._
-import spade.newnode._
+import spade.params._
 
 import pirc.enums._
 
@@ -11,7 +11,7 @@ import scala.language.reflectiveCalls
 class MeshCB(numRows:Int=2, numCols:Int=2, numArgIns:Int=3, numArgOuts:Int=3) extends Spade {
   override def toString = s"SN${numRows}x${numCols}"
 
-  override lazy val newTopParam = MeshDesignParam(
+  override lazy val topParam = MeshDesignParam(
     numRows=numRows,
     numCols=numCols,
     pattern=Checkerboard(),
