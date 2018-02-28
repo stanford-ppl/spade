@@ -20,7 +20,7 @@ trait SimUtil extends Logger {
   def cycle:Int
 }
 
-class Simulator(implicit arch:Spade, design:Design) extends SimUtil with Logger {
+class Simulator(implicit arch:Spade, compiler:Compiler) extends SimUtil with Logger {
 
   val spademeta:SpadeMetadata = arch 
   implicit val sim:Simulator = this
@@ -35,7 +35,7 @@ class Simulator(implicit arch:Spade, design:Design) extends SimUtil with Logger 
   var _inRegistration = false 
   def inRegistration = _inRegistration
 
-  override lazy val stream = newStream("sim.log")(design) //TODO: change this to app specific
+  override lazy val stream = newStream("sim.log")(compiler) //TODO: change this to app specific
 
   val period = 1; //ns per cycle
   var cycle = 0

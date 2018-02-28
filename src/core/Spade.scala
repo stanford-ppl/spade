@@ -23,7 +23,7 @@ trait PreLoadSpadeParam extends SpadeParam {
   override lazy val numLanes = ConfigFactory.plasticineConf.lanes
 }
 
-trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork {
+trait Spade extends Compiler with SpadeMetadata with SpadeParam with SwitchNetwork {
   val spademeta:SpadeMetadata = this
 
   override def toString = getClass().getSimpleName().replace("$", "")
@@ -33,10 +33,11 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
   lazy val simulatable = ListBuffer[Simulatable]()
 
   var top:Top = _ 
+  val nextId = 0 //TODO
 
   override def reset = {
     super[SpadeMetadata].reset
-    super[Design].reset
+    super[Compiler].reset
     top = null
     newTop = null
   }
@@ -51,9 +52,9 @@ trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork
 
   val designPath = s"${outDir}${File.separator}${name}.spade"
 
-  var newTop:spade.newnode.Top = _
-  lazy val newTopParam:spade.newnode.TopParam = newnode.MeshTopParam()()
-  def loadDesign = newTop = loadFromFile[spade.newnode.Top](designPath)
+  var newTop:spade.newnode.Design = _
+  lazy val newTopParam:spade.newnode.DesignParam = newnode.MeshDesignParam()()
+  def loadDesign = newTop = loadFromFile[spade.newnode.Design](designPath)
 
   def newDesign = {
     newTop = spade.newnode.Factory.create(newTopParam)

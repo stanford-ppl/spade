@@ -9,7 +9,7 @@ import scala.reflect._
 
 import scala.collection.mutable._
 
-trait TopParam extends Parameter
-abstract class Top(param:TopParam)(implicit design:Spade) extends Module {
+trait DesignParam extends Parameter
+abstract class Design(param:DesignParam) extends SpadeNode(0) with prism.node.Design with Module {
+  implicit val design:this.type = this
 }
-

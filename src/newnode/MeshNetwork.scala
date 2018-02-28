@@ -10,7 +10,7 @@ import scala.reflect._
 
 import scala.collection.mutable
 
-case class MeshTopParam(
+case class MeshDesignParam(
   numRows:Int=2,
   numCols:Int=2,
   pattern:GridPattern=Checkerboard(),
@@ -21,11 +21,11 @@ case class MeshTopParam(
     MeshNetworkParam[Word](numRows,numCols,pattern,argFringeParam),
     MeshNetworkParam[Vector](numRows,numCols,pattern,argFringeParam)
   )
-) extends TopParam
-case class MeshTop(param:MeshTopParam)(implicit design:Spade) extends Top(param) {
+) extends DesignParam
+case class MeshDesign(param:MeshDesignParam) extends Design(param) {
   import param._
 
-  @transient val networks = block { implicit design => networkParams.map { param => new MeshNetwork(param) } }
+  @transient val networks = networkParams.map { param => new MeshNetwork(param) }
 
   val argBundles = networks.map(_.argBundle)
   val argFringe = {
@@ -33,18 +33,14 @@ case class MeshTop(param:MeshTopParam)(implicit design:Spade) extends Top(param)
   }
 
   val cuBundles = networks.map(_.cuBundles)
-  val cuArray = block { implicit design =>
-    List.tabulate(numCols, numRows) { case (i,j) => 
-      val param = pattern.cuAt(i,j)
-      Module(Factory.create(param, cuBundles.map(_(i)(j))))
-    }
+  val cuArray = List.tabulate(numCols, numRows) { case (i,j) => 
+    val param = pattern.cuAt(i,j)
+    Module(Factory.create(param, cuBundles.map(_(i)(j))))
   }
 
   val sbBundles = networks.map(_.switchBundle)
-  val switchArray = block { implicit design =>
-    List.tabulate(numCols + 1, numRows + 1) { case (i,j) => 
-      Module(SwitchBox(sbBundles.map(_(i)(j))))
-    }
+  val switchArray = List.tabulate(numCols + 1, numRows + 1) { case (i,j) => 
+    Module(SwitchBox(sbBundles.map(_(i)(j))))
   }
 }
 
@@ -65,30 +61,26 @@ case class MeshNetworkParam[B<:BundleType:ClassTag] (
     default=0
   )
 }
-class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit design:Spade) {
+class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit design:Design) {
   import param._
 
   type Node = (GridBundle[B], String)
 
   val argBundle = GridBundle[B]()
   val arg = (argBundle, "arg")
-  val cuArray = block{ implicit design =>
-    List.tabulate(numCols, numRows) { case (i,j) => 
-      val name = pattern.cuAt(i,j) match {
-        case param:PCUParam => "pcu"
-        case param:PMUParam => "pmu"
-        case param:SCUParam => "scu"
-      }
-      (GridBundle[B](), name)
+  val cuArray = List.tabulate(numCols, numRows) { case (i,j) => 
+    val name = pattern.cuAt(i,j) match {
+      case param:PCUParam => "pcu"
+      case param:PMUParam => "pmu"
+      case param:SCUParam => "scu"
     }
+    (GridBundle[B](), name)
   }
   val cuBundles = cuArray.map(_.map(_._1))
-  val sbArray = block { implicit design =>
-    List.tabulate(numCols + 1, numRows + 1) { case (i,j) => (GridBundle[B](), "switch") }
-  }
+  val sbArray = List.tabulate(numCols + 1, numRows + 1) { case (i,j) => (GridBundle[B](), "switch") }
   val switchBundle = sbArray.map(_.map(_._1))
 
-  def connect(outNode:Node, outDir:String, inNode:Node, inDir:String, pos:String)(implicit design:Spade):Unit = {
+  def connect(outNode:Node, outDir:String, inNode:Node, inDir:String, pos:String)(implicit design:Design):Unit = {
     val (out, outType) = outNode
     val (in, inType) = inNode
     val cw = channelWidth("pos"->pos, "src"->outType, "dst"->inType, "srcDir"->inDir, "dstDir"->outDir)

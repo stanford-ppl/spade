@@ -21,8 +21,4 @@ package object newnode {
   def asScalar[B<:BundleType:ClassTag,A[_<:BundleType]](x:A[B]) = if (isScalar[B]) Some(x.asInstanceOf[A[Word]]) else None
   def asVector[B<:BundleType:ClassTag,A[_<:BundleType]](x:A[B]) = if (isVector[B]) Some(x.asInstanceOf[A[Vector]]) else None
 
-  def block[T](lambda:Spade => T)(implicit spade:Spade):T = {
-    lambda(spade)
-  }
-
 }
