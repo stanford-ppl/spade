@@ -14,15 +14,18 @@ import scala.collection.mutable._
 trait Edge extends prism.node.Edge[SpadeNode]() {
   type A = Bundle[_]
 }
-trait DirectedEdge[E<:Edge] extends prism.node.DirectedEdge[SpadeNode, E] with Edge
+trait DirectedEdge[E<:Edge] extends prism.node.DirectedEdge[SpadeNode, E] with Edge {
+}
 
 class InputEdge[B<:BundleType:ClassTag](val src:Bundle[B])(implicit design:Design) extends prism.node.Input[SpadeNode] with DirectedEdge[OutputEdge[B]] {
+  val id = design.nextId
   type E <: OutputEdge[B]
   def connect(p:Bundle[B]):Unit = connect(p.out) 
   def <== (p:Bundle[B]):Unit = connect(p) 
   def <== (ps:List[Bundle[B]]):Unit = ps.foreach { p => connect(p) }
 }
 class OutputEdge[B<:BundleType:ClassTag](val src:Bundle[B])(implicit design:Design) extends prism.node.Output[SpadeNode] with DirectedEdge[InputEdge[B]] {
+  val id = design.nextId
   type E <: InputEdge[B]
 }
 

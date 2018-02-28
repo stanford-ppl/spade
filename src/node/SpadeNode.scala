@@ -10,14 +10,15 @@ import scala.reflect._
 
 import scala.collection.mutable._
 
-abstract class SpadeNode(id:Int) extends Node[SpadeNode](id) { self =>
+abstract class SpadeNode(val id:Int) extends Node[SpadeNode] { self =>
   def this()(implicit design:Design) = this(design.nextId)
   type N = SpadeNode
   type P = Module
   type A = Bundle[_]
 }
 
-trait Module extends SpadeNode with SubGraph[SpadeNode] {
+abstract class Module(id:Int) extends SpadeNode(id) with SubGraph[SpadeNode] {
+  def this()(implicit design:Design) = this(design.nextId)
   implicit val module:Module = this
 }
 object Module {
