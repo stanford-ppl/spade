@@ -1,6 +1,6 @@
 package spade.params
 
-import pirc.enums._
+import prism.enums._
 import prism.node._
 
 trait DesignParam extends Parameter

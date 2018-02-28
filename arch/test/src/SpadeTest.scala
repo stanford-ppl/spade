@@ -7,10 +7,10 @@ import spade.node._
 import spade.util._
 import spade.codegen._
 
-import pirc.util._
-import pirc._
+import prism.util._
+import prism._
 
-import pirc.test._
+import prism.test._
 
 import org.scalatest._
 import scala.language.reflectiveCalls

@@ -6,8 +6,8 @@ import spade.pass._
 import spade.params._
 import spade.node._
 
-import pirc._
-import pirc.util._
+import prism._
+import prism.util._
 
 import scala.language.implicitConversions
 import scala.collection.mutable.Map

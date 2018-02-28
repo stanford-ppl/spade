@@ -1,6 +1,6 @@
 package spade
 
-import pirc._
+import prism._
 
 import scala.collection.mutable
 

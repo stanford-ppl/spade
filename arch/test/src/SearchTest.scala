@@ -8,10 +8,10 @@ import spade.codegen._
 import spade.traversal._
 import spade.config._
 
-import pirc._
-import pirc.test._
-import pirc.codegen._
-import pirc.util._
+import prism._
+import prism.test._
+import prism.codegen._
+import prism.util._
 
 import org.scalatest._
 import sys.process._

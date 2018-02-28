@@ -5,9 +5,9 @@ import spade.node._
 import spade.network._
 
 import prism.node._
-import pirc.enums._
-import pirc.util._
-import pirc._
+import prism.enums._
+import prism.util._
+import prism._
 
 import scala.language.reflectiveCalls
 import scala.reflect._

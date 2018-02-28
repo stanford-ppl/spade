@@ -3,7 +3,7 @@ package arch
 import spade._
 import spade.params._
 
-import pirc.enums._
+import prism.enums._
 
 import scala.language.implicitConversions
 import scala.language.reflectiveCalls

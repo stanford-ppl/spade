@@ -1,7 +1,7 @@
 package spade.config
 
 import spade.node._
-import pirc.enums._
+import prism.enums._
 
 import prism.collection.immutable._
 import scala.language.existentials

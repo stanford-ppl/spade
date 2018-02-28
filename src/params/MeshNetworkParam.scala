@@ -2,7 +2,7 @@ package spade.params
 
 import spade.node._
 
-import pirc.enums._
+import prism.enums._
 import prism.node._
 import prism.collection.mutable.Table
 

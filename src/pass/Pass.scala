@@ -3,11 +3,11 @@ package spade.pass
 import spade._
 import spade.node._
 
-import pirc._
+import prism._
 
 import scala.collection.mutable
 
-abstract class SpadePass(implicit val compiler:Spade) extends pirc.Pass {
+abstract class SpadePass(implicit val compiler:Spade) extends prism.Pass {
 
   lazy val spademeta: SpadeMetadata = compiler.top.spademeta
 

@@ -3,7 +3,7 @@ package spade.node
 import spade._
 import spade.params._
 import prism.node._
-import pirc.enums._
+import prism.enums._
 
 import scala.language.reflectiveCalls
 import scala.reflect._

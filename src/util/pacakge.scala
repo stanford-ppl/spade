@@ -2,8 +2,8 @@ package spade
 
 import spade.node._
 
-import pirc._
-import pirc.enums._
+import prism._
+import prism.enums._
 
 import scala.language.existentials
 import scala.language.implicitConversions

@@ -5,7 +5,7 @@ import spade.node._
 import spade.params._
 import spade.util._
 
-import pirc.enums._
+import prism.enums._
 import prism.collection.mutable.Table
 
 import scala.language.reflectiveCalls

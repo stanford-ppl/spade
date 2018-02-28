@@ -1,8 +1,8 @@
 package spade.test
 
-import pirc.enums._
-import pirc.util._
-import pirc.test._
+import prism.enums._
+import prism.util._
+import prism.test._
 
 import org.scalatest._
 import scala.language.reflectiveCalls
