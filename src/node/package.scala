@@ -5,4 +5,6 @@ import scala.language.higherKinds
 
 package object node {
 
+  private[node] type Design = SpadeDesign
+
 }

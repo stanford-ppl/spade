@@ -20,10 +20,8 @@ object Factory {
   def create(param:Any) = param match {
     case param:MeshDesignParam => MeshDesign(param)
   }
-  def create(param:Any, nios:List[NetworkBundle[_]])(implicit design:Design) = param match {
-    case param:PCUParam => PCU(param, nios)
-    case param:PMUParam => PMU(param, nios)
-    case param:SCUParam => SCU(param, nios)
+  def create(param:Any, nios:List[NetworkBundle[_]])(implicit design:SpadeDesign) = param match {
+    case param:CUParam => CU(param, nios)
   }
 
   case class PlasticineConf(
