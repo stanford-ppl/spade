@@ -22,6 +22,6 @@ object Modules {
     modules.map(m => Module(m, name))
   }
   def apply[M<:Module](name:String,num:Int,lambda: => M)(implicit parent:Module, design:Design):List[M] = {
-    List.tabulate(num)( i => Module(lambda, name) )
+    indexing(List.fill(num){ Module(lambda, name) })
   }
 }

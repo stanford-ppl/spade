@@ -38,40 +38,41 @@ case class MeshDesign(param:MeshDesignParam) extends SpadeDesign(param) {
 class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit design:Design) {
   import param._
 
-  type Node = (GridBundle[B], String)
+  val bundles = mutable.ListBuffer[GridBundle[B]]()
+  case class Node(tp:String, bundle:GridBundle[B]=GridBundle[B]()) {
+    bundles += bundle
+  }
 
-  val argBundle = GridBundle[B]()
-  val arg = (argBundle, "arg")
+  val arg = Node("arg") 
+  val argBundle = arg.bundle
   val cuArray = List.tabulate(numCols, numRows) { case (i,j) => 
     val name = pattern.cuAt(i,j) match {
       case param:PCUParam => "pcu"
       case param:PMUParam => "pmu"
       case param:SCUParam => "scu"
     }
-    (GridBundle[B](), name)
+    Node(name)
   }
-  val cuBundles = cuArray.map(_.map(_._1))
-  val sbArray = List.tabulate(numCols + 1, numRows + 1) { case (i,j) => (GridBundle[B](), "switch") }
-  val switchBundle = sbArray.map(_.map(_._1))
+  val cuBundles = cuArray.map(_.map(_.bundle))
+  val sbArray = List.tabulate(numCols + 1, numRows + 1) { case (i,j) => Node("switch") }
+  val switchBundle = sbArray.map(_.map(_.bundle))
 
-  def connect(outNode:Node, outDir:String, inNode:Node, inDir:String, pos:String)(implicit design:Design):Unit = {
-    val (out, outType) = outNode
-    val (in, inType) = inNode
-    val cw = channelWidth("pos"->pos, "src"->outType, "dst"->inType, "srcDir"->inDir, "dstDir"->outDir)
-    (out, in) match {
-      case (out, in) if outType=="arg" =>
-        val outs = out.outputs
+  def connect(out:Node, outDir:String, in:Node, inDir:String, pos:String)(implicit design:Design):Unit = {
+    val cw = channelWidth("pos"->pos, "src"->out.tp, "dst"->in.tp, "srcDir"->inDir, "dstDir"->outDir)
+    (out.tp, in.tp) match {
+      case ("arg", _) =>
+        val outs = out.bundle.outputs
         outs.foreach { argIn =>
-          val ins = in.addInAt(inDir, cw)
+          val ins = in.bundle.addInAt(inDir, cw)
           ins.foreach { _ <== argIn }
         }
-      case (out, in) if inType=="arg" =>
-        val outs = out.addOutAt(outDir, cw)
-        val ins = in.inputs
+      case (_, "arg") =>
+        val outs = out.bundle.addOutAt(outDir, cw)
+        val ins = in.bundle.inputs
         ins.foreach { _ <== outs }
-      case (out, in) =>
-        val outs = out.addOutAt(outDir, cw)
-        val ins = in.addInAt(inDir, cw)
+      case (_, _) =>
+        val outs = out.bundle.addOutAt(outDir, cw)
+        val ins = in.bundle.addInAt(inDir, cw)
         outs.zip(ins).foreach { case (o, i) => i <== o }
     }
   }
@@ -224,4 +225,8 @@ class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit de
     //}
   //}
 
+  bundles.foreach { bundle =>
+    indexing(bundle.inputs)
+    indexing(bundle.outputs)
+  }
 }

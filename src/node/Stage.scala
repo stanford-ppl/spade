@@ -8,7 +8,7 @@ case class PipeReg(param:PipeRegParam)(implicit design:Design) extends Module {
   val out = Output[Vector](s"out")
 }
 case class FuncUnit(param:FuncUnitParam)(implicit design:Design) extends Module {
-  val operands = List.tabulate(param.numOperands)(i => Input[Vector](s"operand[$i]"))
+  val operands = Inputs[Vector](s"operand", param.numOperands)
   val out = Output[Vector]("out")
 }
 

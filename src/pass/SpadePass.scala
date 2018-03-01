@@ -14,7 +14,7 @@ abstract class SpadePass(implicit override val compiler:Spade) extends prism.Pas
 
   def quote(n:Any):String = n match {
     case n:SpadeNode => 
-      s"${nameOf.get(n).getOrElse(n.className)}${n.id}${indexOf.get(n).fold("")(idx => s"[$idx]")}"
+      s"${nameOf.get(n).getOrElse(n.className)}${n.id}${indexOf.get(n).fold("")(indices => s"[${indices.mkString(",")}]")}"
     case _ => n.toString
   }
 
