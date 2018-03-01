@@ -12,3 +12,6 @@ case class SRAMParam(
 case class FIFOParam(
   size:Int
 ) extends OnChipMemParam
+case object RegParam extends OnChipMemParam {
+  val size = 1
+}

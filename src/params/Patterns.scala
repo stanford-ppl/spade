@@ -9,7 +9,7 @@ import scala.reflect._
 
 import scala.collection.mutable.ListBuffer
 
-sealed trait Pattern
+sealed trait Pattern extends Parameter
 
 trait GridPattern extends Pattern {
   def cuAt(i:Int, j:Int):CUParam

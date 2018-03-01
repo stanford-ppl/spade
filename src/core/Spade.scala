@@ -63,16 +63,18 @@ trait Spade extends Compiler with SpadeWorld {
     import session._
 
     // Pass
-    addPass(new SpadeIRPrinter(s"spade.txt"))
     //addPass(areaModel)
 
     // Debug
+    addPass(new SpadeIRPrinter(s"spade.txt"))
+    addPass(new ParamIRPrinter(s"param.txt"))
     //addPass(spadePrinter)
     //addPass(plasticineVecDotPrinter)
     //addPass(plasticineScalDotPrinter)
     //addPass(plasticineCtrlDotPrinter)
 
     // Codegen
+    addPass(new ParamScalaCodegen(s"GeneratedParameters.scala"))
     //addPass(spadeNetworkCodegen)
     //addPass(spadeParamCodegen)
   }

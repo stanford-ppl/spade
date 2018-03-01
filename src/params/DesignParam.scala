@@ -16,4 +16,6 @@ case class MeshDesignParam(
     MeshScalarNetworkParam(numRows,numCols,pattern,argFringeParam),
     MeshVectorNetworkParam(numRows,numCols,pattern,argFringeParam)
   )
-) extends DesignParam
+) extends DesignParam {
+  override def fields = super.fields :+ networkParams
+}

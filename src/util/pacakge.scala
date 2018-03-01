@@ -12,10 +12,6 @@ import scala.language.higherKinds
 
 package object util {
 
-  def quote(n:Any)(implicit spade:Spade):String = {
-    n.toString //TODO
-  }
-
   def zip[T1, T2, T](x1:Option[T1], x2:Option[T2])(lambda:(T1,T2) => T):Option[T] = (x1, x2) match {
     case (Some(x1), Some(x2)) => Some(lambda(x1, x2))
     case _ => None

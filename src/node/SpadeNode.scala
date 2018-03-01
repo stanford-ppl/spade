@@ -71,7 +71,7 @@ case class FIFO[B<:BundleType:ClassTag](param:FIFOParam)(implicit design:Design)
   val readPort = Output[B](s"readPort")
 }
 
-case class Reg()(implicit design:Design) extends OnChipMem(new OnChipMemParam { val size = 1 }) {
+case class Reg()(implicit design:Design) extends OnChipMem(RegParam) {
   val writePort = Input[Word](s"writePort")
   val readPort = Output[Word](s"readPort")
 }

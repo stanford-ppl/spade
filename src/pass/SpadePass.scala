@@ -7,7 +7,7 @@ import prism._
 
 import scala.collection.mutable
 
-abstract class SpadePass(implicit val compiler:Spade) extends prism.Pass {
+abstract class SpadePass(implicit override val compiler:Spade) extends prism.Pass {
 
   lazy val spademeta: SpadeMetadata = compiler.top.spademeta
   import spademeta._

@@ -13,7 +13,12 @@ abstract class MeshNetworkParam[B<:BundleType:ClassTag] extends Parameter {
   val numCols:Int
   val pattern:GridPattern
   val argFringeParam:ArgFringeParam
-  val channelWidth = Table[String, String, Int](
+  val channelWidth:ChannelWidth
+}
+
+trait ChannelWidth extends Table[String, String, Int]
+object ChannelWidth {
+  def empty = new Table[String, String, Int] (
     values=Map(
       "pos"->List("left", "right","center","top","bottom"), 
       "src"->List("arg", "pcu", "ocu", "pmu", "mu", "scu", "mc", "switch"), 
@@ -21,15 +26,16 @@ abstract class MeshNetworkParam[B<:BundleType:ClassTag] extends Parameter {
       "srcDir"->GridBundle.eightDirections, 
       "dstDir"->GridBundle.eightDirections
     ), 
-    default=0
-  )
+    default=Some(0)
+  ) with ChannelWidth
 }
 
 case class MeshControlNetworkParam(
   numRows:Int,
   numCols:Int,
   pattern:GridPattern,
-  argFringeParam:ArgFringeParam
+  argFringeParam:ArgFringeParam,
+  channelWidth:ChannelWidth=ChannelWidth.empty
 ) extends MeshNetworkParam[Bit] {
   // switch to switch channel width
   channelWidth("src"->"sb", "dst"->"sb") = 6
@@ -76,7 +82,8 @@ case class MeshScalarNetworkParam(
   numRows:Int,
   numCols:Int,
   pattern:GridPattern,
-  argFringeParam:ArgFringeParam
+  argFringeParam:ArgFringeParam,
+  channelWidth:ChannelWidth=ChannelWidth.empty
 ) extends MeshNetworkParam[Word] {
   // switch to switch channel width
   channelWidth("src"->"sb", "dst"->"sb") = 4
@@ -128,7 +135,8 @@ case class MeshVectorNetworkParam(
   numRows:Int,
   numCols:Int,
   pattern:GridPattern,
-  argFringeParam:ArgFringeParam
+  argFringeParam:ArgFringeParam,
+  channelWidth:ChannelWidth=ChannelWidth.empty
 ) extends MeshNetworkParam[Vector] {
   // switch to switch channel width
   channelWidth("src"->"sb", "dst"->"sb") = 4
