@@ -20,7 +20,7 @@ trait Spade extends Compiler with SpadeWorld {
 
   val configs = List(Config, SpadeConfig)
 
-  lazy val spademeta:SpadeMetadata = top.spademeta
+  lazy val spademeta:SpadeMetadata = design.spademeta
 
   override def reset = {
     super[Compiler].reset
@@ -39,7 +39,7 @@ trait Spade extends Compiler with SpadeWorld {
   lazy val topParam = MeshDesignParam()()
 
   def newDesign = {
-    top = Factory.create(topParam)
+    design = SpadeDesign(topParam)
   }
 
   /* Analysis */

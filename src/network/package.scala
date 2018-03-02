@@ -1,5 +1,5 @@
 package spade
 
 package object network {
-  private[network] type Design = spade.node.SpadeDesign
+  private[network] type Design = spade.SpadeDesign
 }

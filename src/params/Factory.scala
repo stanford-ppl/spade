@@ -17,8 +17,8 @@ import pureconfig._
 import java.io.File
 
 object Factory {
-  def create(param:Any) = param match {
-    case param:MeshDesignParam => MeshDesign(param)
+  def create(param:Any)(implicit design:SpadeDesign) = param match {
+    case param:MeshDesignParam => MeshTop(param)
   }
   def create(param:Any, nios:List[NetworkBundle[_]])(implicit design:SpadeDesign) = param match {
     case param:CUParam => CU(param, nios)

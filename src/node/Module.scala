@@ -4,8 +4,7 @@ import spade.params._
 import prism.node._
 import prism.enums._
 
-abstract class Module(id:Int) extends SpadeNode(id) with SubGraph[SpadeNode] {
-  def this()(implicit design:Design) = this(design.nextId)
+trait Module extends SpadeNode with SubGraph[SpadeNode] {
   implicit val module:Module = this
 }
 object Module {
@@ -22,6 +21,7 @@ object Modules {
     modules.map(m => Module(m, name))
   }
   def apply[M<:Module](name:String,num:Int,lambda: => M)(implicit parent:Module, design:Design):List[M] = {
-    indexing(List.fill(num){ Module(lambda, name) })
+    //indexing(List.fill(num){ Module(lambda, name) })
+    List.fill(num){ Module(lambda, name) }
   }
 }

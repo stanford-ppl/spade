@@ -9,7 +9,7 @@ import scala.collection.mutable
 
 abstract class SpadePass(implicit override val compiler:Spade) extends prism.Pass {
 
-  lazy val spademeta: SpadeMetadata = compiler.top.spademeta
+  lazy val spademeta: SpadeMetadata = compiler.design.spademeta
   import spademeta._
 
   def quote(n:Any):String = n match {

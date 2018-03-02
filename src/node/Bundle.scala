@@ -70,7 +70,8 @@ case class Input[B<:BundleType:ClassTag](name:String)(implicit src:Module, desig
 }
 object Inputs {
   def apply[B<:BundleType:ClassTag](name:String, num:Int)(implicit src:Module, design:Design) = {
-    indexing(List.fill(num)(Input[B](name)))
+    //indexing(List.fill(num)(Input[B](name)))
+    List.fill(num)(Input[B](name)) //TODO
   }
 }
 case class Output[B<:BundleType:ClassTag](name:String)(implicit src:Module, design:Design) extends Port[B] {

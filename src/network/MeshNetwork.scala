@@ -13,28 +13,6 @@ import scala.reflect._
 
 import scala.collection.mutable
 
-case class MeshDesign(param:MeshDesignParam) extends SpadeDesign(param) {
-  import param._
-
-  @transient val networks = networkParams.map { param => new MeshNetwork(param) }
-
-  val argBundles = networks.map(_.argBundle)
-  val argFringe = {
-    Module(ArgFringe(argFringeParam, argBundles))
-  }
-
-  val cuBundles = networks.map(_.cuBundles)
-  val cuArray = List.tabulate(numCols, numRows) { case (i,j) => 
-    val param = pattern.cuAt(i,j)
-    Module(Factory.create(param, cuBundles.map(_(i)(j))))
-  }
-
-  val sbBundles = networks.map(_.switchBundle)
-  val switchArray = List.tabulate(numCols + 1, numRows + 1) { case (i,j) => 
-    Module(SwitchBox(sbBundles.map(_(i)(j))))
-  }
-}
-
 class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit design:Design) {
   import param._
 
