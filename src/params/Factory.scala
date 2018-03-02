@@ -16,7 +16,7 @@ import scala.collection.mutable._
 import pureconfig._
 import java.io.File
 
-object Factory {
+object Factory extends Logging {
   def create(param:Any)(implicit design:SpadeDesign) = param match {
     case param:MeshDesignParam => MeshTop(param)
   }

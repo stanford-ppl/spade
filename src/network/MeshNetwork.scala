@@ -32,11 +32,12 @@ class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit de
     Node(name)
   }
   val cuBundles = cuArray.map(_.map(_.bundle))
-  val sbArray = List.tabulate(numCols + 1, numRows + 1) { case (i,j) => Node("switch") }
+  val sbArray = List.tabulate(numCols + 1, numRows + 1) { case (i,j) => Node("sb") }
   val switchBundle = sbArray.map(_.map(_.bundle))
 
   def connect(out:Node, outDir:String, in:Node, inDir:String, pos:String)(implicit design:Design):Unit = {
     val cw = channelWidth("pos"->pos, "src"->out.tp, "dst"->in.tp, "srcDir"->inDir, "dstDir"->outDir)
+    val key = Seq("pos"->pos, "src"->out.tp, "dst"->in.tp, "srcDir"->inDir, "dstDir"->outDir)
     (out.tp, in.tp) match {
       case ("arg", _) =>
         val outs = out.bundle.outputs
