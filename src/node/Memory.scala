@@ -1,7 +1,7 @@
 package spade.node
 
+import prism._
 import spade.params._
-import scala.reflect._
 
 abstract class OnChipMem(param:OnChipMemParam)(implicit design:Design) extends Module {
   val dequeueEnable = Input[Bit](s"deqEn")

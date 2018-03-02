@@ -2,9 +2,9 @@ package spade.config
 
 import spade.node._
 
+import prism._
 import prism.collection.immutable._
 
-import scala.reflect._
 import scala.language.existentials
 
 import SpadeMap._

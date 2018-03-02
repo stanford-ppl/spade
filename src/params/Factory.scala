@@ -10,7 +10,6 @@ import prism.util._
 import prism._
 
 import scala.language.reflectiveCalls
-import scala.reflect._
 
 import scala.collection.mutable._
 import pureconfig._
@@ -21,7 +20,9 @@ object Factory extends Logging {
     case param:MeshDesignParam => MeshTop(param)
   }
   def create(param:Any, nios:List[NetworkBundle[_<:BundleType]])(implicit design:SpadeDesign) = param match {
-    case param:CUParam => CU(param, nios)
+    case param:PCUParam => PCU(param, nios)
+    case param:PMUParam => PMU(param, nios)
+    case param:SCUParam => SCU(param, nios)
   }
 
   case class PlasticineConf(

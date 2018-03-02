@@ -2,11 +2,11 @@ package spade.node
 
 import spade._
 
+import prism._
 import prism.node._
 import prism.util._
 
 import scala.language.reflectiveCalls
-import scala.reflect._
 
 import scala.collection.mutable._
 
@@ -35,7 +35,11 @@ abstract class Bundle[B<:BundleType:ClassTag](implicit val src:Module, design:De
   val in:InputEdge[B] = new InputEdge(this)
   val out:OutputEdge[B] = new OutputEdge(this) 
 }
-case class Wire[B<:BundleType:ClassTag](name:String)(implicit src:Module, design:Design) extends Bundle[B]
+case class Wire[B<:BundleType:ClassTag]()(implicit src:Module, design:Design) extends Bundle[B]
+object Wire {
+  def apply[B<:BundleType:ClassTag](name:String)(implicit src:Module, design:Design):Wire[B] = naming(Wire(), name)
+}
+
 abstract class Port[B<:BundleType:ClassTag](implicit src:Module, design:Design) extends Bundle[B] {
   val external:DirectedEdge[B,_<:Edge]
   val internal:DirectedEdge[B,_<:Edge]
@@ -48,7 +52,7 @@ abstract class Port[B<:BundleType:ClassTag](implicit src:Module, design:Design) 
   def connect(p:PT):Unit = external.connect(p.external)
   def disconnectFrom(e:PT):Unit = external.disconnectFrom(e.external)
 }
-case class Input[B<:BundleType:ClassTag](name:String)(implicit src:Module, design:Design) extends Port[B] {
+case class Input[B<:BundleType:ClassTag]()(implicit src:Module, design:Design) extends Port[B] {
   type PT = Output[B]
   override val external:InputEdge[B] = in
   override val internal:OutputEdge[B] = out
@@ -70,12 +74,15 @@ case class Input[B<:BundleType:ClassTag](name:String)(implicit src:Module, desig
     sl.in
   }
 }
+object Input {
+  def apply[B<:BundleType:ClassTag](name:String)(implicit src:Module, design:Design):Input[B] = naming(Input(), name)
+}
 object Inputs {
   def apply[B<:BundleType:ClassTag](name:String, num:Int)(implicit src:Module, design:Design) = {
     indexing(List.fill(num)(Input[B](name)))
   }
 }
-case class Output[B<:BundleType:ClassTag](name:String)(implicit src:Module, design:Design) extends Port[B] {
+case class Output[B<:BundleType:ClassTag]()(implicit src:Module, design:Design) extends Port[B] {
   type PT = Input[B]
   override val external:OutputEdge[B] = out 
   override val internal:InputEdge[B] = in
@@ -90,6 +97,9 @@ case class Output[B<:BundleType:ClassTag](name:String)(implicit src:Module, desi
     sl.in <== this
     sl.out
   }
+}
+object Output {
+  def apply[B<:BundleType:ClassTag](name:String)(implicit src:Module, design:Design):Output[B] = naming(Output(), name)
 }
 case class BroadCast[I<:BundleType:ClassTag, O<:BundleType:ClassTag]()(implicit design:Design) extends Module {
   val in = Input[I](s"in")
@@ -112,8 +122,11 @@ case class GridBundle[B<:BundleType:ClassTag]()(implicit design:Design) extends 
   val inMap = Map[String, ListBuffer[Input[B]]]()
   val outMap = Map[String, ListBuffer[Output[B]]]()
 
-  def inputs = eightDirections.flatMap { dir => inMap.getOrElse(dir,Nil).toList } 
-  def outputs = eightDirections.flatMap { dir => outMap.getOrElse(dir, Nil).toList }  
+  def inAt(dir:String) = inMap.get(dir).map { _.toList }.getOrElse(Nil)
+  def outAt(dir:String) = outMap.get(dir).map { _.toList }.getOrElse(Nil)
+
+  def inputs = eightDirections.flatMap { dir => inAt(dir) } 
+  def outputs = eightDirections.flatMap { dir => outAt(dir) }  
 
   def addInAt(dir:String, num:Int)(implicit design:Design):List[Input[B]] = { 
     val ios = List.fill(num)(Input[B]("in"))
@@ -125,6 +138,7 @@ case class GridBundle[B<:BundleType:ClassTag]()(implicit design:Design) extends 
     outMap.getOrElseUpdate(dir, ListBuffer.empty) ++= ios
     ios
   }
+
 }
 object GridBundle {
   val fourDirections = List("W","N","E","S")

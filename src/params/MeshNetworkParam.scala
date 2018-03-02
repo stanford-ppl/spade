@@ -2,11 +2,9 @@ package spade.params
 
 import spade.node._
 
-import prism.enums._
+import prism._
 import prism.node._
 import prism.collection.mutable.Table
-
-import scala.reflect._
 
 abstract class MeshNetworkParam[B<:BundleType:ClassTag] extends Parameter {
   val bct = implicitly[ClassTag[B]]

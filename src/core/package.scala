@@ -5,6 +5,7 @@ package object spade {
   /* ------------- Alias ------------- **/
 
   type SpadePass = spade.pass.SpadePass
+  type SpadeWorld = spade.pass.SpadeWorld
   /* simulation */
 
   /* network */
@@ -14,5 +15,6 @@ package object spade {
 
   /* util */
   type SpadeMetadata = spade.util.SpadeMetadata
+
   /* ------------- Alias (END) ------- **/
 }

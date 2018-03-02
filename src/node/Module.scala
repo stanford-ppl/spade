@@ -8,7 +8,7 @@ trait Module extends SpadeNode with SubGraph[SpadeNode] {
 }
 object Module {
   def apply[M<:Module](module:M, name:String)(implicit parent:Module, design:Design):M = {
-    module.setParent(parent)
+    naming(module.setParent(parent), name)
   }
   def apply[M<:Module](module:M)(implicit parent:Module, design:Design):M = {
     module.setParent(parent)
@@ -20,7 +20,6 @@ object Modules {
     modules.map(m => Module(m, name))
   }
   def apply[M<:Module](name:String,num:Int,lambda: => M)(implicit parent:Module, design:Design):List[M] = {
-    //indexing(List.fill(num){ Module(lambda, name) })
-    List.fill(num){ Module(lambda, name) }
+    indexing(List.fill(num){ Module(lambda, name) })
   }
 }

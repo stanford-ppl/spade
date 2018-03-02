@@ -7,7 +7,6 @@ import prism.enums._
 
 import scala.language.existentials
 import scala.language.implicitConversions
-import scala.reflect.{ClassTag, classTag}
 import scala.language.higherKinds
 
 package object util {

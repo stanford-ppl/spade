@@ -1,4 +1,4 @@
-package spade.traversal
+package spade.pass
 
 import spade._
 import spade.node._

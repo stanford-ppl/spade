@@ -2,7 +2,7 @@ package spade.pass
 
 import spade._
 import spade.node._
-import scala.reflect._
+import prism._
 
 trait SpadeWorld {
   implicit val nct = classTag[N]

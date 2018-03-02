@@ -3,7 +3,6 @@ package spade
 import spade.params._
 import spade.network._
 import prism._
-import scala.reflect.{ClassTag, classTag}
 
 import scala.language.higherKinds
 
@@ -19,19 +18,10 @@ package object node extends SpadeEnums {
     ns
   }
 
-  def isPCU(n:Any) = n match {
-    case cu:CU => cu.param.isInstanceOf[PCUParam]
-    case _ => false
-  }
-
-  def isPMU(n:Any) = n match {
-    case cu:CU => cu.param.isInstanceOf[PMUParam]
-    case _ => false
-  }
-
-  def isSCU(n:Any) = n match {
-    case cu:CU => cu.param.isInstanceOf[SCUParam]
-    case _ => false
+  def naming[T<:SpadeNode](n:T, s:String)(implicit design:SpadeDesign) = {
+    import design.spademeta._
+    nameOf(n) = s
+    n
   }
 
   def bctOf(x:Any):ClassTag[_] = x match {

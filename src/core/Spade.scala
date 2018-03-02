@@ -21,6 +21,7 @@ trait Spade extends Compiler with SpadeWorld {
   val configs = List(Config, SpadeConfig)
 
   lazy val spademeta:SpadeMetadata = design.spademeta
+  def top = design.top
 
   override def reset = {
     super[Compiler].reset
@@ -68,9 +69,12 @@ trait Spade extends Compiler with SpadeWorld {
     // Debug
     addPass(new SpadeIRPrinter(s"spade.txt"))
     addPass(new ParamIRPrinter(s"param.txt"))
-    addPass(new SpadeIRDotCodegen[Bit](s"control.dot"))
-    addPass(new SpadeIRDotCodegen[Word](s"scalar.dot"))
-    addPass(new SpadeIRDotCodegen[Vector](s"vector.dot"))
+    addPass(new NetworkDotCodegen[Bit](s"control.dot"))
+    addPass(new NetworkDotCodegen[Word](s"scalar.dot"))
+    addPass(new NetworkDotCodegen[Vector](s"vector.dot"))
+    addPass(new SpadeDotCodegen[PCU](s"pcu.dot"))
+    addPass(new SpadeDotCodegen[PMU](s"pmu.dot"))
+    addPass(new SpadeDotCodegen[SCU](s"scu.dot"))
     //addPass(spadePrinter)
     //addPass(plasticineVecDotPrinter)
     //addPass(plasticineScalDotPrinter)

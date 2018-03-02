@@ -2,7 +2,7 @@ package spade.node
 
 import spade.params._
 
-abstract class Routable(nios:List[NetworkBundle[_<:BundleType]])(implicit design:Design) extends Module {
+abstract class Routable(val nios:List[NetworkBundle[_<:BundleType]])(implicit design:Design) extends Module {
   nios.foreach { _.setParent(this) }
 
   val cio = nios.flatMap(nio => as[Bit, NetworkBundle](nio)).headOption

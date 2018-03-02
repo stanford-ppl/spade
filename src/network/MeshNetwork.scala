@@ -5,11 +5,10 @@ import spade.node._
 import spade.params._
 import spade.util._
 
-import prism.enums._
+import prism._
 import prism.collection.mutable.Table
 
 import scala.language.reflectiveCalls
-import scala.reflect._
 
 import scala.collection.mutable
 

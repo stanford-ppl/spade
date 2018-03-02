@@ -1,11 +1,11 @@
 package spade.params
                           
 import spade._
+import prism._
 import prism.node._
 import prism.enums._
 
 import scala.language.reflectiveCalls
-import scala.reflect._
 
 import scala.collection.mutable.ListBuffer
 
