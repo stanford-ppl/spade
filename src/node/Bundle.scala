@@ -3,7 +3,6 @@ package spade.node
 import spade._
 
 import prism.node._
-import prism.enums._
 import prism.util._
 
 import scala.language.reflectiveCalls
@@ -14,30 +13,32 @@ import scala.collection.mutable._
 trait Edge extends prism.node.Edge[SpadeNode]() {
   type A = Bundle[_]
 }
-trait DirectedEdge[E<:Edge] extends prism.node.DirectedEdge[SpadeNode, E] with Edge {
+abstract class  DirectedEdge[B<:BundleType:ClassTag, E<:Edge:ClassTag] extends prism.node.DirectedEdge[SpadeNode, E] with Edge {
+  val bct = implicitly[ClassTag[B]]
 }
 
-class InputEdge[B<:BundleType:ClassTag](val src:Bundle[B])(implicit design:Design) extends prism.node.Input[SpadeNode] with DirectedEdge[OutputEdge[B]] {
+class InputEdge[B<:BundleType:ClassTag](val src:Bundle[B])(implicit design:Design) extends DirectedEdge[B,OutputEdge[B]] with prism.node.Input[SpadeNode]  {
   val id = design.nextId
   type E <: OutputEdge[B]
   def connect(p:Bundle[B]):Unit = connect(p.out) 
   def <== (p:Bundle[B]):Unit = connect(p) 
   def <== (ps:List[Bundle[B]]):Unit = ps.foreach { p => connect(p) }
 }
-class OutputEdge[B<:BundleType:ClassTag](val src:Bundle[B])(implicit design:Design) extends prism.node.Output[SpadeNode] with DirectedEdge[InputEdge[B]] {
+class OutputEdge[B<:BundleType:ClassTag](val src:Bundle[B])(implicit design:Design) extends DirectedEdge[B,InputEdge[B]] with prism.node.Output[SpadeNode]  {
   val id = design.nextId
   type E <: InputEdge[B]
 }
 
-abstract class Bundle[B<:BundleType:ClassTag](implicit src:Module, design:Design) extends SpadeNode with Atom[SpadeNode] {
+abstract class Bundle[B<:BundleType:ClassTag](implicit val src:Module, design:Design) extends SpadeNode with Atom[SpadeNode] {
   setParent(src)
+  val bct = implicitly[ClassTag[B]]
   val in:InputEdge[B] = new InputEdge(this)
   val out:OutputEdge[B] = new OutputEdge(this) 
 }
 case class Wire[B<:BundleType:ClassTag](name:String)(implicit src:Module, design:Design) extends Bundle[B]
 abstract class Port[B<:BundleType:ClassTag](implicit src:Module, design:Design) extends Bundle[B] {
-  val external:DirectedEdge[_<:Edge]
-  val internal:DirectedEdge[_<:Edge]
+  val external:DirectedEdge[B,_<:Edge]
+  val internal:DirectedEdge[B,_<:Edge]
   def ic = internal
 
   type PT <: Port[B]
@@ -55,10 +56,11 @@ case class Input[B<:BundleType:ClassTag](name:String)(implicit src:Module, desig
   def <== (p:OutputEdge[B]):Unit = external.connect(p)
   def <== (p:PT):Unit = connect(p)
   def <== (p:Wire[B]):Unit = ic.connect(p.in)
-  def <== (ps:List[Bundle[B]]):Unit = ps.foreach { p => 
+  def <== (ps:List[Any]):Unit = ps.foreach { p => 
     p match {
       case p:PT => <==(p)
       case p:Wire[B] => <==(p)
+      case p:OutputEdge[B] => <==(p)
       case p => err(s"$this cannot connect to $p")
     }
   }
@@ -100,15 +102,9 @@ case class Slice[I<:BundleType:ClassTag, O<:BundleType:ClassTag](idx:Int)(implic
 }
 
 abstract class NetworkBundle[B<:BundleType:ClassTag]()(implicit design:Design) extends Module {
+  val bct = implicitly[ClassTag[B]]
   def inputs:List[Input[B]]
   def outputs:List[Output[B]]
-
-  val isControl = util.isControl[B]
-  val isScalar = util.isScalar[B]
-  val isVector = util.isVector[B]
-  val asControl = util.asControl(this)
-  val asScalar = util.asScalar(this)
-  val asVector = util.asVector(this)
 }
 case class GridBundle[B<:BundleType:ClassTag]()(implicit design:Design) extends NetworkBundle[B] {
   import GridBundle._

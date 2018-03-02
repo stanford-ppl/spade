@@ -2,7 +2,6 @@ package spade.node
 
 import spade.params._
 import prism.node._
-import prism.enums._
 
 abstract class SpadeNode(implicit design:Design) extends Node[SpadeNode] { self =>
   val id = design.nextId

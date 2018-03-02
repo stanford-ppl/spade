@@ -2,7 +2,6 @@ package spade.node
 
 import spade.params._
 import prism.node._
-import prism.enums._
 
 trait Module extends SpadeNode with SubGraph[SpadeNode] {
   implicit val module:Module = this

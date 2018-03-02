@@ -9,6 +9,7 @@ import prism.collection.mutable.Table
 import scala.reflect._
 
 abstract class MeshNetworkParam[B<:BundleType:ClassTag] extends Parameter {
+  val bct = implicitly[ClassTag[B]]
   val numRows:Int
   val numCols:Int
   val pattern:GridPattern

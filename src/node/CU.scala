@@ -1,13 +1,12 @@
 package spade.node
 
 import spade.params._
-import prism.enums._
 
 import scala.reflect._
 
 import scala.collection.mutable._
 
-case class CU(param:CUParam, nios:List[NetworkBundle[_]])(implicit design:Design) extends Routable(nios) {
+case class CU(param:CUParam, nios:List[NetworkBundle[_<:BundleType]])(implicit design:Design) extends Routable(nios) {
   param.set(this) // Compute derived parameters
   import param._
 
@@ -54,10 +53,10 @@ case class CU(param:CUParam, nios:List[NetworkBundle[_]])(implicit design:Design
     (vio.inputs.zip(vectorFifos)).foreach { case (input, fifo) => fifo.writePort <== input.ic }
   }
   sio.foreach { sio =>
-    scalarFifos.foreach { fifo => fifo.writePort <== sio.inputs }
+    scalarFifos.foreach { fifo => fifo.writePort <== sio.inputs.map(_.ic) }
   }
   cio.foreach { cio =>
-    controlFifos.foreach { fifo => fifo.writePort <== cio.inputs }
+    controlFifos.foreach { fifo => fifo.writePort <== cio.inputs.map(_.ic) }
   }
   //TODO SRAM. multiple writer
 

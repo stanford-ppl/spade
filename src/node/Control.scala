@@ -1,7 +1,6 @@
 package spade.node
 
 import spade.params._
-import prism.enums._
 
 case class UpDownCounter()(implicit sapde:Design) extends Module {
   val inc = Input[Vector](s"writePort")

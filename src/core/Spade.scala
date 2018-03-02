@@ -68,7 +68,9 @@ trait Spade extends Compiler with SpadeWorld {
     // Debug
     addPass(new SpadeIRPrinter(s"spade.txt"))
     addPass(new ParamIRPrinter(s"param.txt"))
-    addPass(new SpadeIRDotCodegen(s"top1.dot"))
+    addPass(new SpadeIRDotCodegen[Bit](s"control.dot"))
+    addPass(new SpadeIRDotCodegen[Word](s"scalar.dot"))
+    addPass(new SpadeIRDotCodegen[Vector](s"vector.dot"))
     //addPass(spadePrinter)
     //addPass(plasticineVecDotPrinter)
     //addPass(plasticineScalDotPrinter)

@@ -13,7 +13,8 @@ import scala.reflect._
 
 import scala.collection.mutable
 
-class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit design:Design) {
+class MeshNetwork[B<:BundleType](param:MeshNetworkParam[B])(implicit design:Design) {
+  implicit val bct = param.bct
   import param._
 
   val bundles = mutable.ListBuffer[GridBundle[B]]()
@@ -57,10 +58,10 @@ class MeshNetwork[B<:BundleType:ClassTag](param:MeshNetworkParam[B])(implicit de
   }
 
 
-  if (isScalar[B]) {
+  if (is[Word](this)) {
     argBundle.addInAt("S", argFringeParam.numArgOuts)
     argBundle.addOutAt("S", argFringeParam.numArgIns)
-  } else if (isControl[B]) {
+  } else if (is[Bit](this)) {
     argBundle.addInAt("S", 1) //status
     argBundle.addOutAt("S", 1) //command
   }

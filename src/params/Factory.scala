@@ -20,7 +20,7 @@ object Factory extends Logging {
   def create(param:Any)(implicit design:SpadeDesign) = param match {
     case param:MeshDesignParam => MeshTop(param)
   }
-  def create(param:Any, nios:List[NetworkBundle[_]])(implicit design:SpadeDesign) = param match {
+  def create(param:Any, nios:List[NetworkBundle[_<:BundleType]])(implicit design:SpadeDesign) = param match {
     case param:CUParam => CU(param, nios)
   }
 

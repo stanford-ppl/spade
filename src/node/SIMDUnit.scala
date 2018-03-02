@@ -1,7 +1,6 @@
 package spade.node
 
 import spade.params._
-import prism.enums._
 
 case class SIMDUnit(param:SIMDParam)(implicit design:Design) extends Module {
   val stages = Modules("stage", param.stageParams.map { param => Stage(param) })

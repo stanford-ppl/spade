@@ -1,7 +1,6 @@
 package spade.params
 
-import prism.enums._
-import prism.node._
+import spade.node._
 
 import scala.collection.mutable._
 

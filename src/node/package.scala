@@ -1,8 +1,13 @@
 package spade
 
 import spade.params._
+import spade.network._
+import prism._
+import scala.reflect.{ClassTag, classTag}
 
-package object node {
+import scala.language.higherKinds
+
+package object node extends SpadeEnums {
 
   private[node] type Design = SpadeDesign
 
@@ -28,4 +33,16 @@ package object node {
     case cu:CU => cu.param.isInstanceOf[SCUParam]
     case _ => false
   }
+
+  def bctOf(x:Any):ClassTag[_] = x match {
+    case x:DirectedEdge[_,_] => x.bct
+    case x:Bundle[_] => x.bct
+    case x:NetworkBundle[_] => x.bct
+    case x:MeshNetwork[_] => x.bct
+    case x => throw PIRException(s"don't have ClassTag[_<:BundleType] for $x")
+  }
+
+  def is[B<:BundleType:ClassTag](x:Any) = implicitly[ClassTag[B]] == bctOf(x)
+
+  def as[B<:BundleType:ClassTag,A[_<:BundleType]](x:A[_]) = if (is[B](x)) Some(x.asInstanceOf[A[B]]) else None
 }

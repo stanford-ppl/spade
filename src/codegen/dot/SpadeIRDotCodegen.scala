@@ -6,8 +6,9 @@ import prism._
 import prism.codegen._
 
 import sys.process._
+import scala.reflect._
 
-class SpadeIRDotCodegen(val fileName:String)(implicit design:Spade) extends SpadeCodegen with IRDotCodegen {
+class SpadeIRDotCodegen[B<:BundleType:ClassTag](val fileName:String)(implicit design:Spade) extends SpadeCodegen with IRDotCodegen {
 
   import spademeta._
 
@@ -56,8 +57,16 @@ class SpadeIRDotCodegen(val fileName:String)(implicit design:Spade) extends Spad
   
   override def emitNode(n:N) = {
     n match {
+      case n:Top => super.visitNode(n)
       case n:Routable => emitSingleNode(n)
       case n => super.emitNode(n) 
+    }
+  }
+
+  override def emitEdge(from:prism.node.Edge[N], to:prism.node.Edge[N], attr:DotAttr):Unit = {
+    (from, to) match {
+      case (from, to) if is[B](from) & is[B](to) => emitEdgeMatched(from.src.asInstanceOf[N], to.src, attr) 
+      case _ => dbg(s"${implicitly[ClassTag[B]]} ${bctOf(from)} ${bctOf(to)}")
     }
   }
 

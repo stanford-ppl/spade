@@ -1,7 +1,6 @@
 package spade.node
 
 import spade.params._
-import prism.enums._
 import scala.reflect._
 
 abstract class OnChipMem(param:OnChipMemParam)(implicit design:Design) extends Module {
