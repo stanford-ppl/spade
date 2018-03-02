@@ -21,8 +21,8 @@ object ChannelWidth {
   def empty = new Table[String, String, Int] (
     values=Map(
       "pos"->List("left", "right","center","top","bottom"), 
-      "src"->List("arg", "pcu", "ocu", "pmu", "mu", "scu", "mc", "switch"), 
-      "dst"->List("arg", "pcu", "ocu", "pmu", "mu", "scu", "mc", "switch"), 
+      "src"->List("arg", "pcu", "ocu", "pmu", "mu", "scu", "mc", "sb"), 
+      "dst"->List("arg", "pcu", "ocu", "pmu", "mu", "scu", "mc", "sb"), 
       "srcDir"->GridBundle.eightDirections, 
       "dstDir"->GridBundle.eightDirections
     ), 
@@ -73,9 +73,9 @@ case class MeshControlNetworkParam(
   channelWidth("pos"->"center", "src"->"sb", "dst"->"ocu") = 4
 
   // Top to switch channel width
-  channelWidth("pos"->List("top", "bottom"), "src"->"Top", "dst"->"sb") = 1
+  channelWidth("pos"->List("top", "bottom"), "src"->"arg", "dst"->"sb") = 1
   // switch to Top channel width
-  channelWidth("pos"->List("top", "bottom"), "src"->"sb", "dst"->"Top") = 1
+  channelWidth("pos"->List("top", "bottom"), "src"->"sb", "dst"->"arg") = 1
 }
 
 case class MeshScalarNetworkParam(
@@ -125,10 +125,10 @@ case class MeshScalarNetworkParam(
   channelWidth("pos"->"center", "src"->"sb", "dst"->"ocu") = 5
   
   //// Top to switch channel width
-  channelWidth("pos"->List("top", "bottom"), "src"->"Top", "dst"->"sb") = 1
+  channelWidth("pos"->List("top", "bottom"), "src"->"arg", "dst"->"sb") = 1
 
   //// switch to Top channel width
-  channelWidth("pos"->List("top", "bottom"), "src"->"sb", "dst"->"Top") = 1
+  channelWidth("pos"->List("top", "bottom"), "src"->"sb", "dst"->"arg") = 1
 }
 
 case class MeshVectorNetworkParam(

@@ -1,8 +1,6 @@
 package spade
 
-import scala.reflect._
-import scala.language.higherKinds
-import prism.node._
+import spade.params._
 
 package object node {
 
@@ -14,5 +12,20 @@ package object node {
       indexOf(n) = i
     }
     ns
+  }
+
+  def isPCU(n:Any) = n match {
+    case cu:CU => cu.param.isInstanceOf[PCUParam]
+    case _ => false
+  }
+
+  def isPMU(n:Any) = n match {
+    case cu:CU => cu.param.isInstanceOf[PMUParam]
+    case _ => false
+  }
+
+  def isSCU(n:Any) = n match {
+    case cu:CU => cu.param.isInstanceOf[SCUParam]
+    case _ => false
   }
 }
