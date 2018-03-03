@@ -17,12 +17,17 @@ import java.io.File
 
 object Factory extends Logging {
   def create(param:Any)(implicit design:SpadeDesign) = param match {
-    case param:MeshDesignParam => MeshTop(param)
+    case param:MeshTopParam => MeshTop(param)
   }
   def create(param:Any, nios:List[NetworkBundle[_<:BundleType]])(implicit design:SpadeDesign) = param match {
     case param:PCUParam => PCU(param, nios)
     case param:PMUParam => PMU(param, nios)
     case param:SCUParam => SCU(param, nios)
+    case param:SramAGParam => SramAG(param, nios)
+    case param:DramAGParam => DramAG(param, nios)
+    case param:ArgFringeParam => ArgFringe(param, nios)
+    case param:MCParam => MC(param, nios)
+    case param:SwitchParam => SwitchBox(param, nios)
   }
 
   case class PlasticineConf(

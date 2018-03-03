@@ -12,57 +12,56 @@ import scala.language.reflectiveCalls
 
 import scala.collection.mutable
 
-class MeshNetwork[B<:BundleType](param:MeshNetworkParam[B])(implicit design:Design) {
+class MeshNetwork[B<:BundleType](param:MeshNetworkParam[B], top:MeshTop)(implicit design:Design) {
   implicit val bct = param.bct
   import param._
+  import top._
 
-  val bundles = mutable.ListBuffer[GridBundle[B]]()
-  case class Node(tp:String, bundle:GridBundle[B]=GridBundle[B]()) {
-    bundles += bundle
+  val bundleOf = mutable.Map[Any, GridBundle[B]]()
+
+  top.nodes.foreach { node => 
+    val bundle = GridBundle[B]()
+    node.nios += bundle
+    bundleOf(node) = bundle
   }
 
-  val arg = Node("arg") 
-  val argBundle = arg.bundle
-  val cuArray = List.tabulate(numCols, numRows) { case (i,j) => 
-    val name = pattern.cuAt(i,j) match {
-      case param:PCUParam => "pcu"
-      case param:PMUParam => "pmu"
-      case param:SCUParam => "scu"
-    }
-    Node(name)
+  def tpOf(node:Node) = node.param match {
+    case param:PCUParam => "pcu"
+    case param:PMUParam => "pmu"
+    case param:SCUParam => "scu"
+    case param:SwitchParam => "sb"
+    case param:ArgFringeParam => "arg"
+    case param:MCParam => "mc"
   }
-  val cuBundles = cuArray.map(_.map(_.bundle))
-  val sbArray = List.tabulate(numCols + 1, numRows + 1) { case (i,j) => Node("sb") }
-  val switchBundle = sbArray.map(_.map(_.bundle))
 
   def connect(out:Node, outDir:String, in:Node, inDir:String, pos:String)(implicit design:Design):Unit = {
-    val cw = channelWidth("pos"->pos, "src"->out.tp, "dst"->in.tp, "srcDir"->inDir, "dstDir"->outDir)
-    val key = Seq("pos"->pos, "src"->out.tp, "dst"->in.tp, "srcDir"->inDir, "dstDir"->outDir)
-    (out.tp, in.tp) match {
+    val cw = channelWidth("pos"->pos, "src"->tpOf(out), "dst"->tpOf(in), "srcDir"->inDir, "dstDir"->outDir)
+    val key = Seq("pos"->pos, "src"->tpOf(out), "dst"->tpOf(in), "srcDir"->inDir, "dstDir"->outDir)
+    (tpOf(out), tpOf(in)) match {
       case ("arg", _) =>
-        val outs = out.bundle.outputs
+        val outs = bundleOf(out).outputs
         outs.foreach { argIn =>
-          val ins = in.bundle.addInAt(inDir, cw)
+          val ins = bundleOf(in).addInAt(inDir, cw)
           ins.foreach { _ <== argIn }
         }
       case (_, "arg") =>
-        val outs = out.bundle.addOutAt(outDir, cw)
-        val ins = in.bundle.inputs
+        val outs = bundleOf(out).addOutAt(outDir, cw)
+        val ins = bundleOf(in).inputs
         ins.foreach { _ <== outs }
       case (_, _) =>
-        val outs = out.bundle.addOutAt(outDir, cw)
-        val ins = in.bundle.addInAt(inDir, cw)
+        val outs = bundleOf(out).addOutAt(outDir, cw)
+        val ins = bundleOf(in).addInAt(inDir, cw)
         outs.zip(ins).foreach { case (o, i) => i <== o }
     }
   }
 
 
   if (is[Word](this)) {
-    argBundle.addInAt("S", argFringeParam.numArgOuts)
-    argBundle.addOutAt("S", argFringeParam.numArgIns)
+    bundleOf(argFringe).addInAt("S", argFringeParam.numArgOuts)
+    bundleOf(argFringe).addOutAt("S", argFringeParam.numArgIns)
   } else if (is[Bit](this)) {
-    argBundle.addInAt("S", 1) //status
-    argBundle.addOutAt("S", 1) //command
+    bundleOf(argFringe).addInAt("S", 1) //status
+    bundleOf(argFringe).addOutAt("S", 1) //command
   }
 
   /** ----- Central Array Connection ----- **/
@@ -130,16 +129,16 @@ class MeshNetwork[B<:BundleType](param:MeshNetworkParam[B])(implicit design:Desi
       // Top Switches
       if (y==numRows) {
         // S -> N
-        connect(sbArray(x)(y), "N", arg, "S", "top") // bottom up 
+        connect(sbArray(x)(y), "N", argFringe, "S", "top") // bottom up 
         // N -> S
-        connect(arg, "S", sbArray(x)(y), "N", "top") // top down
+        connect(argFringe, "S", sbArray(x)(y), "N", "top") // top down
       }
       // Bottom Switches
       if (y==0) {
         // N -> S
-        connect(sbArray(x)(y), "S", arg, "N", "bottom") // top down 
+        connect(sbArray(x)(y), "S", argFringe, "N", "bottom") // top down 
         // S -> N
-        connect(arg, "N", sbArray(x)(y), "S", "bottom") // bottom up
+        connect(argFringe, "N", sbArray(x)(y), "S", "bottom") // bottom up
       }
 
 
@@ -153,8 +152,8 @@ class MeshNetwork[B<:BundleType](param:MeshNetworkParam[B])(implicit design:Desi
   }
 
   /** ----- Fringe Connection ----- **/
-  //for (y <- 0 until mcArray.headOption.map(_.size).getOrElse(0)) { //cols
-    //for (x <- 0 until mcArray.size) { //rows
+  for (y <- 0 until mcArray.headOption.map(_.size).getOrElse(0)) { //cols
+    for (x <- 0 until mcArray.size) { //rows
 
       ///* ---- DramAddrGen and SwitchBox connection ---- */
       //if (x==0) {
@@ -183,17 +182,17 @@ class MeshNetwork[B<:BundleType](param:MeshNetworkParam[B])(implicit design:Desi
       //}
 
       ///* ---- MC and SwitchBox connection ---- */
-      //if (x==0) {
-        //// MC to SB (W -> E) (left side)
-        //connect(mcArray(x)(y), "E", sbArray(0)(y), "W", "left")
-        //// SB to MC (E -> W) (left side)
-        //connect(sbArray(0)(y), "W", mcArray(x)(y), "E", "left")
-      //} else {
-        //// MC to SB (E -> W) (right side)
-        //connect(mcArray(x)(y), "W", sbArray(numCols)(y), "E", "right")
-        //// SB to MC (W -> E) (right side)
-        //connect(sbArray(numCols)(y), "E", mcArray(x)(y), "W", "right")
-      //}
+      if (x==0) {
+        // MC to SB (W -> E) (left side)
+        connect(mcArray(x)(y), "E", sbArray(0)(y), "W", "left")
+        // SB to MC (E -> W) (left side)
+        connect(sbArray(0)(y), "W", mcArray(x)(y), "E", "left")
+      } else {
+        // MC to SB (E -> W) (right side)
+        connect(mcArray(x)(y), "W", sbArray(numCols)(y), "E", "right")
+        // SB to MC (W -> E) (right side)
+        connect(sbArray(numCols)(y), "E", mcArray(x)(y), "W", "right")
+      }
 
       ///* ---- MC and DramAddrGen connection ---- */
       //val pos = if (x==0) "left" else "right"
@@ -201,10 +200,10 @@ class MeshNetwork[B<:BundleType](param:MeshNetworkParam[B])(implicit design:Desi
       //connect(mcArray(x)(y), "N", dramAGs(x)(y), "S", pos)
       //// DAG to MC (N -> S)
       //connect(dramAGs(x)(y), "S", mcArray(x)(y), "N", pos)
-    //}
-  //}
+    }
+  }
 
-  bundles.foreach { bundle =>
+  bundleOf.values.foreach { bundle =>
     indexing(bundle.inputs)
     indexing(bundle.outputs)
   }

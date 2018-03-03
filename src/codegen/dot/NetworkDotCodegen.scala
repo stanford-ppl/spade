@@ -48,7 +48,7 @@ class NetworkDotCodegen[B<:BundleType:ClassTag](val fileName:String)(implicit co
           val coord:Option[(Double, Double)] = n match {
             case n:SCU if ((x<0) | (x>=numCols)) => Some(x, y-0.2)
             case n:PCU if ((x<0) | (x>=numCols)) => Some(x, y-0.8)
-            //case n:MemoryController => Some((x, y-0.5))
+            case n:MC => Some((x, y-0.5))
             //case n:OuterComputeUnit => Some((x-0.3, y-0.3))
             case n:SwitchBox => Some((x-0.5, y-0.5))
             case n:ArgFringe => None
@@ -67,9 +67,9 @@ class NetworkDotCodegen[B<:BundleType:ClassTag](val fileName:String)(implicit co
     case n:PCU => attr.fillcolor("dodgerblue").style(filled)
     case n:PMU => attr.fillcolor("lightseagreen").style(filled)
     case n:SCU => attr.fillcolor("palevioletred1").style(filled)
+    case n:MC => attr.fillcolor("forestgreen").style(filled)
     case n:SwitchBox => attr.fillcolor("indianred1").style(filled)
     //case n:OuterComputeUnit => Color("orange")
-    //case n:MemoryController => Color("forestgreen")
     case n => super.color(attr, n)
   }
 

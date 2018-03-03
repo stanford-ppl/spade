@@ -11,7 +11,7 @@ import scala.language.reflectiveCalls
 class MeshCB(numRows:Int=2, numCols:Int=2, numArgIns:Int=3, numArgOuts:Int=3) extends Spade {
   override def toString = s"SN${numRows}x${numCols}"
 
-  override lazy val topParam = MeshDesignParam(
+  override lazy val topParam = MeshTopParam(
     numRows=numRows,
     numCols=numCols,
     pattern=Checkerboard(),

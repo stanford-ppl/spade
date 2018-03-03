@@ -8,7 +8,7 @@ abstract class OnChipMem(param:OnChipMemParam)(implicit design:Design) extends M
   val enqueueEnable = Input[Bit](s"deqEn")
   val notEmpty = Input[Bit](s"notEmpty")
   val notFull = Input[Bit](s"notFull")
-  val counter = Module(BufferCounter(), "counter")
+  val counter = Module(BufferCounter(), "bufferCounter")
 
   counter.inc <== enqueueEnable.ic
   counter.dec <== dequeueEnable.ic
