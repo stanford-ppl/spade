@@ -4,7 +4,7 @@ import spade.params._
 import prism.node._
 
 trait Module extends SpadeNode with SubGraph[SpadeNode] {
-  implicit val module:Module = this
+  implicit val module:this.type = this
 }
 object Module {
   def apply[M<:Module](module:M, name:String)(implicit parent:Module, design:Design):M = {

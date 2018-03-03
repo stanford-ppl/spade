@@ -12,31 +12,27 @@ case class MeshTop(param:MeshTopParam)(implicit design:Design) extends Top(param
   import param._
   import design.spademeta._
 
-  @transient val nodes = ListBuffer[Node]()
-  case class Node(param:Parameter, nios:ListBuffer[GridBundle[_<:BundleType]]=ListBuffer.empty, coord:Option[(Int,Int)]=None) {
-    nodes += this
-  }
+  @transient val bundles = ListBuffer[BundleGroup]()
 
-  @transient val argFringe = Node(argFringeParam)
+  @transient val argFringe = fringePattern.argBundle
 
   @transient val cuArray = List.tabulate(numCols, numRows) { case (i,j) => 
-    val param = pattern.cuAt(i,j)
-    Node(param, coord=Some((i,j)))
-  }
-
-  //@transient val dramAGs = List.tabulate(2, numRows+1) { case (x, y) => Node(dramAGsParam, coord=Some(if (x==0) (-1, y) else (numCols, y))) }
-  //@transient val sramAGs = List.tabulate(2, numRows+1) { case (x, y) => if (x==0) (-1, y) else (numCols, y) }
-  @transient val mcArray = List.tabulate(2, numRows+1) { case (x, y) => 
-    Node(mcParam, coord=Some(if (x==0) (-1, y) else (numCols, y)))
+    centrolPattern.cuAt(i,j)
   }
 
   @transient val sbArray = List.tabulate(numCols + 1, numRows + 1) { case (i,j) => 
-    Node(switchParam, coord=Some((i,j)))
+    centrolPattern.switchAt(i,j)
+  }
+
+  //@transient val dramAGs = List.tabulate(2, numRows+1) { case (i, j) => BundleGroup(dramAGsParam, coord=Some(if (i==0) (-1, j) else (numCols, j))) }
+  //@transient val sramAGs = List.tabulate(2, numRows+1) { case (i, j) => if (i==0) (-1, j) else (numCols, j) }
+  @transient val mcArray = List.tabulate(2, numRows+1) { case (i, j) => 
+    fringePattern.mcAt(i,j)
   }
 
   @transient val networks = networkParams.map { param => new MeshNetwork(param, this) }
 
-  nodes.foreach { case Node(param, nios, coord) => 
+  bundles.foreach { case BundleGroup(param, nios, coord) => 
     val m = Module(Factory.create(param, nios.toList))
     coord.foreach { coord => indexOf(m) = coord }
   }

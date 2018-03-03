@@ -37,7 +37,7 @@ trait Spade extends Compiler with SpadeWorld {
 
   val designPath = s"${outDir}${File.separator}${name}.spade"
 
-  lazy val topParam = MeshTopParam()()
+  lazy val topParam = MeshTopParam()
 
   def newDesign = {
     design = SpadeDesign(topParam)

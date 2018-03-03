@@ -38,7 +38,7 @@ class NetworkDotCodegen[B<:BundleType:ClassTag](val fileName:String)(implicit co
 
   //def shape(attr:DotAttr, n:Any) = attr.shape(box)
 
-  val scale = 20
+  val scale = 5
 
   def pos(attr:DotAttr, n:Any) = {
     import compiler.topParam._
@@ -46,19 +46,18 @@ class NetworkDotCodegen[B<:BundleType:ClassTag](val fileName:String)(implicit co
       case (n:SpadeNode) =>
         indexOf.get(n).foreach { case List(x,y) =>
           val coord:Option[(Double, Double)] = n match {
-            case n:SCU if ((x<0) | (x>=numCols)) => Some(x, y-0.2)
-            case n:PCU if ((x<0) | (x>=numCols)) => Some(x, y-0.8)
-            case n:MC => Some((x, y-0.5))
+            //case n:SCU if ((x<0) | (x>=numCols)) => Some(x, y-0.2)
+            //case n:PCU if ((x<0) | (x>=numCols)) => Some(x, y-0.8)
+            //case n:MC => Some((x, y-0.5))
             //case n:OuterComputeUnit => Some((x-0.3, y-0.3))
-            case n:SwitchBox => Some((x-0.5, y-0.5))
+            //case n:SwitchBox => Some((x-0.5, y-0.5))
             case n:ArgFringe => None
-            case n:CU => Some((x,y))
-            case n => None
+            case n => Some((x,y))
           }
           coord.foreach { case (x,y) => attr.pos((x*scale, y*scale)) }
         }
-      case (n:ArgFringe, "top") => attr.pos((numCols/2-1)*scale+scale/2, numRows*scale)
-      case (n:ArgFringe, "bottom") => attr.pos((numCols/2-1)*scale+scale/2, -scale)
+      case (n:ArgFringe, "top") => attr.pos((numCols/2)*scale*2, (numRows+1)*scale*2) //TODO
+      case (n:ArgFringe, "bottom") => attr.pos((numCols/2)*scale*2, -scale*2) //TODO
     }
     attr
   }

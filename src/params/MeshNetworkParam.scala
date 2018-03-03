@@ -8,10 +8,6 @@ import prism.collection.mutable.Table
 
 abstract class MeshNetworkParam[B<:BundleType:ClassTag] extends Parameter {
   val bct = implicitly[ClassTag[B]]
-  val numRows:Int
-  val numCols:Int
-  val pattern:GridPattern
-  val argFringeParam:ArgFringeParam
   val channelWidth:ChannelWidth
 }
 
@@ -30,10 +26,6 @@ object ChannelWidth {
 }
 
 case class MeshControlNetworkParam(
-  numRows:Int,
-  numCols:Int,
-  pattern:GridPattern,
-  argFringeParam:ArgFringeParam,
   channelWidth:ChannelWidth=ChannelWidth.empty
 ) extends MeshNetworkParam[Bit] {
   // switch to switch channel width
@@ -78,10 +70,6 @@ case class MeshControlNetworkParam(
 }
 
 case class MeshScalarNetworkParam(
-  numRows:Int,
-  numCols:Int,
-  pattern:GridPattern,
-  argFringeParam:ArgFringeParam,
   channelWidth:ChannelWidth=ChannelWidth.empty
 ) extends MeshNetworkParam[Word] {
   // switch to switch channel width
@@ -131,10 +119,6 @@ case class MeshScalarNetworkParam(
 }
 
 case class MeshVectorNetworkParam(
-  numRows:Int,
-  numCols:Int,
-  pattern:GridPattern,
-  argFringeParam:ArgFringeParam,
   channelWidth:ChannelWidth=ChannelWidth.empty
 ) extends MeshNetworkParam[Vector] {
   // switch to switch channel width

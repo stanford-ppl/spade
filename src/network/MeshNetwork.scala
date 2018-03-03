@@ -16,16 +16,18 @@ class MeshNetwork[B<:BundleType](param:MeshNetworkParam[B], top:MeshTop)(implici
   implicit val bct = param.bct
   import param._
   import top._
+  import top.param._
+  import fringePattern.argFringeParam._
 
-  val bundleOf = mutable.Map[Any, GridBundle[B]]()
+  val bundleOf = mutable.Map[BundleGroup, GridBundle[B]]()
 
-  top.nodes.foreach { node => 
+  bundles.foreach { node => 
     val bundle = GridBundle[B]()
     node.nios += bundle
     bundleOf(node) = bundle
   }
 
-  def tpOf(node:Node) = node.param match {
+  def tpOf(node:BundleGroup) = node.param match {
     case param:PCUParam => "pcu"
     case param:PMUParam => "pmu"
     case param:SCUParam => "scu"
@@ -34,7 +36,7 @@ class MeshNetwork[B<:BundleType](param:MeshNetworkParam[B], top:MeshTop)(implici
     case param:MCParam => "mc"
   }
 
-  def connect(out:Node, outDir:String, in:Node, inDir:String, pos:String)(implicit design:Design):Unit = {
+  def connect(out:BundleGroup, outDir:String, in:BundleGroup, inDir:String, pos:String)(implicit design:Design):Unit = {
     val cw = channelWidth("pos"->pos, "src"->tpOf(out), "dst"->tpOf(in), "srcDir"->inDir, "dstDir"->outDir)
     val key = Seq("pos"->pos, "src"->tpOf(out), "dst"->tpOf(in), "srcDir"->inDir, "dstDir"->outDir)
     (tpOf(out), tpOf(in)) match {
@@ -57,8 +59,8 @@ class MeshNetwork[B<:BundleType](param:MeshNetworkParam[B], top:MeshTop)(implici
 
 
   if (is[Word](this)) {
-    bundleOf(argFringe).addInAt("S", argFringeParam.numArgOuts)
-    bundleOf(argFringe).addOutAt("S", argFringeParam.numArgIns)
+    bundleOf(argFringe).addInAt("S", numArgOuts)
+    bundleOf(argFringe).addOutAt("S", numArgIns)
   } else if (is[Bit](this)) {
     bundleOf(argFringe).addInAt("S", 1) //status
     bundleOf(argFringe).addOutAt("S", 1) //command
