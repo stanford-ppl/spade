@@ -7,7 +7,7 @@ abstract class Parameter extends ProductNode[Parameter](None) with ProductAtom[P
   override val id = this.hashCode & 0xfffffff
 
   def newIn = ParameterInput(this)
-  def out = ParameterOutput(this)
+  def newOut = ParameterOutput(this)
 }
 
 case class ParameterInput(src:Parameter) extends Input[Parameter] {
