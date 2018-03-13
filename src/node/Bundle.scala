@@ -139,6 +139,12 @@ case class GridBundle[B<:BundleType:ClassTag]()(implicit design:Design) extends 
     ios
   }
 
+  def addIns(num:Int)(implicit design:Design):List[Input[B]] = { 
+    addInAt("W", num)
+  }
+  def addOuts(num:Int)(implicit design:Design):List[Output[B]] = {
+    addOutAt("W", num)
+  }
 }
 object GridBundle {
   val fourDirections = List("W","N","E","S")

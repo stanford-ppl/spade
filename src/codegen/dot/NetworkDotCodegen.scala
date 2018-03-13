@@ -1,6 +1,7 @@
 package spade.codegen
 import spade._
 import spade.node._
+import spade.params._
 
 import prism._
 import prism.codegen._
@@ -41,9 +42,9 @@ class NetworkDotCodegen[B<:BundleType:ClassTag](val fileName:String)(implicit co
   val scale = 5
 
   def pos(attr:DotAttr, n:Any) = {
-    import compiler.topParam._
-    n match {
-      case (n:SpadeNode) =>
+    val dynamic = isDynamic(compiler.top)
+    (n, compiler.topParam) match {
+      case (n:SpadeNode, param:MeshTopParam) =>
         indexOf.get(n).foreach { case List(x,y) =>
           val coord:Option[(Double, Double)] = n match {
             //case n:SCU if ((x<0) | (x>=numCols)) => Some(x, y-0.2)
@@ -54,10 +55,17 @@ class NetworkDotCodegen[B<:BundleType:ClassTag](val fileName:String)(implicit co
             case n:ArgFringe => None
             case n => Some((x,y))
           }
-          coord.foreach { case (x,y) => attr.pos((x*scale, y*scale)) }
+          coord.foreach { case (x,y) => 
+            n match {
+              case n:CU if dynamic => attr.pos(((x+0.5)*scale, (y + 0.5)*scale))
+              case n => attr.pos((x*scale, y*scale))
+            }
+          }
         }
-      case (n:ArgFringe, "top") => attr.pos((numCols/2)*scale*2, (numRows+1)*scale*2) //TODO
-      case (n:ArgFringe, "bottom") => attr.pos((numCols/2)*scale*2, -scale*2) //TODO
+      case ((n:ArgFringe, "top"), param:MeshTopParam) if dynamic => attr.pos(((param.numCols/2)*scale, (param.numRows-1)*scale+scale))
+      case ((n:ArgFringe, "bottom"), param:MeshTopParam) if dynamic => attr.pos(((param.numCols/2)*scale, -scale))
+      case ((n:ArgFringe, "top"), param:MeshTopParam) => attr.pos(((param.numCols/2)*scale*2, (param.numRows+1)*scale*2))
+      case ((n:ArgFringe, "bottom"), param:MeshTopParam) => attr.pos(((param.numCols/2)*scale*2, -scale*2))
     }
     attr
   }

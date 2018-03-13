@@ -37,7 +37,7 @@ trait Spade extends Compiler with SpadeWorld {
 
   val designPath = s"${outDir}${File.separator}${name}.spade"
 
-  lazy val topParam = MeshTopParam()
+  lazy val topParam:TopParam = StaticMeshTopParam()
 
   def newDesign = {
     design = SpadeDesign(topParam)
@@ -67,7 +67,7 @@ trait Spade extends Compiler with SpadeWorld {
     //addPass(areaModel)
 
     // Debug
-    addPass(new SpadeIRPrinter(s"spade.txt"))
+    //addPass(new SpadeIRPrinter(s"spade.txt"))
     addPass(new ParamIRPrinter(s"param.txt"))
     addPass(new NetworkDotCodegen[Bit](s"control.dot"))
     addPass(new NetworkDotCodegen[Word](s"scalar.dot"))

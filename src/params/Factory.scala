@@ -17,7 +17,8 @@ import java.io.File
 
 object Factory extends Logging {
   def create(param:Any)(implicit design:SpadeDesign) = param match {
-    case param:MeshTopParam => MeshTop(param)
+    case param:StaticMeshTopParam => StaticMeshTop(param)
+    case param:DynamicMeshTopParam => DynamicMeshTop(param)
   }
   def create(param:Any, nios:List[NetworkBundle[_<:BundleType]])(implicit design:SpadeDesign) = param match {
     case param:PCUParam => PCU(param, nios)

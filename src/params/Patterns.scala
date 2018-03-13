@@ -20,11 +20,16 @@ trait GridPattern extends Pattern {
 trait GridCentrolPattern extends GridPattern {
   val switchParam:SwitchParam
   def switchAt(i:Int, j:Int)(implicit top:MeshTop):BundleGroup = {
-    val coord = (i*step, j*step)
+    val coord = if (isDynamic(top)) (i,j) else (i*step, j*step)
     BundleGroup(param=switchParam, coord=Some(coord))
   }
   def cuAt(i:Int, j:Int)(implicit top:MeshTop):BundleGroup
-  def cuCoord(i:Int, j:Int) = (step/2 + i*step, step/2 + j*step)
+  def cuCoord(i:Int, j:Int)(implicit top:MeshTop) = {
+    top match {
+      case top if isDynamic(top) => (i, j)
+      case top => (step/2 + i*step, step/2 + j*step)
+    }
+  }
 }
 
 trait GridFringePattern extends GridPattern {
@@ -35,7 +40,10 @@ trait GridFringePattern extends GridPattern {
   }
   def mcAt(i:Int, j:Int)(implicit top:MeshTop):BundleGroup = {
     import top.param._
-    val coord = if (i==0) (-step/2, j*step) else (numCols*step+step/2, j*step)
+    val coord = top match {
+      case top:StaticMeshTop => if (i==0) (-step/2, j*step) else (numCols*step+step/2, j*step)
+      case top:DynamicMeshTop => if (i==0) (-1, j) else (numCols, j)
+    }
     BundleGroup(mcParam, coord=Some(coord))
   }
 }

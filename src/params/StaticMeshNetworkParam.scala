@@ -6,13 +6,14 @@ import prism._
 import prism.node._
 import prism.collection.mutable.Table
 
-abstract class MeshNetworkParam[B<:BundleType:ClassTag] extends Parameter {
+abstract class StaticMeshNetworkParam[B<:BundleType:ClassTag] extends Parameter {
   val bct = implicitly[ClassTag[B]]
-  val channelWidth:ChannelWidth
+  val channelWidth:StaticChannelWidth
+
 }
 
-trait ChannelWidth extends Table[String, String, Int]
-object ChannelWidth {
+trait StaticChannelWidth extends Table[String, String, Int]
+object StaticChannelWidth {
   def empty = new Table[String, String, Int] (
     values=Map(
       "pos"->List("left", "right","center","top","bottom"), 
@@ -22,12 +23,12 @@ object ChannelWidth {
       "dstDir"->GridBundle.eightDirections
     ), 
     default=Some(0)
-  ) with ChannelWidth
+  ) with StaticChannelWidth
 }
 
-case class MeshControlNetworkParam(
-  channelWidth:ChannelWidth=ChannelWidth.empty
-) extends MeshNetworkParam[Bit] {
+case class StaticMeshControlNetworkParam(
+  channelWidth:StaticChannelWidth=StaticChannelWidth.empty
+) extends StaticMeshNetworkParam[Bit] {
   // switch to switch channel width
   channelWidth("src"->"sb", "dst"->"sb") = 6
 
@@ -69,9 +70,9 @@ case class MeshControlNetworkParam(
   channelWidth("pos"->List("top", "bottom"), "src"->"sb", "dst"->"arg") = 1
 }
 
-case class MeshScalarNetworkParam(
-  channelWidth:ChannelWidth=ChannelWidth.empty
-) extends MeshNetworkParam[Word] {
+case class StaticMeshScalarNetworkParam(
+  channelWidth:StaticChannelWidth=StaticChannelWidth.empty
+) extends StaticMeshNetworkParam[Word] {
   // switch to switch channel width
   channelWidth("src"->"sb", "dst"->"sb") = 4
 
@@ -118,9 +119,9 @@ case class MeshScalarNetworkParam(
   channelWidth("pos"->List("top", "bottom"), "src"->"sb", "dst"->"arg") = 1
 }
 
-case class MeshVectorNetworkParam(
-  channelWidth:ChannelWidth=ChannelWidth.empty
-) extends MeshNetworkParam[Vector] {
+case class StaticMeshVectorNetworkParam(
+  channelWidth:StaticChannelWidth=StaticChannelWidth.empty
+) extends StaticMeshNetworkParam[Vector] {
   // switch to switch channel width
   channelWidth("src"->"sb", "dst"->"sb") = 4
 

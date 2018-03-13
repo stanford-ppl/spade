@@ -3,14 +3,37 @@ package spade.params
 import spade.node._
 import prism.node._
 
-case class MeshTopParam (
+trait MeshTopParam extends TopParam {
+  val numRows:Int
+  val numCols:Int
+  val centrolPattern:GridCentrolPattern
+  val fringePattern:GridFringePattern
+}
+
+case class StaticMeshTopParam (
   numRows:Int=2,
   numCols:Int=2,
   centrolPattern:GridCentrolPattern=Checkerboard(),
   fringePattern:GridFringePattern=MCOnly(),
-  val networkParams:List[MeshNetworkParam[_<:BundleType]] = List(
-    MeshControlNetworkParam(),
-    MeshScalarNetworkParam(),
-    MeshVectorNetworkParam()
+  val networkParams:List[StaticMeshNetworkParam[_<:BundleType]] = List(
+    StaticMeshControlNetworkParam(),
+    StaticMeshScalarNetworkParam(),
+    StaticMeshVectorNetworkParam()
   )
-) extends TopParam
+) extends MeshTopParam {
+  val busWithReady = false
+}
+
+case class DynamicMeshTopParam (
+  numRows:Int=2,
+  numCols:Int=2,
+  centrolPattern:GridCentrolPattern=Checkerboard(),
+  fringePattern:GridFringePattern=MCOnly(),
+  val networkParams:List[DynamicMeshNetworkParam[_<:BundleType]] = List(
+    DynamicMeshControlNetworkParam(),
+    DynamicMeshScalarNetworkParam(),
+    DynamicMeshVectorNetworkParam()
+  )
+) extends MeshTopParam {
+  val busWithReady = true
+}
