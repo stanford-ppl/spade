@@ -7,6 +7,7 @@ import spade.util._
 
 import prism._
 import scala.collection.mutable._
+import scala.language.reflectiveCalls
 
 abstract class MeshTop(val param:MeshTopParam)(implicit design:Design) extends Top(param) {
   import param._

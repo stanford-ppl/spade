@@ -51,4 +51,5 @@ package object node extends SpadeEnums {
     case n:StaticMeshTop => true
     case n => false
   }
+
 }
