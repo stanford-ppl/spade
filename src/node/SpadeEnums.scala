@@ -6,9 +6,6 @@ trait SpadeEnums {
   trait Bit extends BundleType
   trait Word extends BundleType
   trait Vector extends BundleType
-  case object Bit extends Bit
-  case object Word extends Word
-  case object Vector extends Vector
 
   trait RegColor extends Enum
   case object VecInReg extends RegColor

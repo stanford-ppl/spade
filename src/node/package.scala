@@ -5,6 +5,7 @@ import spade.network._
 import prism._
 
 import scala.language.higherKinds
+import scala.language.reflectiveCalls
 
 package object node extends SpadeEnums {
 

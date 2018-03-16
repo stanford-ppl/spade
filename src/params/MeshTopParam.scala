@@ -15,7 +15,7 @@ case class StaticMeshTopParam (
   numCols:Int=2,
   centrolPattern:GridCentrolPattern=Checkerboard(),
   fringePattern:GridFringePattern=MCOnly(),
-  val networkParams:List[StaticMeshNetworkParam[_<:BundleType]] = List(
+  networkParams:List[StaticMeshNetworkParam[_<:BundleType]] = List(
     StaticMeshControlNetworkParam(),
     StaticMeshScalarNetworkParam(),
     StaticMeshVectorNetworkParam()
@@ -29,7 +29,7 @@ case class DynamicMeshTopParam (
   numCols:Int=2,
   centrolPattern:GridCentrolPattern=Checkerboard(),
   fringePattern:GridFringePattern=MCOnly(),
-  val networkParams:List[DynamicMeshNetworkParam[_<:BundleType]] = List(
+  networkParams:List[DynamicMeshNetworkParam[_<:BundleType]] = List(
     DynamicMeshControlNetworkParam(),
     DynamicMeshScalarNetworkParam(),
     DynamicMeshVectorNetworkParam()
