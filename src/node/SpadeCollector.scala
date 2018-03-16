@@ -12,8 +12,8 @@ trait SpadeCollector extends GraphCollector[SpadeNode] { self:SpadeNode =>
     typeOf[M] match {
       case tag if tag <:< typeOf[Routable] => 
         // Performance optimization
-        collectDown[Routable](depth, logger).collect { case m:M => m }
-      case _ => collectDown[M](depth, logger)
+        super.collectDown[Routable](depth, logger).collect { case m:M => m }
+      case _ => super.collectDown[M](depth, logger)
     }
   }
 

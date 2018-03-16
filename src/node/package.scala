@@ -31,6 +31,7 @@ package object node extends SpadeEnums {
     case x:NetworkBundle[_] => x.bct
     case x:StaticMeshNetwork[_] => x.bct
     case x:DynamicMeshNetwork[_] => x.bct
+    case x:FIFO[_] => x.bct
     case x => throw PIRException(s"don't have ClassTag[_<:BundleType] for $x")
   }
 

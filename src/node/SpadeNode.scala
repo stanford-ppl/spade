@@ -9,5 +9,10 @@ abstract class SpadeNode(implicit design:Design) extends Node[SpadeNode] with Sp
   type N = SpadeNode
   type P = Module
   type A = Bundle[_]
+
+  def qindex(implicit design:Design) = {
+    import design.spademeta._
+    s"${nameOf.get(this).getOrElse(className)}${id}${indexOf.get(this).fold("")(indices => s"[${indices.mkString(",")}]")}"
+  }
 }
 
