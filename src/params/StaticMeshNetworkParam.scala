@@ -8,8 +8,13 @@ import prism.collection.mutable.Table
 
 abstract class StaticMeshNetworkParam[B<:BundleType:ClassTag] extends Parameter {
   val bct = implicitly[ClassTag[B]]
+  lazy val meshTopParam = collectOut[MeshTopParam]().head
+  lazy val numRows:Int = meshTopParam.numRows
+  lazy val numCols:Int = meshTopParam.numCols
+  lazy val argFringeParam = meshTopParam.fringePattern.argFringeParam
+  lazy val numArgIns:Int = argFringeParam.numArgIns
+  lazy val numArgOuts:Int = argFringeParam.numArgOuts
   val channelWidth:StaticChannelWidth
-
 }
 
 trait StaticChannelWidth extends Table[String, String, Int]

@@ -7,12 +7,12 @@ import spade.node._
 
 case class DefaultSIMDParam (
   numStages:Int,
-  numLanes:Int,
+  vectorized:Boolean,
   numRegs:Int
 ) extends SIMDParam {
-  val numReductionStages = (Math.log(numLanes) / Math.log(2)).toInt
-  val numNonReductionStages = numStages - numReductionStages
-  val reductionIndices = List.tabulate(numStages){ i =>
+  lazy val numReductionStages = (Math.log(numLanes) / Math.log(2)).toInt
+  lazy val numNonReductionStages = numStages - numReductionStages
+  lazy val reductionIndices = List.tabulate(numStages){ i =>
     if (i >= numNonReductionStages) Some(i - numNonReductionStages) else None
   }
   def set(cu:CU):Unit = {
@@ -30,8 +30,11 @@ case class DefaultSIMDParam (
 }
 
 trait SIMDParam extends Parameter {
-  val numLanes:Int
   val numRegs:Int
+  val vectorized:Boolean
+  lazy val meshTopParam = collectOut[MeshTopParam]().head
+  lazy val vecWidth = meshTopParam.vecWidth
+  lazy val numLanes:Int = if (vectorized) vecWidth else 1
   val reductionIndices:List[Option[Int]]
   def set(cu:CU):Unit
   val pipeRegParams = List.tabulate(numRegs) { ir => PipeRegParam() }

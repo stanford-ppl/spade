@@ -16,8 +16,6 @@ class StaticMeshNetwork[B<:BundleType](param:StaticMeshNetworkParam[B], top:Stat
   implicit val bct = param.bct
   import param._
   import top._
-  import top.param._
-  import fringePattern.argFringeParam._
 
   val bundleOf = mutable.Map[BundleGroup, GridBundle[B]]()
 
