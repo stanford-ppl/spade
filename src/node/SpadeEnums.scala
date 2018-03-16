@@ -17,5 +17,4 @@ trait SpadeEnums {
   case object CounterReg extends RegColor
   case object ReduceReg extends RegColor
   case object AccumReg extends RegColor
-
 }

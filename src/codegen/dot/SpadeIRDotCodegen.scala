@@ -31,7 +31,7 @@ class SpadeIRDotCodegen[M<:SpadeNode:ClassTag:TypeTag](val fileName:String)(impl
   }
 
   override def runPass = {
-    collectDown[M](compiler.top).headOption.foreach { node =>
+    compiler.top.collectDown[M]().headOption.foreach { node =>
       traverseNode(node)
     }
   }

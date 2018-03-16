@@ -53,4 +53,6 @@ package object node extends SpadeEnums {
     case n => false
   }
 
+  def cuOf(n:SpadeNode) = n.collectUp[CU]().headOption
+
 }

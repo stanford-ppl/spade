@@ -7,7 +7,7 @@ import prism._
 import prism.codegen._
 import prism.traversal._
 
-abstract class ParamCodegen(implicit compiler:Spade) extends Pass with BFSTopologicalTraversal with Codegen with GraphCollector {
+abstract class ParamCodegen(implicit compiler:Spade) extends Pass with BFSTopologicalTraversal with Codegen {
   type N = Parameter
 
   override def runPass = {
