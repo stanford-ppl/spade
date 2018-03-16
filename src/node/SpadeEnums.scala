@@ -1,7 +1,6 @@
-package spade
-
+package spade.node
 import prism.enums._
-trait SpadeEnums {
+
   sealed trait BundleType extends Enum
   trait Bit extends BundleType
   trait Word extends BundleType
@@ -17,4 +16,3 @@ trait SpadeEnums {
   case object CounterReg extends RegColor
   case object ReduceReg extends RegColor
   case object AccumReg extends RegColor
-}

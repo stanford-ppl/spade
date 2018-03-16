@@ -7,7 +7,7 @@ import prism._
 import scala.language.higherKinds
 import scala.language.reflectiveCalls
 
-package object node extends SpadeEnums {
+package object node {
 
   private[node] type Design = SpadeDesign
 
