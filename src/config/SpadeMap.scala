@@ -22,6 +22,14 @@ trait SpadeMapLike { self:Product =>
     val constructor = this.getClass.getConstructors()(0) 
     constructor.newInstance(args.map(_.asInstanceOf[Object]):_*).asInstanceOf[S]
   }
+  def set[M:ClassTag](field:M):S = {
+    val args = productIterator.toList.map {
+      case map:M => field
+      case map => map
+    }
+    val constructor = this.getClass.getConstructors()(0) 
+    constructor.newInstance(args.map(_.asInstanceOf[Object]):_*).asInstanceOf[S]
+  }
 }
 case class SpadeMap (
   fimap:FIMap,
