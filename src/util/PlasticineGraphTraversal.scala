@@ -1,14 +1,11 @@
-package spade.pass
+package spade.util
 
 import spade._
 import spade.node._
-import spade.config._
-import spade.util._
-import pirc.enums._
 
-import pirc._
-import pirc.util._
-import pirc.codegen.Logger
+import prism._
+import prism.util._
+import prism.traversal._
 
 import scala.language.postfixOps
 import scala.language.existentials
@@ -19,42 +16,41 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
 
   type S = Routable
   type C = Int
-  type PIO = Bundle[_<:BundleType] 
   type PI = Input[_<:BundleType]
   type PO = Output[_<:BundleType]
-  type Edge = (PIO, PIO)
+  type Edge = (Port[_<:BundleType], Port[_<:BundleType])
   type FE = (PO, PI) 
   type BE = (PI, PO)
   type M = SpadeMapLike
 
-  def setConfig[E<:Edge](map:M, path:List[(S, E)]):M = {
-    var mp = map
-    path.zipWithIndex.foreach { case ((node, (io1, io2)), i) => 
-      val (out, in, outFrom) = (io1, io2) match {
-        case (out:PO, in:PI) => 
-          val outFrom = out.src match {
-            case sb:SwitchBox => Some(path(i-1)._2._2.asInput.asGlobal)
-            case _ => None
-          }
-          (out, in, outFrom)
-        case (in:PI, out:PO) => (out, in)
-          val outFrom = out.src match {
-            case sb:SwitchBox => Some(path(i+1)._2._1.asInput.asGlobal)
-            case _ => None
-          }
-          (out, in, outFrom)
-      }
-      mp = mp.set[FIMap](in, out)
-      out match {
-        case out:GlobalOutput[_,_] =>
-          outFrom.foreach { outFrom => // Config SwitchBox
-            mp = mp.set[FIMap](out.ic, outFrom.ic)
-          }
-        case _ =>
-      }
-    }
-    mp
-  }
+  //def setConfig[E<:Edge](map:M, path:List[(S, E)]):M = {
+    //var mp = map
+    //path.zipWithIndex.foreach { case ((node, (io1, io2)), i) => 
+      //val (out, in, outFrom) = (io1, io2) match {
+        //case (out:PO, in:PI) => 
+          //val outFrom = out.src match {
+            //case sb:SwitchBox => Some(path(i-1)._2._2.asInput.asGlobal)
+            //case _ => None
+          //}
+          //(out, in, outFrom)
+        //case (in:PI, out:PO) => (out, in)
+          //val outFrom = out.src match {
+            //case sb:SwitchBox => Some(path(i+1)._2._1.asInput.asGlobal)
+            //case _ => None
+          //}
+          //(out, in, outFrom)
+      //}
+      //mp = mp.set[FIMap](in, out)
+      //out match {
+        //case out:GlobalOutput[_,_] =>
+          //outFrom.foreach { outFrom => // Config SwitchBox
+            //mp = mp.set[FIMap](out.ic, outFrom.ic)
+          //}
+        //case _ =>
+      //}
+    //}
+    //mp
+  //}
 
   def advance[PH,PT](
     tails:(S, Option[PH]) => Seq[PT], 
@@ -64,7 +60,7 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
   )(n:S, prevEdge:Option[(PT,PH)], c:C):Seq[(S, (PT,PH))] = {
     type X = (S,(PT,PH))
     n match {
-      case n:Controller if n != start => Nil
+      case n if !n.isInstanceOf[SwitchBox] && n != start => Nil
       case n =>
         val head = prevEdge.map(_._2)
         tails(n, head).flatMap[X, Seq[X]]{ out => 
@@ -80,10 +76,9 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
     tails:(S, Option[PI]) => Seq[PO], 
     start:S
   )(n:S, prevEdge:Option[(PO,PI)], c:C):Seq[(S, (PO,PI))] = {
-
     advance[PI,PO](
       tails   = tails,
-      heads   = (o:PO) => o.fanOuts,
+      heads   = (o:PO) => o.connected,
       src     = (i:PI) => i.src.asInstanceOf[S],
       start   = start
     )(n, prevEdge, c)
@@ -95,10 +90,11 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
     advance:(S, Option[A], C) => Seq[(S, A, C)],
     map:M,
     finPass: (M,List[(S,A)],C) => M,
-    logger:Option[Logger] = None
+    logger:Option[Logging] = None
   ):Either[PIRException, M] = {
     def fp(route:List[(S,A)], cost:C):M = {
-      finPass(setConfig(map, route),route,cost)
+      //finPass(setConfig(map, route),route,cost)
+      finPass(map, route, cost)
     }
     def adv(n:S, backPointers:BackPointer[S,A,C], c:C):Seq[(S,A,C)] = {
       val prevEdge = backPointers.get(n).map (_._2)
@@ -110,7 +106,7 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
       zeroCost = 0,
       sumCost  = { (a:C, b:C) => a + b },
       advance  = adv _,
-      quote = spade.util.quote _,
+      quote    = (n:S) => n.qindex,
       finPass = fp _,
       logger = logger
     )
@@ -122,7 +118,7 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
     advance:(S,Option[A],C) => Seq[(S, A)],
     map:M,
     finPass: (M,C) => M,
-    logger:Option[Logger] = None
+    logger:Option[Logging] = None
   ):Either[PIRException,M] = {
     def simpleCostAdvance(n:S, prevEdge:Option[A], c:C):Seq[(S, A, C)] = {
       advance(n,prevEdge,c).map { case (n, a) => (n, a, 1) }
@@ -130,9 +126,7 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
     def fp(mp:M, route:List[(S,A)], cost:C) = {
       finPass(mp, cost)
     }
-    logger.foreach { l =>
-      l.dprintln(s"start=${quote(start)} end=${quote(end)} --------------")
-    }
+    dbg(logger, s"start=${start.qindex} end=${end.qindex} --------------")
     uniformCostSearch (
       start   = start,
       end     = end,
@@ -146,7 +140,7 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
   def uniformCostSpan[A <: Edge](
     start:S, 
     advance:(S, Option[A], C) => Seq[(S, A, C)], 
-    logger:Option[Logger]
+    logger:Option[Logging]
   ):Seq[(S,C)] = {
     def adv(n:S, backPointers:BackPointer[S,A,C], c:C):Seq[(S,A,C)] = {
       val prevEdge = backPointers.get(n).map (_._2)
@@ -157,7 +151,7 @@ trait PlasticineGraphTraversal extends UniformCostGraphSearch {
       zeroCost = 0,
       sumCost  = { (a:C, b:C) => a + b },
       advance  = adv _,
-      quote    = spade.util.quote _,
+      quote    = (n:S) => n.qindex,
       logger   = logger
     )
   }
