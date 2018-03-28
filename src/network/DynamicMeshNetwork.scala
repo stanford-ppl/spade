@@ -17,7 +17,7 @@ class DynamicMeshNetwork[B<:PinType](param:DynamicMeshNetworkParam[B], top:Dynam
   import param._
   import top._
 
-  val bundleOf = mutable.Map[BundleSet, GridBundle[B]]()
+  val bundleOf = mutable.Map[BundleGroup, GridBundle[B]]()
 
   bundles.foreach { node => 
     val bundle = GridBundle[B]()
@@ -25,7 +25,7 @@ class DynamicMeshNetwork[B<:PinType](param:DynamicMeshNetworkParam[B], top:Dynam
     bundleOf(node) = bundle
   }
 
-  def tpOf(node:BundleSet) = node.param match {
+  def tpOf(node:BundleGroup) = node.param match {
     case param:PCUParam => "pcu"
     case param:PMUParam => "pmu"
     case param:SCUParam => "scu"
@@ -34,7 +34,7 @@ class DynamicMeshNetwork[B<:PinType](param:DynamicMeshNetworkParam[B], top:Dynam
     case param:MCParam => "mc"
   }
 
-  def connect(out:BundleSet, in:BundleSet)(implicit design:Design):Unit = {
+  def connect(out:BundleGroup, in:BundleGroup)(implicit design:Design):Unit = {
     val cw = channelWidth("src"->tpOf(out), "dst"->tpOf(in))
     val key = Seq("src"->tpOf(out), "dst"->tpOf(in))
     (tpOf(out), tpOf(in)) match {
