@@ -14,7 +14,7 @@ case class FIMap(fmap:OneToOneMap[K,V], bmap:OneToManyMap[V,K]) extends BiManyTo
 }
 
 object FIMap {
-  type K = Input[_<:BundleType] 
-  type V = Output[_<:BundleType]
+  type K = Input[_<:PinType] 
+  type V = Output[_<:PinType]
   def empty = FIMap(OneToOneMap.empty, OneToManyMap.empty)
 }

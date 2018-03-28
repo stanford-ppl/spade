@@ -24,7 +24,7 @@ class SpadeIRDotCodegen[M<:SpadeNode:ClassTag:TypeTag](val fileName:String)(impl
       case n:Counter => emitSingleNode(n)
       case n:FuncUnit => emitSingleNode(n)
       case n:PipeReg => emitSingleNode(n)
-      case n:Bundle[_] => emitSingleNode(n)
+      case n:Pin[_] => emitSingleNode(n)
       case n:BroadCast[_,_] => emitSingleNode(n)
       case n => super.emitNode(n) 
     }

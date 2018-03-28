@@ -8,7 +8,7 @@ trait SpadeWorld {
   implicit val nct = classTag[N]
   type N = SpadeNode
   type P = Module
-  type A = Bundle[_]
+  type A = Pin[_]
   type D = SpadeDesign
 }
 

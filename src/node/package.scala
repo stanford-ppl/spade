@@ -27,17 +27,17 @@ package object node {
 
   def bctOf(x:Any):ClassTag[_] = x match {
     case x:DirectedEdge[_,_] => x.bct
+    case x:Pin[_] => x.bct
     case x:Bundle[_] => x.bct
-    case x:NetworkBundle[_] => x.bct
     case x:StaticMeshNetwork[_] => x.bct
     case x:DynamicMeshNetwork[_] => x.bct
     case x:FIFO[_] => x.bct
-    case x => throw PIRException(s"don't have ClassTag[_<:BundleType] for $x")
+    case x => throw PIRException(s"don't have ClassTag[_<:PinType] for $x")
   }
 
-  def is[B<:BundleType:ClassTag](x:Any) = implicitly[ClassTag[B]] == bctOf(x)
+  def is[B<:PinType:ClassTag](x:Any) = implicitly[ClassTag[B]] == bctOf(x)
 
-  def as[B<:BundleType:ClassTag,A[_<:BundleType]](x:A[_]) = if (is[B](x)) Some(x.asInstanceOf[A[B]]) else None
+  def as[B<:PinType:ClassTag,A[_<:PinType]](x:A[_]) = if (is[B](x)) Some(x.asInstanceOf[A[B]]) else None
 
   def isMesh(n:Top) = n match {
     case n:MeshTop => true

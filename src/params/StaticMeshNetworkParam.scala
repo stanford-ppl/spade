@@ -6,7 +6,7 @@ import prism._
 import prism.node._
 import prism.collection.mutable.Table
 
-abstract class StaticMeshNetworkParam[B<:BundleType:ClassTag] extends Parameter {
+abstract class StaticMeshNetworkParam[B<:PinType:ClassTag] extends Parameter {
   val bct = implicitly[ClassTag[B]]
   lazy val meshTopParam = collectOut[MeshTopParam]().head
   lazy val numRows:Int = meshTopParam.numRows

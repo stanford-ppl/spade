@@ -8,7 +8,7 @@ abstract class SpadeNode(implicit design:Design) extends Node[SpadeNode] with Sp
 
   type N = SpadeNode
   type P = Module
-  type A = Bundle[_]
+  type A = Pin[_]
 
   def qindex = {
     import design.spademeta._

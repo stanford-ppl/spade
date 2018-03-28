@@ -1,10 +1,10 @@
 package spade.node
 import prism.enums._
 
-  sealed trait BundleType extends Enum
-  trait Bit extends BundleType
-  trait Word extends BundleType
-  trait Vector extends BundleType
+  sealed trait PinType extends Enum
+  trait Bit extends PinType
+  trait Word extends PinType
+  trait Vector extends PinType
 
   trait RegColor extends Enum
   case object VecInReg extends RegColor

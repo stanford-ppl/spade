@@ -6,7 +6,7 @@ import scala.reflect._
 
 import scala.collection.mutable._
 
-abstract class CU(val param:CUParam, nios:List[NetworkBundle[_<:BundleType]])(implicit design:Design) extends Routable(nios) {
+abstract class CU(val param:CUParam, nios:List[Bundle[_<:PinType]])(implicit design:Design) extends Routable(nios) {
   param.set(this) // Compute derived parameters
   import param._
 
@@ -64,8 +64,8 @@ abstract class CU(val param:CUParam, nios:List[NetworkBundle[_<:BundleType]])(im
 
 }
 
-case class PCU(override val param:PCUParam, override val nios:List[NetworkBundle[_<:BundleType]])(implicit design:Design) extends CU(param, nios) 
-case class PMU(override val param:PMUParam, override val nios:List[NetworkBundle[_<:BundleType]])(implicit design:Design) extends CU(param, nios) 
-case class SCU(override val param:SCUParam, override val nios:List[NetworkBundle[_<:BundleType]])(implicit design:Design) extends CU(param, nios) 
-case class SramAG(override val param:SramAGParam, override val nios:List[NetworkBundle[_<:BundleType]])(implicit design:Design) extends CU(param, nios) 
-case class DramAG(override val param:DramAGParam, override val nios:List[NetworkBundle[_<:BundleType]])(implicit design:Design) extends CU(param, nios) 
+case class PCU(override val param:PCUParam, override val nios:List[Bundle[_<:PinType]])(implicit design:Design) extends CU(param, nios) 
+case class PMU(override val param:PMUParam, override val nios:List[Bundle[_<:PinType]])(implicit design:Design) extends CU(param, nios) 
+case class SCU(override val param:SCUParam, override val nios:List[Bundle[_<:PinType]])(implicit design:Design) extends CU(param, nios) 
+case class SramAG(override val param:SramAGParam, override val nios:List[Bundle[_<:PinType]])(implicit design:Design) extends CU(param, nios) 
+case class DramAG(override val param:DramAGParam, override val nios:List[Bundle[_<:PinType]])(implicit design:Design) extends CU(param, nios) 

@@ -31,7 +31,7 @@ case class SRAM(param:SRAMParam)(implicit design:Design) extends OnChipMem(param
   val readPort = Output[Vector](s"readPort")
 }
 
-case class FIFO[B<:BundleType:ClassTag](param:FIFOParam)(implicit design:Design) extends OnChipMem(param) {
+case class FIFO[B<:PinType:ClassTag](param:FIFOParam)(implicit design:Design) extends OnChipMem(param) {
   val bct = implicitly[ClassTag[B]]
   val writePort = Input[B](s"writePort")
   val readPort = Output[B](s"readPort")

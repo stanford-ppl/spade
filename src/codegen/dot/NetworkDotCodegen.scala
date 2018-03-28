@@ -9,14 +9,14 @@ import prism.codegen._
 import sys.process._
 import scala.collection.mutable
 
-class NetworkDotCodegen[B<:BundleType:ClassTag](val fileName:String)(implicit compiler:Spade) extends SpadeCodegen with IRDotCodegen {
+class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compiler:Spade) extends SpadeCodegen with IRDotCodegen {
 
   import spademeta._
 
   def getLabel(n:Any) = quote(n)
 
   def labelWithPort(attr:DotAttr, n:Routable) = {
-    val nio = n.nios.flatMap(as[B, NetworkBundle]).head.asInstanceOf[GridBundle[B]]
+    val nio = n.nios.flatMap(as[B, Bundle]).head.asInstanceOf[GridBundle[B]]
     val recs = mutable.ListBuffer[String]()
     def ports(dir:String) = {
       var ins = nio.inAt(dir).map{io => s"<$io> $io(${indexOf(io)})"}

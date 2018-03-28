@@ -12,12 +12,12 @@ import scala.language.reflectiveCalls
 
 import scala.collection.mutable
 
-class StaticMeshNetwork[B<:BundleType](param:StaticMeshNetworkParam[B], top:StaticMeshTop)(implicit design:Design) {
+class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticMeshTop)(implicit design:Design) {
   implicit val bct = param.bct
   import param._
   import top._
 
-  val bundleOf = mutable.Map[BundleGroup, GridBundle[B]]()
+  val bundleOf = mutable.Map[BundleSet, GridBundle[B]]()
 
   bundles.foreach { node => 
     val bundle = GridBundle[B]()
@@ -25,7 +25,7 @@ class StaticMeshNetwork[B<:BundleType](param:StaticMeshNetworkParam[B], top:Stat
     bundleOf(node) = bundle
   }
 
-  def tpOf(node:BundleGroup) = node.param match {
+  def tpOf(node:BundleSet) = node.param match {
     case param:PCUParam => "pcu"
     case param:PMUParam => "pmu"
     case param:SCUParam => "scu"
@@ -34,7 +34,7 @@ class StaticMeshNetwork[B<:BundleType](param:StaticMeshNetworkParam[B], top:Stat
     case param:MCParam => "mc"
   }
 
-  def connect(out:BundleGroup, outDir:String, in:BundleGroup, inDir:String, pos:String)(implicit design:Design):Unit = {
+  def connect(out:BundleSet, outDir:String, in:BundleSet, inDir:String, pos:String)(implicit design:Design):Unit = {
     val cw = channelWidth("pos"->pos, "src"->tpOf(out), "dst"->tpOf(in), "srcDir"->inDir, "dstDir"->outDir)
     val key = Seq("pos"->pos, "src"->tpOf(out), "dst"->tpOf(in), "srcDir"->inDir, "dstDir"->outDir)
     (tpOf(out), tpOf(in)) match {
