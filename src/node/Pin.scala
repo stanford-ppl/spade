@@ -23,6 +23,8 @@ class InputEdge[B<:PinType:ClassTag](val src:Pin[B])(implicit design:Design) ext
   def connect(p:Pin[B]):Unit = connect(p.out) 
   def <== (p:Pin[B]):Unit = connect(p) 
   def <== (ps:List[Pin[B]]):Unit = ps.foreach { p => connect(p) }
+  def <== (p:OutputEdge[B]):Unit = connect(p) 
+  def <<== (p:OutputEdge[_]):Unit = connect(p.asInstanceOf[OutputEdge[B]]) 
 }
 class OutputEdge[B<:PinType:ClassTag](val src:Pin[B])(implicit design:Design) extends DirectedEdge[B,InputEdge[B]] with prism.node.Output[SpadeNode]  {
   val id = design.nextId

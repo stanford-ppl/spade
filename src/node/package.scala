@@ -39,6 +39,13 @@ package object node {
 
   def as[B<:PinType:ClassTag,A[_<:PinType]](x:A[_]) = if (is[B](x)) Some(x.asInstanceOf[A[B]]) else None
 
+  def bundleOf[B<:PinType:ClassTag:TypeTag](x:SpadeNode) = {
+    x.collectDown[Bundle[B]]().headOption
+  }
+  def cbundleOf(x:SpadeNode) = bundleOf[Bit](x)
+  def sbundleOf(x:SpadeNode) = bundleOf[Word](x)
+  def vbundleOf(x:SpadeNode) = bundleOf[Vector](x)
+
   def isMesh(n:Top) = n match {
     case n:MeshTop => true
     case _ => false
@@ -55,5 +62,7 @@ package object node {
   }
 
   def cuOf(n:SpadeNode) = n.collectUp[CU]().headOption
+
+  def routableOf(n:SpadeNode) = n.collectUp[Routable]().headOption
 
 }

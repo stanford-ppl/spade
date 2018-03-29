@@ -42,22 +42,22 @@ abstract class CU(val param:CUParam, nios:List[Bundle[_<:PinType]])(implicit des
       last.pipeRegs.foreach { pipeReg =>
         pipeReg.param.colors.foreach {
           case VecOutReg =>
-            vio.foreach { _.outputs.foreach { _.ic <== pipeReg.out } }
+            vbundleOf(this).foreach { _.outputs.foreach { _.ic <== pipeReg.out } }
           case ScalarOutReg =>
-            sio.foreach { _.outputs.foreach { _.ic <== pipeReg.out.slice[Word](0) } }
+            sbundleOf(this).foreach { _.outputs.foreach { _.ic <== pipeReg.out.slice[Word](0) } }
           case _ =>
         }
       }
     }
   }
   //// Memory Connection
-  vio.foreach { vio =>
+  vbundleOf(this).foreach { vio =>
     (vio.inputs.zip(vectorFifos)).foreach { case (input, fifo) => fifo.writePort <== input.ic }
   }
-  sio.foreach { sio =>
+  sbundleOf(this).foreach { sio =>
     scalarFifos.foreach { fifo => fifo.writePort <== sio.inputs.map(_.ic) }
   }
-  cio.foreach { cio =>
+  cbundleOf(this).foreach { cio =>
     controlFifos.foreach { fifo => fifo.writePort <== cio.inputs.map(_.ic) }
   }
   //TODO SRAM. multiple writer
