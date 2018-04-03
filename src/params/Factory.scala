@@ -1,19 +1,8 @@
-package spade.params
+package spade.node
 
-import spade._
-import spade.node._
-import spade.network._
-
-import prism.node._
 import prism.enums._
-import prism.util._
-import prism._
-
-import scala.language.reflectiveCalls
-
 import scala.collection.mutable._
 import pureconfig._
-import java.io.File
 
 object Factory extends Logging {
   def create(param:Any)(implicit design:SpadeDesign) = param match {
@@ -77,7 +66,7 @@ object Factory extends Logging {
   
   lazy val plasticineConf = {
     val path = s"${Config.SPATIAL_HOME}/apps/resources/application.conf"
-    val config = loadConfig[PlasticineConf](com.typesafe.config.ConfigFactory.parseFile(new File(path)), "plasticine") match {
+    val config = loadConfig[PlasticineConf](com.typesafe.config.ConfigFactory.parseFile(new java.io.File(path)), "plasticine") match {
       case Right(config) => 
         info(s"Loading configuration from $path")
         config

@@ -1,10 +1,6 @@
 package spade.codegen
 
-import spade._
-import spade.node._
-
-import prism._
-import prism.codegen._
+import spade.node._ 
 
 class SpadeIRDotCodegen[M<:SpadeNode:ClassTag:TypeTag](val fileName:String)(implicit compiler:Spade) extends SpadeCodegen with IRDotCodegen {
 

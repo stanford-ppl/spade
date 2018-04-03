@@ -1,7 +1,4 @@
-package spade.params
-
-import spade.node._
-import prism.node._
+package spade.node
 
 trait MeshTopParam extends TopParam {
   val numRows:Int

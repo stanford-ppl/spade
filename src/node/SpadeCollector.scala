@@ -1,12 +1,6 @@
 package spade.node
 
-import spade._
-import spade.node._
-
-import prism._
-import prism.traversal._
-
-trait SpadeCollector extends GraphCollector[SpadeNode] { self:SpadeNode =>
+trait SpadeCollector extends prism.traversal.GraphCollector[SpadeNode] { self:SpadeNode =>
 
   override def collectDown[M<:SpadeNode:ClassTag:TypeTag](depth:Int= -1, logger:Option[Logging]=None):List[M] = {
     // Performance optimization

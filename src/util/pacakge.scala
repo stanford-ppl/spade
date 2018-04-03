@@ -1,15 +1,16 @@
 package spade
 
-import spade.node._
-
-import prism._
-import prism.enums._
-
-import scala.language.existentials
-import scala.language.implicitConversions
-import scala.language.higherKinds
-
 package object util {
+  type Spade = spade.Spade
+  type SpadeDesign = spade.node.SpadeDesign
+  type SpadeNode = spade.node.SpadeNode
+  type PinType = spade.node.PinType
+  type Pin[P<:PinType] = spade.node.Pin[P]
+  type Module = spade.node.Module
+  type SpadePass = spade.pass.SpadePass
+  type SpadeWorld = spade.pass.SpadeWorld
+  type SpadeTraversal = spade.pass.SpadeTraversal
+  type SpadeMapLike = spade.config.SpadeMapLike
 
   def zip[T1, T2, T](x1:Option[T1], x2:Option[T2])(lambda:(T1,T2) => T):Option[T] = (x1, x2) match {
     case (Some(x1), Some(x2)) => Some(lambda(x1, x2))

@@ -1,18 +1,8 @@
-package spade.network
-
-import spade._
-import spade.node._
-import spade.params._
-import spade.util._
-
-import prism._
-import prism.collection.mutable.Table
-
-import scala.language.reflectiveCalls
+package spade.node
 
 import scala.collection.mutable
 
-class DynamicMeshNetwork[B<:PinType](param:DynamicMeshNetworkParam[B], top:DynamicMeshTop)(implicit design:Design) {
+class DynamicMeshNetwork[B<:PinType](param:DynamicMeshNetworkParam[B], top:DynamicMeshTop)(implicit design:SpadeDesign) {
   implicit val bct = param.bct
   import param._
   import top._
@@ -34,7 +24,7 @@ class DynamicMeshNetwork[B<:PinType](param:DynamicMeshNetworkParam[B], top:Dynam
     case param:MCParam => "mc"
   }
 
-  def connect(out:BundleGroup, in:BundleGroup)(implicit design:Design):Unit = {
+  def connect(out:BundleGroup, in:BundleGroup)(implicit design:SpadeDesign):Unit = {
     val cw = channelWidth("src"->tpOf(out), "dst"->tpOf(in))
     val key = Seq("src"->tpOf(out), "dst"->tpOf(in))
     (tpOf(out), tpOf(in)) match {

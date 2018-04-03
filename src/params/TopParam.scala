@@ -1,6 +1,5 @@
-package spade.params
+package spade.node
 
-import spade.node._
 import prism.node._
 
 trait TopParam extends Parameter {

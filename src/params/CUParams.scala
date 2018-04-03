@@ -1,6 +1,4 @@
-package spade.params
-
-import spade.node._
+package spade.node
 
 import prism.enums._
 import prism.node._

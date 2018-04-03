@@ -1,10 +1,8 @@
 package spade.config
 
 import spade.node._
-import prism.enums._
 
 import prism.collection.immutable._
-import scala.language.existentials
 
 import FIMap._
 case class FIMap(fmap:OneToOneMap[K,V], bmap:OneToManyMap[V,K]) extends BiManyToOneMapLike[K,V,FIMap] {

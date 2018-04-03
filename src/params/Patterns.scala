@@ -1,16 +1,5 @@
-package spade.params
+package spade.node
                           
-import spade._
-import spade.node._
-import spade.network._
-import prism._
-import prism.node._
-import prism.enums._
-
-import scala.language.reflectiveCalls
-
-import scala.collection.mutable.ListBuffer
-
 sealed trait Pattern extends Parameter
 
 trait GridPattern extends Pattern {

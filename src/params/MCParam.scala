@@ -1,6 +1,4 @@
-package spade.params
-
-import spade.node._
+package spade.node
 
 case class MCParam (
   wOffsetFifoParam:FIFOParam=FIFOParam(size=16),

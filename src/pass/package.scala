@@ -1,13 +1,12 @@
+package spade
 
-package object spade extends spade.util.PrismAlias {
-  type SpadeNode = spade.node.SpadeNode
+package object pass extends spade.util.PrismAlias {
+  type Spade = spade.Spade
   type SpadeDesign = spade.node.SpadeDesign
+  type SpadeNode = spade.node.SpadeNode
   type Module = spade.node.Module
   type PinType = spade.node.PinType
   type Pin[P<:PinType] = spade.node.Pin[P]
-  type SpadePass = spade.pass.SpadePass
-  type SpadeWorld = spade.pass.SpadeWorld
-  type SpadeTraversal = spade.pass.SpadeTraversal
   type SpadeMapLike = spade.config.SpadeMapLike
   type SpadeMetadata = spade.util.SpadeMetadata
 }

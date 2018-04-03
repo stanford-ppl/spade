@@ -1,7 +1,5 @@
 package spade.config
 
-import spade.util._
-
 trait Configuration
 
 trait Configurable {

@@ -1,15 +1,12 @@
 package spade
 
-import spade.params._
-import spade.network._
-import prism._
-
-import scala.language.higherKinds
-import scala.language.reflectiveCalls
-
-package object node {
-
-  private[node] type Design = SpadeDesign
+package object node extends spade.util.PrismAlias {
+  type Spade = spade.Spade
+  type SpadePass = spade.pass.SpadePass
+  type SpadeWorld = spade.pass.SpadeWorld
+  type SpadeTraversal = spade.pass.SpadeTraversal
+  type SpadeMapLike = spade.config.SpadeMapLike
+  type SpadeMetadata = spade.util.SpadeMetadata
 
   def indexing[T<:SpadeNode](ns:List[T])(implicit design:SpadeDesign):List[T] = {
     import design.spademeta._

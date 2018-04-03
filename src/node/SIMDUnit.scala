@@ -1,8 +1,6 @@
 package spade.node
 
-import spade.params._
-
-case class SIMDUnit(param:SIMDParam)(implicit design:Design) extends Module {
+case class SIMDUnit(param:SIMDParam)(implicit design:SpadeDesign) extends Module {
   val stages = Modules("stage", param.stageParams.map { param => Stage(param) })
 
   stages.zipWithIndex.foreach { case (stage, i) =>

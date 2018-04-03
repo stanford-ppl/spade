@@ -1,10 +1,6 @@
 package spade.node
 
-import spade._
-import spade.params._
-import spade.network._
-
-case class MC(param:MCParam, override val nios:List[Bundle[_<:PinType]])(implicit design:Design) extends Routable(nios) {
+case class MC(param:MCParam, override val nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends Routable(nios) {
   import param._
   val wOffset = Module(FIFO[Word](wOffsetFifoParam),"wOffset")
   val rOffset = Module(FIFO[Word](rOffsetFifoParam),"rOffset")

@@ -1,8 +1,4 @@
-package spade
-
-import spade._
-import spade.node._
-import spade.params._
+package spade.node
 
 case class SpadeDesign(param:TopParam)(implicit compiler:Spade) extends prism.node.Design {
   val spademeta = new SpadeMetadata

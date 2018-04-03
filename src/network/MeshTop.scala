@@ -1,15 +1,6 @@
-package spade.network
+package spade.node
 
-import spade._
-import spade.node._
-import spade.params._
-import spade.util._
-
-import prism._
-import scala.collection.mutable._
-import scala.language.reflectiveCalls
-
-abstract class MeshTop(val param:MeshTopParam)(implicit design:Design) extends Top(param) {
+abstract class MeshTop(val param:MeshTopParam)(implicit design:SpadeDesign) extends Top(param) {
   import param._
   import design.spademeta._
 
@@ -23,7 +14,7 @@ abstract class MeshTop(val param:MeshTopParam)(implicit design:Design) extends T
 
 }
 
-case class StaticMeshTop(override val param:StaticMeshTopParam)(implicit design:Design) extends MeshTop(param) {
+case class StaticMeshTop(override val param:StaticMeshTopParam)(implicit design:SpadeDesign) extends MeshTop(param) {
   import param._
   import design.spademeta._
 
@@ -46,7 +37,7 @@ case class StaticMeshTop(override val param:StaticMeshTopParam)(implicit design:
 
 }
 
-case class DynamicMeshTop(override val param:DynamicMeshTopParam)(implicit design:Design) extends MeshTop(param) {
+case class DynamicMeshTop(override val param:DynamicMeshTopParam)(implicit design:SpadeDesign) extends MeshTop(param) {
   import param._
   import design.spademeta._
 

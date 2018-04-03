@@ -1,10 +1,5 @@
 package spade.codegen
 
-import spade._
-import spade.params._
-
-import prism._
-import prism.codegen._
 import prism.collection.mutable._
 
 class ParamScalaCodegen(val fileName:String)(implicit compiler:Spade) extends ParamCodegen with ScalaCodegen {

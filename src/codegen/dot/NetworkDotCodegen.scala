@@ -1,13 +1,8 @@
 package spade.codegen
-import spade._
-import spade.node._
-import spade.params._
 
-import prism._
-import prism.codegen._
+import spade.node._ 
 
 import sys.process._
-import scala.collection.mutable
 
 class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compiler:Spade) extends SpadeCodegen with IRDotCodegen {
 
@@ -17,7 +12,7 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
 
   def labelWithPort(attr:DotAttr, n:Routable) = {
     val nio = n.nios.flatMap(as[B, Bundle]).head.asInstanceOf[GridBundle[B]]
-    val recs = mutable.ListBuffer[String]()
+    val recs = ListBuffer[String]()
     def ports(dir:String) = {
       var ins = nio.inAt(dir).map{io => s"<$io> $io(${indexOf(io)})"}
       var outs = nio.outAt(dir).map{io => s"<$io> $io(${indexOf(io)})"}

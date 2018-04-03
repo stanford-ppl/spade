@@ -1,9 +1,6 @@
 package spade.config
 
-import spade.node._
-
 import prism.collection.immutable._
-import scala.language.existentials
 
 import ConfigMap._
 case class ConfigMap(map:Map[K,V]) extends OneToOneMapLike[K,V,ConfigMap] {

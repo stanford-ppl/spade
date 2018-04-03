@@ -1,7 +1,4 @@
-package spade.params
-
-import prism.enums._
-import prism.node._
+package spade.node
 
 trait OnChipMemParam extends Parameter { 
   val size:Int // Total capacity

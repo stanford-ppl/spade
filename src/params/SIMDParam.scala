@@ -1,9 +1,6 @@
-package spade.params
+package spade.node
 
 import prism.enums._
-import prism.node._
-
-import spade.node._
 
 case class DefaultSIMDParam (
   numStages:Int,

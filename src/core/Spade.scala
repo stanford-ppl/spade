@@ -1,17 +1,8 @@
 package spade
 
-import spade.util._
-import spade.codegen._
-import spade.pass._
-import spade.params._
 import spade.node._
+import spade.codegen._
 
-import prism._
-import prism.util._
-
-import scala.language.implicitConversions
-import scala.collection.mutable.Map
-import scala.collection.mutable.ListBuffer
 import java.io._
 
 trait Spade extends Compiler with SpadeWorld {
@@ -35,7 +26,7 @@ trait Spade extends Compiler with SpadeWorld {
   def load = SpadeConfig.loadDesign
   def save = SpadeConfig.saveDesign
 
-  val designPath = s"${outDir}${File.separator}${name}.spade"
+  val designPath = s"${outDir}${separator}${name}.spade"
 
   lazy val topParam:TopParam = StaticMeshTopParam()
 

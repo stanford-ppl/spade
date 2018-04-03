@@ -1,7 +1,6 @@
-package spade.params
+package spade.node
 
 import prism.enums._
-import prism.node._
 
 case class ArgFringeParam(
   numArgIns:Int=6,

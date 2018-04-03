@@ -1,10 +1,6 @@
 package spade.codegen
-import spade._
 
-import prism._
-import prism.codegen._
-
-class SpadeIRPrinter(val fileName:String)(implicit compiler:Spade) extends SpadeCodegen with IRPrinter {
+class SpadeIRPrinter(val fileName:String)(implicit compiler:Spade) extends SpadeCodegen with prism.codegen.IRPrinter {
 
   lazy val metadata = Some(spademeta)
 

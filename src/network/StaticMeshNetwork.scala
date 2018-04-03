@@ -1,18 +1,8 @@
-package spade.network
-
-import spade._
-import spade.node._
-import spade.params._
-import spade.util._
-
-import prism._
-import prism.collection.mutable.Table
-
-import scala.language.reflectiveCalls
+package spade.node
 
 import scala.collection.mutable
 
-class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticMeshTop)(implicit design:Design) {
+class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticMeshTop)(implicit design:SpadeDesign) {
   implicit val bct = param.bct
   import param._
   import top._
@@ -34,7 +24,7 @@ class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticM
     case param:MCParam => "mc"
   }
 
-  def connect(out:BundleGroup, outDir:String, in:BundleGroup, inDir:String, pos:String)(implicit design:Design):Unit = {
+  def connect(out:BundleGroup, outDir:String, in:BundleGroup, inDir:String, pos:String)(implicit design:SpadeDesign):Unit = {
     val cw = channelWidth("pos"->pos, "src"->tpOf(out), "dst"->tpOf(in), "srcDir"->inDir, "dstDir"->outDir)
     val key = Seq("pos"->pos, "src"->tpOf(out), "dst"->tpOf(in), "srcDir"->inDir, "dstDir"->outDir)
     (tpOf(out), tpOf(in)) match {

@@ -1,16 +1,8 @@
 package spade.util
 
-import spade._
 import spade.node._
 
-import prism._
-import prism.util._
-import prism.mapper._
-
-import scala.language.postfixOps
-import scala.language.existentials
-
-abstract class NetworkAStarSearch[B<:PinType:ClassTag:TypeTag](design:SpadeDesign) extends UniformCostGraphSearch[Bundle[B], (Port[B], Port[B]), Int] { 
+abstract class NetworkAStarSearch[B<:PinType:ClassTag:TypeTag](design:SpadeDesign) extends prism.mapper.UniformCostGraphSearch[Bundle[B], (Port[B], Port[B]), Int] { 
   import design.spademeta._
 
   type Edge = (Port[B], Port[B])
