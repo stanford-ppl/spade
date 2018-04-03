@@ -1,12 +1,7 @@
 package arch
 
-import spade._
-import spade.params._
-
+import spade.node._
 import prism.enums._
-
-import scala.language.implicitConversions
-import scala.language.reflectiveCalls
 
 class StaticMeshCB(numRows:Int=2, numCols:Int=2, numArgIns:Int=3, numArgOuts:Int=3) extends Spade {
   override def toString = s"SN${numRows}x${numCols}"

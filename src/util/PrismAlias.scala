@@ -18,7 +18,7 @@ trait PrismAlias extends prism.util.Misc with prism.mapper.MappingUtil with pris
   val PIRException = prism.exceptions.PIRException
   val Config = prism.Config
 
-  type FactorGraphLike[K,V,S] = prism.collection.immutable.FactorGraphLike[K,V,S]
+  type FactorGraphLike[K,V,S<:FactorGraphLike[K,V,S]] = prism.collection.immutable.FactorGraphLike[K,V,S]
   val InvalidFactorGraph = prism.collection.immutable.InvalidFactorGraph
   type Op = prism.enums.Op
 }
