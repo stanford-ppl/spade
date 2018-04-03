@@ -5,16 +5,13 @@ import spade.node._
 
 import prism._
 import prism.util._
-import prism.traversal._
+import prism.mapper._
 
 import scala.language.postfixOps
 import scala.language.existentials
 
-abstract class NetworkAStarSearch[B<:PinType:ClassTag:TypeTag] extends UniformCostGraphSearch[Bundle[B], (Port[B], Port[B]), Int] { 
-  val spademeta: SpadeMetadata
-  import spademeta._
-
-  implicit def arch:Spade
+abstract class NetworkAStarSearch[B<:PinType:ClassTag:TypeTag](design:SpadeDesign) extends UniformCostGraphSearch[Bundle[B], (Port[B], Port[B]), Int] { 
+  import design.spademeta._
 
   type Edge = (Port[B], Port[B])
   type C = Int
@@ -38,7 +35,8 @@ abstract class NetworkAStarSearch[B<:PinType:ClassTag:TypeTag] extends UniformCo
     }
   }
 
-  def advance(forward:Boolean, end:Option[Routable])(state:Bundle[B], backPointers:BackPointer, pastCost:C):Seq[(Bundle[B], Edge, C)] = {
+  def advance(forward:Boolean, end:Option[Routable])
+              (state:Bundle[B], backPointers:BackPointer, pastCost:C):Seq[(Bundle[B], Edge, C)] = {
     routableOf(state).get match {
       case rt:SwitchBox =>
         /*
@@ -71,7 +69,7 @@ abstract class NetworkAStarSearch[B<:PinType:ClassTag:TypeTag] extends UniformCo
     }
   }
 
-  def search(
+  def search[M](
     start:Routable, 
     end:Routable,
     forward:Boolean,
@@ -96,6 +94,5 @@ abstract class NetworkAStarSearch[B<:PinType:ClassTag:TypeTag] extends UniformCo
       logger=logger
     ).map { case (bundle, cost) => (routableOf(bundle).get, cost) }
   }
-
 
 }
