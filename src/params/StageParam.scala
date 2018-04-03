@@ -1,11 +1,11 @@
 package spade.node
 
-import scala.collection.mutable._
+import scala.collection.mutable
 
 case class PipeRegParam(
-  colors:Set[RegColor]=Set.empty
+  colors:mutable.Set[RegColor]=mutable.Set.empty
 ) extends Parameter {
-  def color(c:RegColor) = colors += c
+  def color(c:RegColor) = ()//colors += c
   def is(c:RegColor) = colors.contains(c)
 }
 case class FuncUnitParam(
@@ -14,6 +14,8 @@ case class FuncUnitParam(
 
 case class StageParam(
   funcUnitParam:FuncUnitParam=FuncUnitParam(),
-  pipeRegParams:List[PipeRegParam],
   reductionIdx:Option[Int] // If the stage can perform reduction, which stage of the reduction can it perform. 
-) extends Parameter
+) extends Parameter {
+  lazy val simdParam = collectOut[SIMDParam]().head
+  lazy val pipeRegParams = simdParam.pipeRegParams
+}

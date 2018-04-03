@@ -34,9 +34,9 @@ trait SIMDParam extends Parameter {
   lazy val numLanes:Int = if (vectorized) vecWidth else 1
   val reductionIndices:List[Option[Int]]
   def set(cu:CU):Unit
-  val pipeRegParams = List.tabulate(numRegs) { ir => PipeRegParam() }
+  val pipeRegParams:List[PipeRegParam] = List.tabulate(numRegs) { ir => addField(PipeRegParam()) }
   lazy val stageParams = reductionIndices.map { reductionIdx =>
-    StageParam(pipeRegParams=pipeRegParams, reductionIdx=reductionIdx)
+    addField(StageParam(reductionIdx=reductionIdx))
   }
 }
 

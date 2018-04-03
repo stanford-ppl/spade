@@ -2,15 +2,9 @@ package arch.test
 
 import arch._
 import spade.node._
-import spade.network._
-
-import prism._
-import prism.util._
 import prism.test._
 
 import org.scalatest._
-import scala.language.reflectiveCalls
-import scala.collection.mutable.ListBuffer
 
 class SpadeCollectorTest extends UnitTest with Logging { self =>
 

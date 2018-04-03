@@ -10,6 +10,7 @@ case class FuncUnit(param:FuncUnitParam)(implicit design:SpadeDesign) extends Mo
 }
 
 case class Stage(param:StageParam)(implicit design:SpadeDesign) extends Module {
+  import param._
   val funcUnit = Module(FuncUnit(param.funcUnitParam), "funcUnit")
-  val pipeRegs = Modules("pipeReg",param.pipeRegParams.map { param => PipeReg(param) })
+  lazy val pipeRegs = Modules("pipeReg",param.pipeRegParams.map { param => PipeReg(param) })
 }
