@@ -32,6 +32,16 @@ package object node extends spade.util.PrismAlias {
     case x => throw PIRException(s"don't have ClassTag[_<:PinType] for $x")
   }
 
+  def isInput(port:Port[_]) = port match {
+    case port:Input[_] => true
+    case port:Output[_] => false
+  }
+
+  def isOutput(port:Port[_]) = port match {
+    case port:Input[_] => false
+    case port:Output[_] => true
+  }
+
   def is[B<:PinType:ClassTag](x:Any) = implicitly[ClassTag[B]] == bctOf(x)
 
   def as[B<:PinType:ClassTag,A[_<:PinType]](x:A[_]) = if (is[B](x)) Some(x.asInstanceOf[A[B]]) else None

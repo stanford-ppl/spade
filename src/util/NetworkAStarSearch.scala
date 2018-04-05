@@ -2,16 +2,16 @@ package spade.util
 
 import spade.node._
 
-abstract class NetworkAStarSearch[B<:PinType:ClassTag:TypeTag](design:SpadeDesign) extends prism.mapper.UniformCostGraphSearch[Bundle[B], (Port[B], Port[B]), Int] { 
-  import design.spademeta._
+trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], (Port[_<:PinType], Port[_<:PinType]), Int] { 
 
-  type Edge = (Port[B], Port[B])
+  val spademeta:SpadeMetadata
+  import spademeta._
+
+  type PT = Port[_<:PinType]
+  type Action = (PT, PT)
   type C = Int
 
-  def quote(n:Any) = n match {
-    case n:SpadeNode => n.qindex
-    case n => n.toString
-  }
+  implicit val cnu:Numeric[Int] = implicitly[Numeric[Int]]
 
   def heuristic(next:Routable, end:Routable):Int = {
     if (next.isInstanceOf[ArgFringe] || end.isInstanceOf[ArgFringe]) return 0
@@ -20,15 +20,23 @@ abstract class NetworkAStarSearch[B<:PinType:ClassTag:TypeTag](design:SpadeDesig
     Math.abs(cx - ex) + Math.abs(cy - ey)
   }
 
-  def heuristic(port:Port[B], end:Option[Routable]):Int = {
+  def heuristic(port:PT, end:Option[Routable]):Int = {
     end.fold(0) { end => 
       val next = routableOf(port).get
       heuristic(next, end)
     }
   }
 
-  def advance(forward:Boolean, end:Option[Routable])
-              (state:Bundle[B], backPointers:BackPointer, pastCost:C):Seq[(Bundle[B], Edge, C)] = {
+  def advance(
+    start:Routable, 
+    end:Option[Routable], 
+    startTails:List[PT], 
+    tailToHead:Edge => List[Edge]
+  )(
+    state:Bundle[_], 
+    backPointers:BackPointer, 
+    pastCost:C
+  ):Seq[(Bundle[_], Action, C)] = {
     routableOf(state).get match {
       case rt:SwitchBox =>
         /*
@@ -38,53 +46,28 @@ abstract class NetworkAStarSearch[B<:PinType:ClassTag:TypeTag](design:SpadeDesig
          *   +----------+      +----------+       +----------+
          * */
         val (_, (tail1, head1), _) = backPointers(state)
-        head1.internal.connected.flatMap { tail2ic =>
-          val tail2 = tail2ic.src.asInstanceOf[Port[B]]
-          tail2.connected.map { head2 =>
-            (head2.src.asInstanceOf[Bundle[B]], (tail2, head2), 1 + heuristic(head2, end))
+        tailToHead(head1.internal).flatMap { tail2ic =>
+          val tail2 = tail2ic.src.asInstanceOf[PT]
+          tailToHead(tail2.external).map { head2edge =>
+            val head2 = head2edge.src.asInstanceOf[PT]
+            (head2.src.asInstanceOf[Bundle[_<:PinType]], (tail2, head2), 1 + heuristic(head2, end))
           }
         }
-      case rt:Routable if !backPointers.contains(state) => // Start
+      case rt:Routable if rt == start => // Start
         /*
          *   +----------+      +----------+
          *   |    tails +----->|heads     +
          *   |  curr    +----->|          |
          *   +----------+      +----------+
          * */
-        val tails = if (forward) state.outputs else state.inputs
-        tails.flatMap { tail =>
-          tail.connected.map { head =>
-            (head.src.asInstanceOf[Bundle[B]], (tail, head), 1 + heuristic(head, end))
+        startTails.flatMap { tail =>
+          tailToHead(tail.external).map { headedge =>
+            val head = headedge.src.asInstanceOf[PT]
+            (head.src.asInstanceOf[Bundle[_<:PinType]], (tail, head), 1 + heuristic(head, end))
           }
         }
       case _ => Nil
     }
-  }
-
-  def search[M](
-    start:Routable, 
-    end:Routable,
-    forward:Boolean,
-    logger:Option[Logging]
-  ):EOption[Route] = {
-    uniformCostSearch(
-      start=bundleOf[B](start).get, 
-      isEnd=(n:Bundle[B]) => routableOf(n).get == end,
-      advance=advance(forward, Some(end))_,
-      logger=logger
-    )
-  }
-
-  def span(
-    start:Routable, 
-    forward:Boolean,
-    logger:Option[Logging]
-  ):Seq[(Routable,C)] = {
-    uniformCostSpan(
-      start=bundleOf[B](start).get, 
-      advance=advance(forward, None)_,
-      logger=logger
-    ).map { case (bundle, cost) => (routableOf(bundle).get, cost) }
   }
 
 }
