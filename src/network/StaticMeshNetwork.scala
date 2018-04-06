@@ -46,10 +46,10 @@ class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticM
   }
 
 
-  if (is[Word](this)) {
+  if (isWord(this)) {
     bundleOf(argFringe).addInAt("S", numArgOuts)
     bundleOf(argFringe).addOutAt("S", numArgIns)
-  } else if (is[Bit](this)) {
+  } else if (isBit(this)) {
     bundleOf(argFringe).addInAt("S", 1) //status
     bundleOf(argFringe).addOutAt("S", 1) //command
   }

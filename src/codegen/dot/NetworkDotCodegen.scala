@@ -11,7 +11,7 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
   def getLabel(n:Any) = quote(n)
 
   def labelWithPort(attr:DotAttr, n:Routable) = {
-    val nio = n.nios.flatMap(as[B, Bundle]).head.asInstanceOf[GridBundle[B]]
+    val nio = n.nios.flatMap(as[Bundle,B]).head.asInstanceOf[GridBundle[B]]
     val recs = ListBuffer[String]()
     def ports(dir:String) = {
       var ins = nio.inAt(dir).map{io => s"<$io> $io(${indexOf(io)})"}
@@ -95,7 +95,7 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
 
   override def emitEdge(from:prism.node.Edge[N], to:prism.node.Edge[N], attr:DotAttr):Unit = {
     (from, to) match {
-      case (from, to) if is[B](from) & is[B](to) => emitEdgeMatched(from.src.asInstanceOf[N], to.src, attr) 
+      case (from:DirectedEdge[_,_], to:DirectedEdge[_,_]) if is[B](from) & is[B](to) => emitEdgeMatched(from.src.asInstanceOf[N], to.src, attr) 
       case _ => 
     }
   }

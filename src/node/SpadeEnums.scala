@@ -5,9 +5,6 @@ sealed trait PinType extends Enum
 trait Bit extends PinType
 trait Word extends PinType
 trait Vector extends PinType
-case object Bit extends PinType
-case object Word extends PinType
-case object Vector extends PinType
 
 trait RegColor extends Enum
 case object VecInReg extends RegColor

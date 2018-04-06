@@ -32,7 +32,7 @@ package object node extends spade.util.PrismAlias {
     case x => throw PIRException(s"don't have ClassTag[_<:PinType] for $x")
   }
 
-  def isInput(port:Port[_]) = port match {
+  def isInput(port:Pin[_]) = port match {
     case port:Input[_] => true
     case port:Output[_] => false
   }
@@ -42,9 +42,19 @@ package object node extends spade.util.PrismAlias {
     case port:Output[_] => true
   }
 
-  def is[B<:PinType:ClassTag](x:Any) = implicitly[ClassTag[B]] == bctOf(x)
-
-  def as[B<:PinType:ClassTag,A[_<:PinType]](x:A[_]) = if (is[B](x)) Some(x.asInstanceOf[A[B]]) else None
+  def is[B<:PinType:ClassTag](x:ClassTag[_<:PinType]) = implicitly[ClassTag[B]] == x
+  def isBit(x:ClassTag[_<:PinType]) = is[Bit](x)
+  def isWord(x:ClassTag[_<:PinType]) = is[Word](x)
+  def isVector(x:ClassTag[_<:PinType]) = is[Vector](x)
+  def as[A[_<:PinType], B<:PinType:ClassTag](x:A[_])(implicit f:A[_] => ClassTag[_<:PinType]) = {
+    if (is[B](f(x))) Some(x.asInstanceOf[A[B]]) else None
+  }
+  implicit def DirectedEdgeToBct(x:DirectedEdge[_,_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
+  implicit def PinToBct(x:Pin[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
+  implicit def BundleToBct(x:Bundle[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
+  implicit def FIFOToBct(x:FIFO[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
+  implicit def DynamicMeshNetworkToBct(x:DynamicMeshNetwork[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
+  implicit def StaticMeshNetworkToBct(x:StaticMeshNetwork[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
 
   def bundleOf[B<:PinType:ClassTag:TypeTag](x:SpadeNode) = {
     x.collectDown[Bundle[B]]().headOption
@@ -71,5 +81,4 @@ package object node extends spade.util.PrismAlias {
   def cuOf(n:SpadeNode) = n.collectUp[CU]().headOption
 
   def routableOf(n:SpadeNode) = n.collectUp[Routable]().headOption
-
 }

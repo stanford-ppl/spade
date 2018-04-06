@@ -11,7 +11,7 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
   type Action = (PT, PT)
   type C = Int
 
-  implicit val cnu:Numeric[Int] = implicitly[Numeric[Int]]
+  val cnu:Numeric[Int] = implicitly[Numeric[Int]]
 
   def heuristic(next:Routable, end:Routable):Int = {
     if (next.isInstanceOf[ArgFringe] || end.isInstanceOf[ArgFringe]) return 0
