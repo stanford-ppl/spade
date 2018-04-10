@@ -71,6 +71,8 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
     case n:SCU => attr.fillcolor("palevioletred1").style(filled)
     case n:MC => attr.fillcolor("forestgreen").style(filled)
     case n:SwitchBox => attr.fillcolor("indianred1").style(filled)
+    case (n:ArgFringe, "top") => attr.fillcolor("indianred1").style(filled)
+    case (n:ArgFringe, "bottom") => attr.fillcolor("indianred1").style(filled)
     //case n:OuterComputeUnit => Color("orange")
     case n => super.color(attr, n)
   }
@@ -89,7 +91,6 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
         emitNode(s"${n}_bottom",setAttrs((n, "bottom")))
         nodes += n
       case n:Routable => emitSingleNode(n)
-      case n => super.emitNode(n) 
     }
   }
 
