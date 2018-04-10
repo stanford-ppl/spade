@@ -7,8 +7,6 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
   val spademeta:SpadeMetadata
   import spademeta._
 
-  private lazy val dpfx = debug && routingVerbosity > 1
-
   type PT = Port[_<:PinType]
   type Action = (PT, PT)
   type C = Int
@@ -41,7 +39,7 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
     pastCost:C
   ):Seq[(Bundle[_], Action, C)] = {
     if (maxCost>0 && pastCost>maxCost) return Nil
-    dbgblk(dpfx, s"advance(start=${quote(start)}, end=${end.map(quote)}, state=${quote(state)})") {
+    dbgblk(1, s"advance(start=${quote(start)}, end=${end.map(quote)}, state=${quote(state)})") {
       routableOf(state).get match {
         case rt:SwitchBox =>
           /*

@@ -2,7 +2,7 @@ package spade
 
 object SpadeConfig extends prism.GlobalConfig {
 
-  var saveDesign:Boolean = register("save-spade", default=true, info="Save IR into a file") { saveDesign = _ }
+  var saveDesign:Boolean = register("save-spade", default=false, info="Save IR into a file") { saveDesign = _ }
   var loadDesign:Boolean = register("load-spade", default=false, info="Load IR from a file") { loadDesign = _ }
 
   // Properties go here
