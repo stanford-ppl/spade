@@ -11,7 +11,7 @@ trait SpadeMapLike { self:Product =>
   val fimap:FIMap
   val cfmap:ConfigMap
 
-  def set[M<:MapLike[_,_,_,M]:ClassTag](k:Any, v:Any):S = {
+  def set[M<:MapLike[_,_,M]:ClassTag](k:Any, v:Any):S = {
     val args = productIterator.toList.map{
       case map:M => map + (k.asInstanceOf[map.K] -> v.asInstanceOf[map.V]) 
       case map => map
