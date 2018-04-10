@@ -39,7 +39,7 @@ case class PCUParam (
   simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=6, vectorized=true, numRegs=16))
 ) extends CUParam {
   val numSrams:Int = 0
-  val sramParam:SRAMParam = SRAMParam(0)
+  val sramParam:SRAMParam = SRAMParam(0,0)
 }
 case class SCUParam (
   numControlFifos:Int=6,
@@ -51,7 +51,7 @@ case class SCUParam (
   simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=6, vectorized=false, numRegs=16))
 ) extends CUParam {
   val numSrams:Int = 0
-  val sramParam:SRAMParam = SRAMParam(0)
+  val sramParam:SRAMParam = SRAMParam(0,0)
 }
 case class PMUParam (
   numControlFifos:Int=6,
@@ -59,7 +59,7 @@ case class PMUParam (
   controlFifoParam:FIFOParam=FIFOParam(size=4),
   scalarFifoParam:FIFOParam=FIFOParam(size=4),
   vectorFifoParam:FIFOParam=FIFOParam(size=4),
-  sramParam:SRAMParam=SRAMParam(size=256),
+  sramParam:SRAMParam=SRAMParam(size=256 * 1024 / 4,4), // 256 kB
   numCtrs:Int=6
 ) extends CUParam {
   val numSrams:Int = 1 
@@ -75,7 +75,7 @@ case class SramAGParam (
   simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=6, vectorized=true, numRegs=16))
 ) extends CUParam {
   val numSrams:Int = 0
-  val sramParam:SRAMParam = SRAMParam(0)
+  val sramParam:SRAMParam = SRAMParam(0,0)
 }
 case class DramAGParam (
   numControlFifos:Int=6,
@@ -87,5 +87,5 @@ case class DramAGParam (
   simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=6, vectorized=false, numRegs=16))
 ) extends CUParam {
   val numSrams:Int = 0
-  val sramParam:SRAMParam = SRAMParam(0)
+  val sramParam:SRAMParam = SRAMParam(0,0)
 }

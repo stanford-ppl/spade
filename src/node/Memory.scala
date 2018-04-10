@@ -34,9 +34,9 @@ case class FIFO[B<:PinType:ClassTag](param:FIFOParam)(implicit design:SpadeDesig
   val readPort = Output[B](s"readPort")
 }
 
-case class Reg()(implicit design:SpadeDesign) extends OnChipMem(RegParam) {
-  val writePort = Input[Word](s"writePort")
-  val readPort = Output[Word](s"readPort")
-}
+//case class Reg()(implicit design:SpadeDesign) extends OnChipMem(RegParam) {
+  //val writePort = Input[Word](s"writePort")
+  //val readPort = Output[Word](s"readPort")
+//}
 
 
