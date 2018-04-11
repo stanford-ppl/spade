@@ -13,33 +13,27 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
 
   val cnu:Numeric[Int] = implicitly[Numeric[Int]]
 
-  def heuristic(next:Routable, end:Routable):Int = {
+  def heuristic(end:Routable)(newState:Bundle[_]):Int = {
+    val next = routableOf(newState).get
     if (next.isInstanceOf[ArgFringe] || end.isInstanceOf[ArgFringe]) return 0
     val List(cx, cy) = indexOf(next)
     val List(ex, ey) = indexOf(end)
     Math.abs(cx - ex) + Math.abs(cy - ey)
   }
 
-  def heuristic(port:PT, end:Option[Routable]):Int = {
-    end.fold(0) { end => 
-      val next = routableOf(port).get
-      heuristic(next, end)
-    }
-  }
-
   def advance(
-    start:Routable, 
-    end:Option[Routable], 
-    startTails:List[PT], 
+    startTails:List[PT],
     tailToHead:Edge => List[Edge],
+    heuristic:Bundle[_] => C,
     maxCost:Int
   )(
     state:Bundle[_], 
     backPointers:BackPointer, 
     pastCost:C
   ):Seq[(Bundle[_], Action, C)] = {
+
     if (maxCost>0 && pastCost>maxCost) return Nil
-    dbgblk(1, s"advance(start=${quote(start)}, end=${end.map(quote)}, state=${quote(state)})") {
+    dbgblk(2, s"advance(state=${quote(state)} pastCost=$pastCost)") {
       routableOf(state).get match {
         case rt:SwitchBox =>
           /*
@@ -53,10 +47,11 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
             val tail2 = tail2ic.src.asInstanceOf[PT]
             tailToHead(tail2.external).map { head2edge =>
               val head2 = head2edge.src.asInstanceOf[PT]
-              (head2.src.asInstanceOf[Bundle[_<:PinType]], (tail2, head2), 1 + heuristic(head2, end))
+              val newState = head2.src.asInstanceOf[Bundle[_<:PinType]]
+              (newState, (tail2, head2), 1 + heuristic(newState))
             }
           }
-        case rt:Routable if rt == start => // Start
+        case rt:Routable =>
           /*
            *   +----------+      +----------+
            *   |    tails +----->|heads     +
@@ -66,10 +61,10 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
           startTails.flatMap { tail =>
             tailToHead(tail.external).map { headedge =>
               val head = headedge.src.asInstanceOf[PT]
-              (head.src.asInstanceOf[Bundle[_<:PinType]], (tail, head), 1 + heuristic(head, end))
+              val newState = head.src.asInstanceOf[Bundle[_<:PinType]]
+              (newState, (tail, head), 1 + heuristic(newState))
             }
           }
-        case _ => Nil
       }
     }
   }
