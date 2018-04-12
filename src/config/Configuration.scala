@@ -1,10 +1,8 @@
 package spade.config
 
-import spade.util._
-
 trait Configuration
 
-trait Configurable extends Node {
+trait Configurable {
   type CT <: Configuration
   def toConfig(x:Configuration) = x.asInstanceOf[CT]
 }

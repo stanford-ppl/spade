@@ -1,36 +1,16 @@
 package spade.node
 
-import spade._
-import spade.util._
+case class SwitchBox(param:SwitchParam, override val nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends Routable(nios) {
+  import param._
 
-/* Switch box (6 inputs 6 outputs) */
-case class SwitchBox()(implicit spade:Spade) extends Routable {
-  import spademeta._
-  override val typeStr = "sb"
-  val scalarIO:ScalarIO[this.type] = ScalarIO(this)
-  val vectorIO:VectorIO[this.type] = VectorIO(this)
-  val ctrlIO:ControlIO[this.type] = ControlIO(this)
-
-  /* --- Connections -----*/
-  def connectXbar[P<:PortType](gio:GridIO[P, this.type]) = {
-    gio.ins.foreach { in => gio.outs.foreach { out => out.ic <== in.ic } }
-  }
-  override def connect = {
-    super.connect
-    connectXbar(scalarIO)
-    connectXbar(vectorIO)
-    connectXbar(ctrlIO)
-  }
-
-  /* --- Simulation  -----*/
-  override def register(implicit sim:Simulator):Unit = {
-    import sim.util._
-    (souts ++ vouts ++ couts).foreach { out =>
-      fimap.get(out.ic).foreach { inic => 
-        out.ic :== inic
+  connection match {
+    case CrossBarSwitchConnection =>
+      nios.foreach { bundle =>
+        bundle.inputs.foreach { input =>
+          bundle.outputs.foreach { output =>
+            output.ic <<== input.ic
+          }
+        }
       }
-    }
-    super.register
   }
 }
-

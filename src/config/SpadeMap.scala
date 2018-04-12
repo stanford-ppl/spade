@@ -1,79 +1,49 @@
 package spade.config
 
 import spade.node._
-import spade.util.typealias._
 
-import pirc.collection.immutable._
+import prism.collection.immutable._
 
-import scala.reflect.runtime.universe._
-import scala.language.existentials
+import SpadeMap._
 
-trait SpadeMap {
+trait SpadeMapLike { self:Product =>
+  type S <: SpadeMapLike
+  val fimap:FIMap
+  val cfmap:ConfigMap
 
-  def fimap:FIMap
-  def cfmap:CFMap
-
-  private def copy(
-    fimap:FIMap=fimap,
-    cfmap:CFMap=cfmap
-  ) = {
-    SpadeMap(fimap, cfmap)
+  def set[M<:MapLike[_,_,M]:ClassTag](k:Any, v:Any):S = {
+    val args = productIterator.toList.map{
+      case map:M => map + (k.asInstanceOf[map.K] -> v.asInstanceOf[map.V]) 
+      case map => map
+    }
+    val constructor = this.getClass.getConstructors()(0) 
+    constructor.newInstance(args.map(_.asInstanceOf[Object]):_*).asInstanceOf[S]
   }
-
-  def setFI(k:FIMap.K, v:FIMap.V):SpadeMap = copy(fimap=fimap + ((k, v)))
-  def setCF(k:CFMap.K, v:CFMap.V):SpadeMap = copy(cfmap=cfmap + ((k, v)))
+  def get[F:ClassTag]:F = {
+    productIterator.toList.collect { case f:F => f }.head
+  }
+  def set[F:ClassTag](newField:F):S = {
+    val args = productIterator.toList.map {
+      case field:F => newField
+      case field => field
+    }
+    val constructor = this.getClass.getConstructors()(0) 
+    constructor.newInstance(args.map(_.asInstanceOf[Object]):_*).asInstanceOf[S]
+  }
+  def map[F:ClassTag](lambda: F => F):S = {
+    val args = productIterator.toSeq.map {
+      case field:F => lambda(field)
+      case field => field
+    }
+    val constructor = this.getClass.getConstructors()(0) 
+    constructor.newInstance(args.map(_.asInstanceOf[Object]):_*).asInstanceOf[S]
+  }
 }
-
+case class SpadeMap (
+  fimap:FIMap,
+  cfmap:ConfigMap
+) extends SpadeMapLike { type S = SpadeMap }
 object SpadeMap {
-  def apply(fi:FIMap, cf:CFMap) = new SpadeMap {
-    val fimap = fi
-    val cfmap = cf
-  }
-  def empty:SpadeMap = SpadeMap(FIMap.empty, CFMap.empty)
+  def empty:SpadeMap = SpadeMap(FIMap.empty, ConfigMap.empty) 
 }
 
-/* FanIn map: a mapping between a PInput and the POutput it connects to */
-case class FIMap(map:FIMap.M, imap:FIMap.IM) extends IBiManyToOneMap {
-  type K = FIMap.K
-  type V = FIMap.V
-  override type M = FIMap.M
-  override def check(rec:(K,V)):Unit =  {
-    super.check(rec)
-    val (i, o) = rec
-    assert(i.canConnect(o), s"$i cannot connect to $o but trying map $i to $o in FIMap")
-  }
-  override def + (rec:(K,V)) = { 
-    check(rec); 
-    val set:Set[K] = (imap.getOrElse(rec._2, Set.empty) + rec._1)
-    val v:V = rec._2
-    val npmap:IM = imap + ((v, set))
-    FIMap(map + rec, npmap)
-  }
-  def get(k:PGI[_<:PModule]) = { map.get(k).asInstanceOf[Option[PGO[_<:PModule]]] }
-
-  def apply(v:V):KK = imap(v)
-  def get(v:V):Option[KK]         = imap.get(v)
-  def contains(v:V) = imap.contains(v)
-}
-object FIMap extends IBiManyToOneObj {
-  type K = PI[_<:PModule]
-  type V = PO[_<:PModule]
-  def empty:FIMap = FIMap(Map.empty, Map.empty)
-}
-
-case class CFMap(map:CFMap.M) extends IOneToOneMap {
-  type K = CFMap.K
-  type V = CFMap.V
-  override type M = CFMap.M
-  override def + (rec:(K,V)) = { super.check(rec); CFMap(map + rec) }
-
-  override def apply(n:Configurable) = n.toConfig(map(n))
-  override def get(n:Configurable) = map.get(n).map{ c => n.toConfig(c) }
-
-  def isMapped(n:K) = map.contains(n)
-}
-object CFMap extends IOneToOneObj {
-  type K = Configurable
-  type V = Configuration
-  def empty:CFMap = CFMap(Map.empty)
-}

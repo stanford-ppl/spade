@@ -1,110 +1,89 @@
 package spade
 
 import spade.node._
-import spade.util._
 import spade.codegen._
-import spade.pass._
 
-import pirc._
-import pirc.util._
+import java.io._
 
-import scala.language.implicitConversions
-import scala.collection.mutable.Map
-import scala.collection.mutable.ListBuffer
-
-trait SpadeParam {
-  lazy val wordWidth = 32
-  lazy val numLanes = 16
-  lazy val clockFrequency:Int = 1000000000 //Hz
-}
-
-trait PreLoadSpadeParam extends SpadeParam {
-  override lazy val numLanes = ConfigFactory.plasticineConf.lanes
-}
-
-trait Spade extends Design with SpadeMetadata with SpadeParam with SwitchNetwork {
-  implicit def spade:this.type = this
-  val spademeta:SpadeMetadata = this
+trait Spade extends Compiler with SpadeWorld {
 
   override def toString = getClass().getSimpleName().replace("$", "")
 
   val configs = List(Config, SpadeConfig)
 
-  lazy val simulatable = ListBuffer[Simulatable]()
+  lazy val spademeta:SpadeMetadata = design.spademeta
+  def top = design.top
 
-  lazy val top = Top(topParam)
-
-  var nextSym = 0
-  def nextId = {val temp = nextSym; nextSym +=1; temp}
-  
   override def reset = {
-    super[SpadeMetadata].reset
-    super[Design].reset
+    super[Compiler].reset
   }
 
   def handle(e:Exception):Unit = {
-    logger.close
+    //logger.close
     throw e
   }
 
-  def main(args: Array[String]): Unit = {
-    info(s"args=[${args.mkString(", ")}]")
-    try {
-      reset
-      setArgs(args)
-      top.connectAll
-      endInfo(s"Finishing graph construction for ${this}")
-      run
-    } catch { 
-      case e:Exception =>
-        errmsg(e)
-        handle(e)
-    }
+  def load = SpadeConfig.loadDesign
+  def save = SpadeConfig.saveDesign
+
+  val designPath = s"${outDir}${separator}${name}.spade"
+
+  lazy val topParam:TopParam = StaticMeshTopParam()
+
+  def newDesign = {
+    design = SpadeDesign(topParam)
   }
 
   /* Analysis */
   //TODO: Area model
 
   /* Passes */
-  lazy val areaModel = new AreaModel()
+  //lazy val areaModel = new AreaModel()
 
   /* Codegen */
-  lazy val spadeNetworkCodegen = new SpadeNetworkCodegen()
-  lazy val spadeParamCodegen = new SpadeParamCodegen()
-  lazy val spadeControlCodegen = new SpadeControlCodegen()
+  //lazy val spadeNetworkCodegen = new SpadeNetworkCodegen()
+  //lazy val spadeParamCodegen = new SpadeParamCodegen()
 
   /* Debug */
-  lazy val logger = new Logger() { override lazy val stream = newStream(s"spade.log") }
-  // Printing of Plasticine IR connection in Text
-  lazy val spadePrinter = new SpadePrinter()
-  // Debugging dot graph of plasticine network topology.
-  // After generation use bin/dot out/ArchName/DotFileName to open the graph
-  lazy val plasticineVecDotPrinter = new PlasticineVectorDotPrinter()
-  lazy val plasticineScalDotPrinter = new PlasticineScalarDotPrinter()
-  lazy val plasticineCtrlDotPrinter = new PlasticineCtrlDotPrinter()
+  //lazy val spadePrinter = new SpadePrinter()
+  //lazy val plasticineVecDotPrinter = new PlasticineVectorDotPrinter()
+  //lazy val plasticineScalDotPrinter = new PlasticineScalarDotPrinter()
+  //lazy val plasticineCtrlDotPrinter = new PlasticineCtrlDotPrinter()
 
-  override def run = {
+  override def initSession = {
+    super.initSession
+    import session._
+
     // Pass
-    passes += areaModel 
+    //addPass(areaModel)
 
     // Debug
-    passes += spadePrinter 
-    passes += plasticineVecDotPrinter 
-    passes += plasticineScalDotPrinter 
-    passes += plasticineCtrlDotPrinter 
+    //addPass(new SpadeIRPrinter(s"spade.txt"))
+    addPass(new ParamIRPrinter(s"param.txt"))
+    addPass(new NetworkDotCodegen[Bit](s"control.dot"))
+    addPass(new NetworkDotCodegen[Word](s"scalar.dot"))
+    addPass(new NetworkDotCodegen[Vector](s"vector.dot"))
+    //addPass(new SpadeIRDotCodegen[PCU](s"pcu.dot"))
+    //addPass(new SpadeIRDotCodegen[PMU](s"pmu.dot"))
+    //addPass(new SpadeIRDotCodegen[SCU](s"scu.dot"))
+    //addPass(spadePrinter)
+    //addPass(plasticineVecDotPrinter)
+    //addPass(plasticineScalDotPrinter)
+    //addPass(plasticineCtrlDotPrinter)
 
     // Codegen
-    passes += spadeNetworkCodegen 
-    passes += spadeParamCodegen 
-    passes += spadeParamCodegen 
+    addPass(new ParamScalaCodegen(s"GeneratedParameters.scala"))
+    //addPass(spadeNetworkCodegen)
+    //addPass(spadeParamCodegen)
+  }
 
-    super.run
-
-    if (SpadeConfig.openDot) {
-      plasticineVecDotPrinter.open
-      plasticineScalDotPrinter.open
-      plasticineCtrlDotPrinter.open
-    }
+  override def runSession = {
+    super.runSession
+    //if (SpadeConfig.openDot) {
+      //plasticineVecDotPrinter.open
+      //plasticineScalDotPrinter.open
+      //plasticineCtrlDotPrinter.open
+    //}
   }
 
 }
