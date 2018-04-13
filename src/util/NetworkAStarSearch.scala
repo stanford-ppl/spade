@@ -72,7 +72,7 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
   override def quote(n:Any) = n match {
     case (state, action, cost) => (quote(state), quote(action), cost).toString
     case (tail, head) => (quote(tail), quote(head)).toString
-    case n:Bundle[_] => s"${quote(routableOf(n).get)}.${n}"
+    case n:Bundle[_] => s"${quote(routableOf(n).get)}.${n}[${n.bct.runtimeClass.getSimpleName}]"
     case n => super.quote(n)
   }
 

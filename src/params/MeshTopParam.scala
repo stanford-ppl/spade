@@ -18,7 +18,8 @@ case class StaticMeshTopParam (
     StaticMeshVectorNetworkParam()
   )
 ) extends MeshTopParam {
-  val busWithReady = false
+  //val busWithReady = false
+  val busWithReady = true
 }
 
 case class DynamicMeshTopParam (

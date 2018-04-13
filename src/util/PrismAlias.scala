@@ -15,6 +15,7 @@ trait PrismAlias extends prism.util.Misc with prism.mapper.MappingUtil with pris
   type IRDotCodegen = prism.codegen.IRDotCodegen
   type ScalaCodegen = prism.codegen.ScalaCodegen
   type PIRException = prism.exceptions.PIRException
+  type MappingFailure = prism.mapper.MappingFailure
   val PIRException = prism.exceptions.PIRException
   val Config = prism.Config
 
