@@ -31,22 +31,16 @@ case class DynamicMeshControlNetworkParam(
   channelWidth:DynamicChannelWidth=DynamicChannelWidth.empty
 ) extends DynamicMeshNetworkParam[Bit] {
   // switch to CU channel width
-  channelWidth("src"->"sb", "dst"->List("pcu", "pmu", "scu")) = 1
+  channelWidth("src"->"sb", "dst"->List("pcu", "pmu", "scu")) = 4
 
   // CU to Switch channel width
-  channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->"sb") = 2
+  channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->"sb") = 4
 
   // DAG to switch channel width
   channelWidth("src"->"scu", "dst"->"sb") = 1
 
   // switch to DAG channel width
   channelWidth("src"->"sb", "dst"->"scu") = 1
-
-  // switch to SAG channel width
-  channelWidth("src"->"sb", "dst"->"pcu") = 2
-
-  // SAG to switch channel width
-  channelWidth("src"->"pcu", "dst"->"sb") = 2 
 
   // switch to MC channel width
   channelWidth("src"->"sb", "dst"->"mc") = 1
@@ -67,16 +61,16 @@ case class DynamicMeshScalarNetworkParam(
   channelWidth:DynamicChannelWidth=DynamicChannelWidth.empty
 ) extends DynamicMeshNetworkParam[Word] {
   // switch to PCU channel width
-  channelWidth("src"->"sb", "dst"->List("pcu", "scu")) = 1//roundUp(pcuSins / 4.0) 
+  channelWidth("src"->"sb", "dst"->List("pcu", "scu")) = 4//roundUp(pcuSins / 4.0) 
 
   // PCU to Switch channel width
-  channelWidth("src"->List("pcu", "scu"), "dst"->"sb") = 1//roundUp(pcuSouts / 4.0)
+  channelWidth("src"->List("pcu", "scu"), "dst"->"sb") = 4//roundUp(pcuSouts / 4.0)
 
-  // switch to MCU channel width
-  channelWidth("src"->"sb", "dst"->List("pmu")) = 1//roundUp(pmuSins / 4.0) 
+  // switch to PMU channel width
+  channelWidth("src"->"sb", "dst"->List("pmu")) = 4//roundUp(pmuSins / 4.0) 
 
-  // MCU to Switch channel width
-  channelWidth("src"->List("pmu"), "dst"->"sb") = 1//roundUp(pmuSouts / 4.0)
+  // PMU to Switch channel width
+  channelWidth("src"->List("pmu"), "dst"->"sb") = 4//roundUp(pmuSouts / 4.0)
   
   // switch to DAG channel width
   channelWidth("src"->"sb", "dst"->"scu") = 1//roundUp(ucuSins)
@@ -113,16 +107,16 @@ case class DynamicMeshVectorNetworkParam(
   channelWidth:DynamicChannelWidth=DynamicChannelWidth.empty
 ) extends DynamicMeshNetworkParam[Vector] {
   // switch to PCU channel width
-  channelWidth("src"->"sb", "dst"->List("pcu")) = 1//roundUp(pcuVins / 4.0)
+  channelWidth("src"->"sb", "dst"->List("pcu")) = 4//roundUp(pcuVins / 4.0)
 
   // PCU to Switch channel width
-  channelWidth("src"->List("pcu"), "dst"->"sb") = 1//roundUp(pcuVouts / 4.0)
+  channelWidth("src"->List("pcu"), "dst"->"sb") = 4//roundUp(pcuVouts / 4.0)
 
-  // switch to MCU channel width
-  channelWidth("src"->"sb", "dst"->List("pmu")) = 1//roundUp(pmuVins / 4.0) 
+  // switch to PMU channel width
+  channelWidth("src"->"sb", "dst"->List("pmu")) = 4//roundUp(pmuVins / 4.0) 
 
-  // MCU to Switch channel width
-  channelWidth("src"->List("pmu"), "dst"->"sb") = 1//roundUp(pmuVouts / 4.0)
+  // PMU to Switch channel width
+  channelWidth("src"->List("pmu"), "dst"->"sb") = 4//roundUp(pmuVouts / 4.0)
 
   // switch to MC channel width
   channelWidth("src"->"sb", "dst"->"mc") = 1

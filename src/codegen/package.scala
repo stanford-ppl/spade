@@ -13,4 +13,5 @@ package object codegen extends util.PrismAlias {
   type SpadeTraversal = spade.pass.SpadeTraversal
   type SpadeMapLike = spade.config.SpadeMapLike
   type SpadeMetadata = spade.util.SpadeMetadata
+  val SpadeConfig = spade.SpadeConfig
 }

@@ -8,6 +8,11 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
 
   import spademeta._
 
+  override def finPass(runner:RunPass[_]) = {
+    super.finPass(runner)
+    if (SpadeConfig.openDot) open
+  }
+
   def getLabel(n:Any) = quote(n)
 
   def labelWithPort(attr:DotAttr, n:Routable) = {

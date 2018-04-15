@@ -77,13 +77,4 @@ trait Spade extends Compiler with SpadeWorld {
     //addPass(spadeParamCodegen)
   }
 
-  override def runSession = {
-    super.runSession
-    //if (SpadeConfig.openDot) {
-      //plasticineVecDotPrinter.open
-      //plasticineScalDotPrinter.open
-      //plasticineCtrlDotPrinter.open
-    //}
-  }
-
 }
