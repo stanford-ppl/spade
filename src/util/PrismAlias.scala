@@ -2,7 +2,6 @@ package spade.util
 
 trait PrismAlias extends prism.util.Misc with prism.mapper.MappingUtil with prism.enums.Ops with prism.util.ScalaAlias with prism.util.FileManager {
   type Pass = prism.Pass
-  type RunPass[P<:Pass] = prism.RunPass[P]
   type Compiler = prism.Compiler
   type Design = prism.node.Design
   type Node[N<:Node[N]] = prism.node.Node[N]

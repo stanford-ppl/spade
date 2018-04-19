@@ -28,17 +28,17 @@ class ParamScalaCodegen(val fileName:String)(implicit compiler:Spade) extends Pa
     emitln(s"val ${quote(n)} = new Table(${quote(n)}_map) with ChannelWidth")
   }
 
-  override def initPass(runner:RunPass[_]) = {
-    super.initPass(runner)
+  override def initPass = {
+    super.initPass
     emitln(s"package spade.params")
     emitln
   }
 
-  override def runPass(runner:RunPass[_]) = {
+  override def runPass = {
     emitBlock(s"trait GeneratedParam") {
       emitln
       emitln
-      super.runPass(runner)
+      super.runPass
     }
   }
 }

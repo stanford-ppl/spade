@@ -8,8 +8,8 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
 
   import spademeta._
 
-  override def finPass(runner:RunPass[_]) = {
-    super.finPass(runner)
+  override def finPass = {
+    super.finPass
     if (SpadeConfig.openDot) open
   }
 
