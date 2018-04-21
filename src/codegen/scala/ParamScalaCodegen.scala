@@ -4,7 +4,6 @@ import prism.collection.mutable._
 
 class ParamScalaCodegen(val fileName:String)(implicit compiler:Spade) extends ParamCodegen with ScalaCodegen {
 
-  val shouldRun = Config.codegen
   val forward = true
 
   override def quote(n:Any):String = n match {
