@@ -25,7 +25,11 @@ trait GridFringePattern extends GridPattern {
   val mcParam:MCParam
   val argFringeParam:ArgFringeParam
   def argBundle(implicit top:MeshTop):BundleGroup = {
-    BundleGroup(argFringeParam)
+    import top.param._
+    top match {
+      case top:StaticMeshTop => BundleGroup(argFringeParam)(top)
+      case top:DynamicMeshTop => BundleGroup(argFringeParam, coord=Some(numCols/2, numRows))(top)
+    }
   }
   def mcAt(i:Int, j:Int)(implicit top:MeshTop):BundleGroup = {
     import top.param._

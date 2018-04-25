@@ -8,6 +8,8 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
 
   import spademeta._
 
+  lazy val dynamic = isDynamic(compiler.top)
+
   override def finPass = {
     super.finPass
     if (SpadeConfig.openDot) open
@@ -42,30 +44,16 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
   val scale = 5
 
   def pos(attr:DotAttr, n:Any) = {
-    val dynamic = isDynamic(compiler.top)
     (n, compiler.topParam) match {
       case (n:SpadeNode, param:MeshTopParam) =>
         indexOf.get(n).foreach { case List(x,y) =>
-          val coord:Option[(Double, Double)] = n match {
-            //case n:SCU if ((x<0) | (x>=numCols)) => Some(x, y-0.2)
-            //case n:PCU if ((x<0) | (x>=numCols)) => Some(x, y-0.8)
-            //case n:MC => Some((x, y-0.5))
-            //case n:OuterComputeUnit => Some((x-0.3, y-0.3))
-            //case n:SwitchBox => Some((x-0.5, y-0.5))
-            case n:ArgFringe => None
-            case n => Some((x,y))
-          }
-          coord.foreach { case (x,y) => 
-            n match {
-              case n:CU if dynamic => attr.pos(((x+0.5)*scale, (y + 0.5)*scale))
-              case n => attr.pos((x*scale, y*scale))
-            }
+          n match {
+            case n:CU if dynamic => attr.pos(((x+0.5)*scale, (y + 0.5)*scale))
+            case n => attr.pos((x*scale, y*scale))
           }
         }
-      case ((n:ArgFringe, "top"), param:MeshTopParam) if dynamic => attr.pos(((param.numCols/2)*scale, (param.numRows-1)*scale+scale))
-      case ((n:ArgFringe, "bottom"), param:MeshTopParam) if dynamic => attr.pos(((param.numCols/2)*scale, -scale))
-      case ((n:ArgFringe, "top"), param:MeshTopParam) => attr.pos(((param.numCols/2)*scale*2, (param.numRows+1)*scale*2))
-      case ((n:ArgFringe, "bottom"), param:MeshTopParam) => attr.pos(((param.numCols/2)*scale*2, -scale*2))
+      case ((n:ArgFringe, "top"), param:MeshTopParam) if !dynamic => attr.pos(((param.numCols/2)*scale*2, (param.numRows+1)*scale*2))
+      case ((n:ArgFringe, "bottom"), param:MeshTopParam) if !dynamic => attr.pos(((param.numCols/2)*scale*2, -scale*2))
     }
     attr
   }
@@ -78,6 +66,7 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
     case n:SwitchBox => attr.fillcolor("indianred1").style(filled)
     case (n:ArgFringe, "top") => attr.fillcolor("indianred1").style(filled)
     case (n:ArgFringe, "bottom") => attr.fillcolor("indianred1").style(filled)
+    case n:ArgFringe => attr.fillcolor("indianred1").style(filled)
     //case n:OuterComputeUnit => Color("orange")
     case n => super.color(attr, n)
   }
@@ -91,7 +80,7 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
   override def emitNode(n:N) = {
     n match {
       case n:Top => super.visitNode(n)
-      case n:ArgFringe =>
+      case n:ArgFringe if !dynamic =>
         emitNode(s"${n}_top",setAttrs((n, "top")))
         emitNode(s"${n}_bottom",setAttrs((n, "bottom")))
         nodes += n
@@ -108,11 +97,11 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
 
   override def emitEdge(from:N, to:N, attr:DotAttr):Unit = {
     val (fromStr, toStr) = (from, to) match {
-      case (from:SwitchBox, to:ArgFringe) =>
+      case (from:SwitchBox, to:ArgFringe) if !dynamic =>
         val List(x,y) = indexOf(from)
         val toStr = if (y==0) s"${to}_bottom" else s"${to}_top"
         (from.toString, toStr)
-      case (from:ArgFringe, to:SwitchBox) =>
+      case (from:ArgFringe, to:SwitchBox) if !dynamic =>
         val List(x,y) = indexOf(to)
         val fromStr = if (y==0) s"${from}_bottom" else s"${from}_top"
         (fromStr, to.toString)
@@ -122,4 +111,3 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
   }
 
 }
-

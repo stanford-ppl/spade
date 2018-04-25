@@ -47,11 +47,11 @@ class DynamicMeshNetwork[B<:PinType](param:DynamicMeshNetworkParam[B], top:Dynam
 
 
   if (isWord(this)) {
-    bundleOf(argFringe).addInAt("S", numArgOuts)
-    bundleOf(argFringe).addOutAt("S", numArgIns)
+    bundleOf(argFringe).addIns(numArgOuts)
+    bundleOf(argFringe).addOuts(numArgIns)
   } else if (isBit(this)) {
-    bundleOf(argFringe).addInAt("S", 1) //status
-    bundleOf(argFringe).addOutAt("S", 1) //command
+    bundleOf(argFringe).addIns(1) //status
+    bundleOf(argFringe).addOuts(1) //command
   }
 
   /** ----- Central Array Connection ----- **/
@@ -68,19 +68,12 @@ class DynamicMeshNetwork[B<:PinType](param:DynamicMeshNetworkParam[B], top:Dynam
   for (y <- 0 until numRows) {
     for (x <- 0 until numCols) {
       // Top to SB
-      // Top Switches
-      if (y==numRows) {
+      // Top middle Switches
+      if (y==numRows-1 && x == numCols/2) {
         // S -> N
         connect(sbArray(x)(y), argFringe) // bottom up 
         // N -> S
         connect(argFringe, sbArray(x)(y)) // top down
-      }
-      // Bottom Switches
-      if (y==0) {
-        // N -> S
-        connect(sbArray(x)(y), argFringe) // top down 
-        // S -> N
-        connect(argFringe, sbArray(x)(y)) // bottom up
       }
     }
   }
