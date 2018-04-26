@@ -13,7 +13,7 @@ abstract class DynamicMeshNetworkParam[B<:PinType:ClassTag] extends Parameter {
   lazy val numArgIns:Int = argFringeParam.numArgIns
   lazy val numArgOuts:Int = argFringeParam.numArgOuts
   val channelWidth:DynamicChannelWidth
-
+  val numVirtualChannel:Int
 }
 
 trait DynamicChannelWidth extends Table[String, String, Int]
@@ -28,7 +28,8 @@ object DynamicChannelWidth {
 }
 
 case class DynamicMeshControlNetworkParam(
-  channelWidth:DynamicChannelWidth=DynamicChannelWidth.empty
+  channelWidth:DynamicChannelWidth=DynamicChannelWidth.empty,
+  numVirtualChannel:Int = 4
 ) extends DynamicMeshNetworkParam[Bit] {
   // switch to CU channel width
   channelWidth("src"->"sb", "dst"->List("pcu", "pmu", "scu")) = 4
@@ -58,7 +59,8 @@ case class DynamicMeshControlNetworkParam(
 }
 
 case class DynamicMeshScalarNetworkParam(
-  channelWidth:DynamicChannelWidth=DynamicChannelWidth.empty
+  channelWidth:DynamicChannelWidth=DynamicChannelWidth.empty,
+  numVirtualChannel:Int = 4
 ) extends DynamicMeshNetworkParam[Word] {
   // switch to PCU channel width
   channelWidth("src"->"sb", "dst"->List("pcu", "scu")) = 4//roundUp(pcuSins / 4.0) 
@@ -104,7 +106,8 @@ case class DynamicMeshScalarNetworkParam(
 }
 
 case class DynamicMeshVectorNetworkParam(
-  channelWidth:DynamicChannelWidth=DynamicChannelWidth.empty
+  channelWidth:DynamicChannelWidth=DynamicChannelWidth.empty,
+  numVirtualChannel:Int = 4
 ) extends DynamicMeshNetworkParam[Vector] {
   // switch to PCU channel width
   channelWidth("src"->"sb", "dst"->List("pcu")) = 4//roundUp(pcuVins / 4.0)

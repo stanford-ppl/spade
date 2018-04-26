@@ -27,7 +27,9 @@ package object node extends spade.util.PrismAlias {
     case x:Pin[_] => x.bct
     case x:Bundle[_] => x.bct
     case x:StaticMeshNetwork[_] => x.bct
+    case x:StaticMeshNetworkParam[_] => x.bct
     case x:DynamicMeshNetwork[_] => x.bct
+    case x:DynamicMeshNetworkParam[_] => x.bct
     case x:FIFO[_] => x.bct
     case x => throw PIRException(s"don't have ClassTag[_<:PinType] for $x")
   }
