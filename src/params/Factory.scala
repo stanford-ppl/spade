@@ -65,7 +65,8 @@ object Factory extends Logging {
   """), "plasticine").right.get
   
   lazy val plasticineConf = {
-    val path = s"${Config.SPATIAL_HOME}/apps/resources/application.conf"
+    val SPATIAL_HOME = Config.SPATIAL_HOME.getOrElse({err(s"set SPATIAL_HOME for application.conf"); ""})
+    val path = s"${SPATIAL_HOME}/apps/resources/application.conf"
     val config = loadConfig[PlasticineConf](com.typesafe.config.ConfigFactory.parseFile(new java.io.File(path)), "plasticine") match {
       case Right(config) => 
         info(s"Loading configuration from $path")
