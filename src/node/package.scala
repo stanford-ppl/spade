@@ -70,13 +70,19 @@ package object node extends spade.util.PrismAlias {
     case _ => false
   }
 
-  def isDynamic(n:Top) = n match {
+  def isDynamic(n:Any) = n match {
     case n:DynamicMeshTop => true
+    case n:DynamicMeshTopParam => true
+    case n:DynamicMeshNetwork[_] => true
+    case n:DynamicMeshNetworkParam[_] => true
     case n => false
   }
 
-  def isStatic(n:Top) = n match {
+  def isStatic(n:Any) = n match {
     case n:StaticMeshTop => true
+    case n:StaticMeshTopParam => true
+    case n:StaticMeshNetwork[_] => true
+    case n:StaticMeshNetworkParam[_] => true
     case n => false
   }
 
