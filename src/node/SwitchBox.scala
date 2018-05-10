@@ -1,4 +1,5 @@
-package spade.node
+package spade
+package node
 
 case class SwitchBox(param:SwitchParam, override val nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends Routable(nios) {
   import param._

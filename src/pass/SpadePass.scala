@@ -1,6 +1,6 @@
-package spade.pass
+package spade
+package pass
 
-import spade._
 import spade.node._
 
 import prism._

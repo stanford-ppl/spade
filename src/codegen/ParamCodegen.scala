@@ -1,5 +1,7 @@
-package spade.codegen
+package spade
+package codegen
 
+import spade.node._
 import prism.traversal._
 
 abstract class ParamCodegen(implicit compiler:Spade) extends Pass with BFSTopologicalTraversal with Codegen {

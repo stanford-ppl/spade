@@ -1,4 +1,5 @@
-package spade.node
+package spade
+package node
 
 abstract class CU(val param:CUParam, nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends Routable(nios) {
   param.set(this) // Compute derived parameters

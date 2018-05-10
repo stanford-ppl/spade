@@ -1,4 +1,5 @@
-package spade.pass
+package spade
+package pass
 
 import spade._
 

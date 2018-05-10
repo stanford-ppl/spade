@@ -1,4 +1,6 @@
-package spade.node
+package spade
+package node
+
 import prism.enums._
 
 sealed trait PinType extends Enum

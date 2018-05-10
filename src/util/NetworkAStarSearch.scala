@@ -1,4 +1,5 @@
-package spade.util
+package spade
+package util
 
 import spade.node._
 

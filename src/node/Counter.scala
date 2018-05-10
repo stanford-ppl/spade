@@ -1,4 +1,5 @@
-package spade.node
+package spade
+package node
 
 case class Counter()(implicit design:SpadeDesign) extends Module {
   val min = Input[Word](s"min")

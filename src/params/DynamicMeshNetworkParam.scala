@@ -1,6 +1,6 @@
-package spade.node
+package spade
+package node
 
-import prism._
 import prism.node._
 import prism.collection.mutable.Table
 

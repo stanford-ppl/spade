@@ -1,4 +1,5 @@
-package spade.node
+package spade
+package node
 
 case class UpDownCounter()(implicit sapde:SpadeDesign) extends Module {
   val inc = Input[Vector](s"writePort")

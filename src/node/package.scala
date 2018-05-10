@@ -1,12 +1,6 @@
 package spade
 
-package object node extends spade.util.PrismAlias {
-  type Spade = spade.Spade
-  type SpadePass = spade.pass.SpadePass
-  type SpadeWorld = spade.pass.SpadeWorld
-  type SpadeTraversal = spade.pass.SpadeTraversal
-  type SpadeMapLike = spade.config.SpadeMapLike
-  type SpadeMetadata = spade.util.SpadeMetadata
+package object node {
 
   def indexing[T<:SpadeNode](ns:List[T])(implicit design:SpadeDesign):List[T] = {
     import design.spademeta._

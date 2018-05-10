@@ -1,4 +1,5 @@
-package spade.codegen
+package spade
+package codegen
 
 class SpadeIRPrinter(val fileName:String)(implicit compiler:Spade) extends SpadeCodegen with prism.codegen.IRPrinter {
 

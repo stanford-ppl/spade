@@ -1,4 +1,5 @@
-package spade.node
+package spade
+package node
 
 abstract class OnChipMem(param:OnChipMemParam)(implicit design:SpadeDesign) extends Module {
   val dequeueEnable = Input[Bit](s"deqEn")

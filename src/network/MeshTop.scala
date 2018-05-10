@@ -1,4 +1,5 @@
-package spade.node
+package spade
+package node
 
 abstract class MeshTop(val param:MeshTopParam)(implicit design:SpadeDesign) extends Top(param) {
   import param._

@@ -1,4 +1,5 @@
-package spade.config
+package spade
+package config
 
 import prism.collection.immutable._
 

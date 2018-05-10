@@ -1,4 +1,5 @@
-package spade.codegen
+package spade
+package codegen
 
 class ParamIRPrinter(val fileName:String)(implicit compiler:Spade) extends ParamCodegen with IRPrinter {
 

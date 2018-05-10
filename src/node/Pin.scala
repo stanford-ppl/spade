@@ -1,4 +1,5 @@
-package spade.node
+package spade
+package node
 
 trait Edge extends prism.node.Edge[SpadeNode]() {
   type A = Pin[_]
@@ -21,7 +22,7 @@ class OutputEdge[B<:PinType:ClassTag](val src:Pin[B])(implicit design:SpadeDesig
   type E <: InputEdge[B]
 }
 
-abstract class Pin[B<:PinType:ClassTag](implicit val src:Module, design:SpadeDesign) extends SpadeNode with Atom[SpadeNode] {
+abstract class Pin[B<:PinType:ClassTag](implicit val src:Module, design:SpadeDesign) extends SpadeNode with prism.node.Atom[SpadeNode] {
   setParent(src)
   val bct = implicitly[ClassTag[B]]
   val in:InputEdge[B] = new InputEdge(this)

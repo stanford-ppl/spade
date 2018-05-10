@@ -1,4 +1,7 @@
-package spade.pass
+package spade
+package pass
+
+import spade.node._
 
 trait SpadeWorld {
   implicit val nct = classTag[N]

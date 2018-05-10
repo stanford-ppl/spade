@@ -1,4 +1,5 @@
-package spade.node
+package spade
+package node
 
 case class SIMDUnit(param:SIMDParam)(implicit design:SpadeDesign) extends Module {
   import param._

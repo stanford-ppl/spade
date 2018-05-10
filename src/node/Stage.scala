@@ -1,4 +1,5 @@
-package spade.node
+package spade
+package node
 
 case class PipeReg(param:PipeRegParam)(implicit design:SpadeDesign) extends Module {
   val in = Input[Vector](s"in")

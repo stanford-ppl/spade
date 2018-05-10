@@ -1,4 +1,5 @@
-package spade.codegen
+package spade
+package codegen
 
 import prism.traversal._
 

@@ -1,4 +1,5 @@
-package spade.node
+package spade
+package node
 
 trait SpadeCollector extends prism.traversal.GraphCollector[SpadeNode] { self:SpadeNode =>
 
