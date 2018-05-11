@@ -7,8 +7,6 @@ import java.io._
 
 trait Spade extends Compiler with SpadeWorld {
 
-  override def toString = getClass().getSimpleName().replace("$", "")
-
   val configs = List(Config, SpadeConfig)
 
   lazy val spademeta:SpadeMetadata = design.spademeta

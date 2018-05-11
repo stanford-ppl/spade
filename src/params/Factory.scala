@@ -9,6 +9,7 @@ object Factory extends Logging {
   def create(param:Any)(implicit design:SpadeDesign) = param match {
     case param:StaticMeshTopParam => StaticMeshTop(param)
     case param:DynamicMeshTopParam => DynamicMeshTop(param)
+    case param:AsicTopParam => AsicTop(param)
   }
   def create(param:Any, nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) = param match {
     case param:PCUParam => PCU(param, nios)
