@@ -4,7 +4,7 @@ import spade.node._
 import prism.enums._
 
 class StaticMeshCB(numRows:Int=2, numCols:Int=2, numArgIns:Int=3, numArgOuts:Int=3) extends Spade {
-  override def toString = s"SN${numRows}x${numCols}"
+  override def toString = super.toString.replace("$","")
 
   override lazy val topParam = StaticMeshTopParam(
     numRows=numRows,
@@ -21,7 +21,7 @@ object SMeshCB4x4 extends StaticMeshCB(numRows=4, numCols=4, numArgIns=10, numAr
 object SMeshCB16x8 extends StaticMeshCB(numRows=16, numCols=8, numArgIns=10, numArgOuts=3)
 
 class DynamicMeshCB(numRows:Int=2, numCols:Int=2, numArgIns:Int=3, numArgOuts:Int=3) extends Spade {
-  override def toString = s"SN${numRows}x${numCols}"
+  override def toString = super.toString.replace("$","")
 
   override lazy val topParam = DynamicMeshTopParam(
     numRows=numRows,
