@@ -1,7 +1,7 @@
 package spade
 package node
 
-abstract class MeshTop(val param:MeshTopParam)(implicit design:SpadeDesign) extends Top(param) {
+abstract class MeshTop(override val param:MeshTopParam)(implicit design:SpadeDesign) extends Top(param) {
   import param._
   import design.spademeta._
 

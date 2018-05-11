@@ -28,10 +28,10 @@ trait Spade extends Compiler with SpadeWorld {
 
   val designPath = s"${outDir}${separator}${name}.spade"
 
-  lazy val topParam:TopParam = StaticMeshTopParam()
+  def topParam:TopParam = top.param
 
   def newDesign = {
-    design = SpadeDesign(topParam)
+    design = SpadeDesign(StaticMeshTopParam())
   }
 
   /* Analysis */

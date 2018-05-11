@@ -29,7 +29,7 @@ trait GridFringePattern extends GridPattern {
     import top.param._
     top match {
       case top:StaticMeshTop => BundleGroup(argFringeParam)(top)
-      case top:DynamicMeshTop => BundleGroup(argFringeParam, coord=Some(numCols/2, numRows))(top)
+      case top:DynamicMeshTop => BundleGroup(argFringeParam, coord=Some((numCols/2, numRows)))(top)
     }
   }
   def mcAt(i:Int, j:Int)(implicit top:MeshTop):BundleGroup = {

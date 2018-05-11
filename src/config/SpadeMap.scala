@@ -5,8 +5,6 @@ import spade.node._
 
 import prism.collection.immutable._
 
-import SpadeMap._
-
 trait SpadeMapLike { self:Product =>
   type S <: SpadeMapLike
   val fimap:FIMap
@@ -40,11 +38,3 @@ trait SpadeMapLike { self:Product =>
     constructor.newInstance(args.map(_.asInstanceOf[Object]):_*).asInstanceOf[S]
   }
 }
-case class SpadeMap (
-  fimap:FIMap,
-  cfmap:ConfigMap
-) extends SpadeMapLike { type S = SpadeMap }
-object SpadeMap {
-  def empty:SpadeMap = SpadeMap(FIMap.empty, ConfigMap.empty) 
-}
-
