@@ -34,7 +34,7 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
   ):Seq[(Bundle[_], Action, C)] = {
 
     if (maxCost>0 && pastCost>maxCost) return Nil
-    dbgblk(2, s"advance(state=${quote(state)} pastCost=$pastCost)") {
+    dbgblk(s"advance(state=${quote(state)} pastCost=$pastCost)",buffer=false) {
       routableOf(state).get match {
         case rt:SwitchBox =>
           /*

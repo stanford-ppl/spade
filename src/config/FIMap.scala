@@ -13,7 +13,6 @@ case class FIMap(
   def get(v:V):Option[KK] = bmap.get(v)
   def contains(v:V) = bmap.contains(v)
 }
-
 object FIMap {
   type K = prism.node.Input[SpadeNode]
   type V = prism.node.Output[SpadeNode]
