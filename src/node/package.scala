@@ -80,6 +80,12 @@ package object node {
     case n => false
   }
 
+  def isAsic(n:Any) = n match {
+    case n:AsicTop => true
+    case n:AsicTopParam => true
+    case n => false
+  }
+
   def cuOf(n:SpadeNode) = n.collectUp[CU]().headOption
 
   def routableOf(n:SpadeNode) = n.collectUp[Routable]().headOption
