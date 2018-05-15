@@ -5,23 +5,25 @@ sealed trait Pattern extends Parameter
 
 trait GridPattern extends Pattern
 
-trait GridFringePattern extends GridPattern {
+trait GridFringePattern extends Pattern {
   val argFringeParam:ArgFringeParam
   val mcParam:MCParam
+  val dagParam:Option[DramAGParam]
 }
 
 case class MCOnly(
   argFringeParam:ArgFringeParam=ArgFringeParam(),
-  mcParam:MCParam=MCParam()
+  mcParam:MCParam=MCParam(),
+  dagParam:Option[DramAGParam]=None
 ) extends GridFringePattern
 
 case class MC_DramAG(
   argFringeParam:ArgFringeParam=ArgFringeParam(),
   mcParam:MCParam=MCParam(),
-  dagParam:DramAGParam=DramAGParam()
+  dagParam:Option[DramAGParam]=Some(DramAGParam())
 ) extends GridFringePattern
 
-trait GridCentrolPattern extends GridPattern {
+trait GridCentrolPattern extends Pattern {
   val switchParam:SwitchParam
   def cuAt(i:Int, j:Int)(implicit top:MeshTop):CUParam
 }

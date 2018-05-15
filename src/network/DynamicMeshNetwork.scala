@@ -10,7 +10,7 @@ class DynamicMeshNetwork[B<:PinType](param:DynamicMeshNetworkParam[B], top:Dynam
 
   val bundleOf = mutable.Map[BundleGroup, GridBundle[B]]()
 
-  bundles.foreach { node => 
+  bundleGroups.foreach { node => 
     val bundle = GridBundle[B]()
     node.nios += bundle
     bundleOf(node) = bundle
