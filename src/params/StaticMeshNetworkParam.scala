@@ -13,10 +13,11 @@ abstract class StaticMeshNetworkParam[B<:PinType:ClassTag] extends Parameter {
   lazy val numArgIns:Int = argFringeParam.numArgIns
   lazy val numArgOuts:Int = argFringeParam.numArgOuts
   lazy val numTokenOuts:Int = argFringeParam.numTokenOuts
-  val channelWidth:Table[String,String,Int]
+  val channelWidth:StaticChannelWidth
 }
 
-object ChannelWidth {
+trait StaticChannelWidth extends Table[String, String, Int]
+object StaticChannelWidth {
   def empty = new Table[String, String, Int] (
     values=Map(
       "src"->List("arg", "pcu", "ocu", "pmu", "mu", "scu", "mc", "sb"), 
@@ -25,12 +26,12 @@ object ChannelWidth {
       "dstDir"->GridBundle.eightDirections
     ), 
     default=Some(0)
-  )
+  ) with StaticChannelWidth
 }
 
 case class StaticMeshControlNetworkParam() extends StaticMeshNetworkParam[Bit] {
   override lazy val channelWidth = {
-    val channelWidth = ChannelWidth.empty
+    val channelWidth = StaticChannelWidth.empty
     // switch to switch channel width
     channelWidth("src"->"sb", "dst"->"sb") = 6
 
@@ -76,7 +77,7 @@ case class StaticMeshControlNetworkParam() extends StaticMeshNetworkParam[Bit] {
 
 case class StaticMeshScalarNetworkParam() extends StaticMeshNetworkParam[Word] {
   override lazy val channelWidth = {
-    val channelWidth = ChannelWidth.empty
+    val channelWidth = StaticChannelWidth.empty
     // switch to switch channel width
     channelWidth("src"->"sb", "dst"->"sb") = 4
 
@@ -127,7 +128,7 @@ case class StaticMeshScalarNetworkParam() extends StaticMeshNetworkParam[Word] {
 
 case class StaticMeshVectorNetworkParam() extends StaticMeshNetworkParam[Vector] {
   override lazy val channelWidth = {
-    val channelWidth = ChannelWidth.empty
+    val channelWidth = StaticChannelWidth.empty
     // switch to switch channel width
     channelWidth("src"->"sb", "dst"->"sb") = 4
 

@@ -27,8 +27,8 @@ class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticM
 
   def connect(src:BundleGroup, outDir:String, dst:BundleGroup, inDir:String)(implicit design:SpadeDesign):Unit = {
     val cw = channelWidth("src"->tpOf(src), "dst"->tpOf(dst), "srcDir"->inDir, "dstDir"->outDir)
-    val outs = bundleOf(src).addOutAt(outDir, cw)
-    val ins = bundleOf(dst).addInAt(inDir, cw)
+    val outs = bundleOf(src).addOuts(cw)
+    val ins = bundleOf(dst).addIns(cw)
     outs.zip(ins).foreach { case (o, i) => i <== o }
   }
 
@@ -126,14 +126,14 @@ class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticM
       ///* ---- DramAddrGen and SwitchBox connection ---- */
       //if (x==0) {
         //// DAG to SB (W -> E) (left side)
-        //connect(dramAGs(x)(y), "E", sbArray(0)(y), "W")
+        //connect(dagArray(x)(y), "E", sbArray(0)(y), "W")
         //// SB to DAG (E -> W) (left side)
-        //connect(sbArray(0)(y), "W", dramAGs(x)(y), "E")
+        //connect(sbArray(0)(y), "W", dagArray(x)(y), "E")
       //} else {
         //// DAG to SB (E -> W) (right side)
-        //connect(dramAGs(x)(y), "W", sbArray(numCols)(y), "E")
+        //connect(dagArray(x)(y), "W", sbArray(numCols)(y), "E")
         //// SB to DAG (W -> E) (right side)
-        //connect(sbArray(numCols)(y), "E", dramAGs(x)(y), "W")
+        //connect(sbArray(numCols)(y), "E", dagArray(x)(y), "W")
       //}
 
       ///* ---- SramAddrGen and SwitchBox connection ---- */
@@ -165,14 +165,10 @@ class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticM
       ///* ---- MC and DramAddrGen connection ---- */
       //val pos = if (x==0) "left" else "right"
       //// MC to DAG (S -> N)
-      //connect(mcArray(x)(y), "N", dramAGs(x)(y), "S", pos)
+      //connect(mcArray(x)(y), "N", dagArray(x)(y), "S", pos)
       //// DAG to MC (N -> S)
-      //connect(dramAGs(x)(y), "S", mcArray(x)(y), "N", pos)
+      //connect(dagArray(x)(y), "S", mcArray(x)(y), "N", pos)
     }
   }
 
-  bundleOf.values.foreach { bundle =>
-    indexing(bundle.inputs)
-    indexing(bundle.outputs)
-  }
 }

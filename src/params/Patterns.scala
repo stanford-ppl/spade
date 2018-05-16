@@ -24,7 +24,6 @@ case class MC_DramAG(
 ) extends GridFringePattern
 
 trait GridCentrolPattern extends Pattern {
-  val switchParam:SwitchParam
   def cuAt(i:Int, j:Int)(implicit top:MeshTop):CUParam
 }
 
@@ -38,7 +37,6 @@ trait GridCentrolPattern extends Pattern {
  *
  * */
 case class Checkerboard (
-  switchParam:SwitchParam=SwitchParam(),
   pcuParam:PCUParam=PCUParam(),
   pmuParam:PMUParam=PMUParam()
 ) extends GridCentrolPattern {
@@ -56,7 +54,6 @@ case class Checkerboard (
  *
  * */
 case class ColumnStrip (
-  switchParam:SwitchParam=SwitchParam(),
   pcuParam:PCUParam=PCUParam(),
   pmuParam:PMUParam=PMUParam()
 ) extends GridCentrolPattern {
@@ -74,7 +71,6 @@ case class ColumnStrip (
  *
  * */
 case class RowStrip (
-  switchParam:SwitchParam=SwitchParam(),
   pcuParam:PCUParam=PCUParam(),
   pmuParam:PMUParam=PMUParam()
 ) extends GridCentrolPattern {
@@ -92,7 +88,6 @@ case class RowStrip (
  *
  * */
 case class MixAll (
-  switchParam:SwitchParam=SwitchParam(),
   pcuParam:PCUParam=PCUParam(),
   pmuParam:PMUParam=PMUParam(),
   scuParam:SCUParam=SCUParam()
@@ -113,7 +108,6 @@ case class MixAll (
  *
  * */
 case class HalfAndHalf (
-  switchParam:SwitchParam=SwitchParam(),
   pcuParam:PCUParam=PCUParam(),
   pmuParam:PMUParam=PMUParam(),
   scuParam:SCUParam=SCUParam()

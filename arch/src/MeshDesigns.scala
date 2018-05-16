@@ -52,7 +52,7 @@ object MyDMesh extends Spade {
         sramParam=SRAMParam(size=256 * 1024 / 4, depth=4) // 256 kB capacity
       )
     ),
-    fringePattern=MCOnly(
+    fringePattern=MC_DramAG(
       argFringeParam=ArgFringeParam(numArgIns=3, numArgOuts=3),
       mcParam=MCParam(
         wOffsetFifoParam=FIFOParam(size=16),

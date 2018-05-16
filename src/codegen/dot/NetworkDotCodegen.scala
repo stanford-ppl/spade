@@ -49,7 +49,7 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
       case (n:SpadeNode, param:MeshTopParam) =>
         indexOf.get(n).foreach { case List(x,y) =>
           n match {
-            case n:CU if dynamic => attr.pos(((x+0.5)*scale, (y + 0.5)*scale))
+            case n:Router => attr.pos(((x-0.5)*scale, (y-0.5)*scale))
             case n => attr.pos((x*scale, y*scale))
           }
         }
@@ -63,11 +63,13 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
     case n:PCU => attr.fillcolor("dodgerblue").style(filled)
     case n:PMU => attr.fillcolor("lightseagreen").style(filled)
     case n:SCU => attr.fillcolor("palevioletred1").style(filled)
+    case n:DramAG => attr.fillcolor("palevioletred1").style(filled)
     case n:MC => attr.fillcolor("forestgreen").style(filled)
     case n:SwitchBox => attr.fillcolor("indianred1").style(filled)
-    case (n:ArgFringe, "top") => attr.fillcolor("indianred1").style(filled)
-    case (n:ArgFringe, "bottom") => attr.fillcolor("indianred1").style(filled)
-    case n:ArgFringe => attr.fillcolor("indianred1").style(filled)
+    case n:Router => attr.fillcolor("indianred1").style(filled)
+    case (n:ArgFringe, "top") => attr.fillcolor("orange").style(filled)
+    case (n:ArgFringe, "bottom") => attr.fillcolor("orange").style(filled)
+    case n:ArgFringe => attr.fillcolor("orange").style(filled)
     //case n:OuterComputeUnit => Color("orange")
     case n => super.color(attr, n)
   }

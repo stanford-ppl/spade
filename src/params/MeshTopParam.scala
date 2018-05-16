@@ -11,6 +11,7 @@ trait MeshTopParam extends TopParam {
 case class StaticMeshTopParam (
   numRows:Int=2,
   numCols:Int=2,
+  switchParam:SwitchParam=SwitchParam(),
   centrolPattern:GridCentrolPattern=Checkerboard(),
   fringePattern:GridFringePattern=MCOnly(),
   networkParams:List[StaticMeshNetworkParam[_<:PinType]] = List(
@@ -26,6 +27,7 @@ case class StaticMeshTopParam (
 case class DynamicMeshTopParam (
   numRows:Int=2,
   numCols:Int=2,
+  routerParam:RouterParam=RouterParam(),
   centrolPattern:GridCentrolPattern=Checkerboard(),
   fringePattern:GridFringePattern=MCOnly(),
   networkParams:List[DynamicMeshNetworkParam[_<:PinType]] = List(

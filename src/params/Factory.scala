@@ -20,6 +20,7 @@ object Factory extends Logging {
     case param:ArgFringeParam => ArgFringe(param, nios)
     case param:MCParam => MC(param, nios)
     case param:SwitchParam => SwitchBox(param, nios)
+    case param:RouterParam => Router(param, nios)
   }
 
   case class PlasticineConf(
