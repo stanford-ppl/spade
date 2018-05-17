@@ -67,12 +67,6 @@ case class DynamicMeshTop(override val param:DynamicMeshTopParam)(implicit desig
   import param._
   import design.spademeta._
 
-  // Oneside
-  val fringeNumCols = fringePattern match {
-    case _:MCOnly => 1
-    case _:MC_DramAG => 2
-  }
-
   @transient val argFringe = bundleGroup(fringePattern.argFringeParam, coord=Some(numCols / 2 + fringeNumCols, numRows))
 
   @transient val cuArray = List.tabulate(numCols, numRows) { case (i,j) => 
@@ -82,7 +76,7 @@ case class DynamicMeshTop(override val param:DynamicMeshTopParam)(implicit desig
     )
   }
 
-  @transient val rtArray = List.tabulate(numCols+fringeNumCols*2, numRows+1) { case (i,j) => 
+  @transient val rtArray = List.tabulate(numTotalCols, numTotalRows) { case (i,j) => 
     bundleGroup(
       routerParam,
       coord=Some(i,j)
