@@ -11,31 +11,26 @@ abstract class Bundle[B<:PinType:ClassTag]()(implicit design:SpadeDesign) extend
 case class GridBundle[B<:PinType:ClassTag]()(implicit design:SpadeDesign) extends Bundle[B] {
   import GridBundle._
 
-  val inMap = mutable.Map[String, ListBuffer[Input[B]]]()
-  val outMap = mutable.Map[String, ListBuffer[Output[B]]]()
+  val _inputs = ListBuffer[Input[B]]()
+  val _outputs = ListBuffer[Output[B]]()
+  def inputs = _inputs.toList
+  def outputs = _outputs.toList
 
-  def inAt(dir:String) = inMap.get(dir).map { _.toList }.getOrElse(Nil)
-  def outAt(dir:String) = outMap.get(dir).map { _.toList }.getOrElse(Nil)
-
-  def inputs = eightDirections.flatMap { dir => inAt(dir) } 
-  def outputs = eightDirections.flatMap { dir => outAt(dir) }  
-
-  def addInAt(dir:String, num:Int)(implicit design:SpadeDesign):List[Input[B]] = { 
-    val ios = List.fill(num)(Input[B]("in"))
-    inMap.getOrElseUpdate(dir, ListBuffer.empty) ++= ios
-    ios
-  }
-  def addOutAt(dir:String, num:Int)(implicit design:SpadeDesign):List[Output[B]] = {
-    val ios = List.fill(num)(Output[B]("out"))
-    outMap.getOrElseUpdate(dir, ListBuffer.empty) ++= ios
-    ios
+  def inputsByNeighbor = inputs.groupBy { in => assertUnify(in.connected, "fromBundle") { _.src } }
+  def outputsByNeighbor = outputs.groupBy { out => assertUnify(out.connected, "toBundle") { _.src } }
+  def neighborBundles = (inputs ++ outputs).map { io => 
+    assertUnify(io.connected, "bundle") { _.src.asInstanceOf[GridBundle[B]] }
   }
 
   def addIns(num:Int)(implicit design:SpadeDesign):List[Input[B]] = { 
-    addInAt("W", num)
+    val ins = List.fill(num) { Input[B]("in") }
+    _inputs ++= ins
+    ins
   }
   def addOuts(num:Int)(implicit design:SpadeDesign):List[Output[B]] = {
-    addOutAt("W", num)
+    val outs = List.fill(num) { Output[B]("out") }
+    _outputs ++= outs
+    outs
   }
 }
 object GridBundle {
