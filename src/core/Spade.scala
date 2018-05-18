@@ -47,8 +47,8 @@ trait Spade extends Compiler with SpadeWorld {
   //lazy val plasticineCtrlDotPrinter = new PlasticineCtrlDotPrinter()
 
   override def initSession = {
-    super.initSession
-    import session._
+    val sess = session
+    import sess._
 
     // Pass
     //addPass(areaModel)
