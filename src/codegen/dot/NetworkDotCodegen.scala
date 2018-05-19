@@ -91,9 +91,10 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
     }
   }
 
-  override def emitEdge(from:prism.node.Edge[N], to:prism.node.Edge[N], attr:DotAttr):Unit = {
+  override def emitEdge(from:prism.node.Output[N], to:prism.node.Input[N], attr:DotAttr):Unit = {
     (from, to) match {
-      case (from:DirectedEdge[_,_], to:DirectedEdge[_,_]) if is[B](from) & is[B](to) => emitEdgeMatched(from.src.asInstanceOf[N], to.src, attr) 
+      case (from:DirectedEdge[_,_], to:DirectedEdge[_,_]) if is[B](from) & is[B](to) => 
+        emitEdgeMatched(from.src.asInstanceOf[N], to.src, attr) 
       case _ => 
     }
   }
