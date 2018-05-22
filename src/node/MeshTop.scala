@@ -46,7 +46,7 @@ case class StaticMeshTop(override val param:StaticMeshTopParam)(implicit design:
       )
     }
   }
-  //@transient val sramAGs = List.tabulate(2, numRows+1) { case (i, j) => if (i==0) (-1, j) else (numCols, j) }
+
   @transient val mcArray = List.tabulate(2, sbArray.head.size) { case (i, j) => 
     bundleGroup(
       fringePattern.mcParam, 
@@ -92,7 +92,7 @@ case class DynamicMeshTop(override val param:DynamicMeshTopParam)(implicit desig
       ) 
     }
   }
-  //@transient val sramAGs = List.tabulate(2, numRows+1) { case (i, j) => if (i==0) (-1, j) else (numCols, j) }
+
   @transient val mcArray = List.tabulate(2, numRows) { case (i, j) => 
     bundleGroup(
       fringePattern.mcParam,
@@ -108,5 +108,3 @@ case class DynamicMeshTop(override val param:DynamicMeshTopParam)(implicit desig
   }
 
 }
-
-case class BundleGroup(param:Parameter, nios:ListBuffer[GridBundle[_<:PinType]]=ListBuffer.empty, coord:Option[(Int,Int)]=None)

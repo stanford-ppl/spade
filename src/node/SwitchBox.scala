@@ -3,13 +3,13 @@ package node
 
 case class SwitchBox (
   param:SwitchParam, 
-  override val nios:List[Bundle[_<:PinType]]
-)(implicit design:SpadeDesign) extends Routable(nios) {
+  override val bundles:List[Bundle[_<:PinType]]
+)(implicit design:SpadeDesign) extends Routable(bundles) {
   import param._
 
   connection match {
     case CrossBarSwitchConnection =>
-      nios.foreach { bundle =>
+      bundles.foreach { bundle =>
         bundle match {
           case bundle:GridBundle[_] => connectCrossBar(bundle)
         }

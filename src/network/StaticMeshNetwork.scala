@@ -12,7 +12,7 @@ class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticM
 
   bundleGroups.foreach { node => 
     val bundle = GridBundle[B]()
-    node.nios += bundle
+    node.bundles += bundle
     bundleOf(node) = bundle
   }
 

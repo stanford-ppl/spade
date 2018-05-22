@@ -1,7 +1,7 @@
 package spade
 package node
 
-abstract class CU(val param:CUParam, nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends Routable(nios) {
+abstract class CU(val param:CUParam, bundles:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends Routable(bundles) {
   param.set(this) // Compute derived parameters
   import param._
 
@@ -59,8 +59,8 @@ abstract class CU(val param:CUParam, nios:List[Bundle[_<:PinType]])(implicit des
 
 }
 
-case class PCU(override val param:PCUParam, override val nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends CU(param, nios) 
-case class PMU(override val param:PMUParam, override val nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends CU(param, nios) 
-case class SCU(override val param:SCUParam, override val nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends CU(param, nios) 
-case class SramAG(override val param:SramAGParam, override val nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends CU(param, nios) 
-case class DramAG(override val param:DramAGParam, override val nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends CU(param, nios) 
+case class PCU(override val param:PCUParam, override val bundles:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends CU(param, bundles) 
+case class PMU(override val param:PMUParam, override val bundles:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends CU(param, bundles) 
+case class SCU(override val param:SCUParam, override val bundles:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends CU(param, bundles) 
+case class SramAG(override val param:SramAGParam, override val bundles:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends CU(param, bundles) 
+case class DramAG(override val param:DramAGParam, override val bundles:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends CU(param, bundles) 
