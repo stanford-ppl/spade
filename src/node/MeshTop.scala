@@ -56,8 +56,8 @@ case class StaticMeshTop(override val param:StaticMeshTopParam)(implicit design:
 
   @transient val networks = networkParams.map { param => new StaticMeshNetwork(param, this) }
 
-  bundleGroups.foreach { case BundleGroup(param, nios, coord) => 
-    val m = Module(Factory.create(param, nios.toList))
+  bundleGroups.foreach { case b@BundleGroup(param, coord) => 
+    val m = Module(Factory.create(param, b.bundles))
     coord.foreach { coord => indexOf(m) = coord }
   }
 
@@ -102,8 +102,8 @@ case class DynamicMeshTop(override val param:DynamicMeshTopParam)(implicit desig
 
   @transient val networks = networkParams.map { param => new DynamicMeshNetwork(param, this) }
 
-  bundleGroups.foreach { case BundleGroup(param, nios, coord) => 
-    val m = Module(Factory.create(param, nios.toList))
+  bundleGroups.foreach { case b@BundleGroup(param, coord) => 
+    val m = Module(Factory.create(param, b.bundles))
     coord.foreach { coord => indexOf(m) = coord }
   }
 

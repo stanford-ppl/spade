@@ -8,13 +8,7 @@ class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticM
   import param._
   import top._
 
-  val bundleOf = mutable.Map[BundleGroup, GridBundle[B]]()
-
-  bundleGroups.foreach { node => 
-    val bundle = GridBundle[B]()
-    node.bundles += bundle
-    bundleOf(node) = bundle
-  }
+  bundleGroups.foreach { node => node.addBundle(GridBundle[B]()) }
 
   def tpOf(node:BundleGroup) = node.param match {
     case param:PCUParam => "pcu"
@@ -27,8 +21,8 @@ class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticM
 
   def connect(src:BundleGroup, outDir:String, dst:BundleGroup, inDir:String)(implicit design:SpadeDesign):Unit = {
     val cw = channelWidth("src"->tpOf(src), "dst"->tpOf(dst), "srcDir"->inDir, "dstDir"->outDir)
-    val outs = bundleOf(src).addOuts(cw)
-    val ins = bundleOf(dst).addIns(cw)
+    val outs = src.bundle[B].addOuts(cw)
+    val ins = dst.bundle[B].addIns(cw)
     outs.zip(ins).foreach { case (o, i) => i <== o }
   }
 

@@ -8,13 +8,7 @@ class DynamicMeshNetwork[B<:PinType](param:DynamicMeshNetworkParam[B], top:Dynam
   import param._
   import top._
 
-  val bundleOf = mutable.Map[BundleGroup, GridBundle[B]]()
-
-  bundleGroups.foreach { node => 
-    val bundle = GridBundle[B]()
-    node.bundles += bundle
-    bundleOf(node) = bundle
-  }
+  bundleGroups.foreach { node => node.addBundle(GridBundle[B]()) }
 
   def tpOf(node:BundleGroup) = node.param match {
     case param:PCUParam => "pcu"
@@ -26,11 +20,11 @@ class DynamicMeshNetwork[B<:PinType](param:DynamicMeshNetworkParam[B], top:Dynam
     case param:DramAGParam => "dag"
   }
 
-  def connect(out:BundleGroup, in:BundleGroup)(implicit design:SpadeDesign):Unit = {
-    val cw = channelWidth("src"->tpOf(out), "dst"->tpOf(in))
-    val key = Seq("src"->tpOf(out), "dst"->tpOf(in))
-    val outs = bundleOf(out).addOuts(cw)
-    val ins = bundleOf(in).addIns(cw)
+  def connect(src:BundleGroup, dst:BundleGroup)(implicit design:SpadeDesign):Unit = {
+    val cw = channelWidth("src"->tpOf(src), "dst"->tpOf(dst))
+    val key = Seq("src"->tpOf(src), "dst"->tpOf(dst))
+    val outs = src.bundle[B].addOuts(cw)
+    val ins = dst.bundle[B].addIns(cw)
     outs.zip(ins).foreach { case (o, i) => i <== o }
   }
 
