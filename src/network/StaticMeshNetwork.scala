@@ -19,11 +19,20 @@ class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticM
     case param:MCParam => "mc"
   }
 
-  def connect(src:BundleGroup, outDir:String, dst:BundleGroup, inDir:String)(implicit design:SpadeDesign):Unit = {
+  def connect(src:BundleGroup, dst:BundleGroup, outDir:String, inDir:String):Unit = {
     val cw = channelWidth("src"->tpOf(src), "dst"->tpOf(dst), "srcDir"->inDir, "dstDir"->outDir)
-    val outs = src.bundle[B].addOuts(cw)
-    val ins = dst.bundle[B].addIns(cw)
-    outs.zip(ins).foreach { case (o, i) => i <== o }
+    src.connect[B](dst, cw)
+  }
+
+  def connect(src:BundleGroup, dst:BundleGroup):Unit = (src, dst) match {
+    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy < dy & sx == dx) => connect(src, dst, "S", "N")
+    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy > dy & sx == dx) => connect(src, dst, "N", "S")
+    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy == dy & sx < dx) => connect(src, dst, "W", "E")
+    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy == dy & sx > dx) => connect(src, dst, "E", "W")
+    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy < dy & sx < dx) => connect(src, dst, "SW", "NE")
+    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy > dy & sx < dx) => connect(src, dst, "NW", "SE")
+    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy < dy & sx > dx) => connect(src, dst, "SE", "NW")
+    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy > dy & sx > dx) => connect(src, dst, "NE", "SW")
   }
 
   /** ----- Central Array Connection ----- **/
@@ -32,39 +41,26 @@ class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticM
       /* ----- CU to CU Connection ----- */
       // CU to CU (Horizontal)
       if (x!=numCols-1) {
-        // W -> E
-        connect(cuArray(x)(y), "E", cuArray(x+1)(y), "W")
-        // E -> W
-        connect(cuArray(x+1)(y), "W", cuArray(x)(y), "E")
+        connect(cuArray(x)(y), cuArray(x+1)(y))
+        connect(cuArray(x+1)(y), cuArray(x)(y))
       }
-      //// CU to CU (Vertical)
+      // CU to CU (Vertical)
       if (y!=numRows-1) {
-        // S -> N
-        connect(cuArray(x)(y), "N", cuArray(x)(y+1), "S")
-        // N -> S 
-        connect(cuArray(x)(y+1), "S", cuArray(x)(y), "N")
+        connect(cuArray(x)(y), cuArray(x)(y+1))
+        connect(cuArray(x)(y+1), cuArray(x)(y))
       }
-
 
       /* ----- CU to SB Connection ----- */
-      // NW (top left)
-      connect(cuArray(x)(y), "NW", sbArray(x)(y+1), "SE")
-      // NE (top right)
-      connect(cuArray(x)(y), "NE", sbArray(x+1)(y+1), "SW")
-      // SW (bottom left)
-      connect(cuArray(x)(y), "SW", sbArray(x)(y), "NE")
-      // SE (bottom right)
-      connect(cuArray(x)(y), "SE", sbArray(x+1)(y), "NW")
+      connect(cuArray(x)(y), sbArray(x)(y))
+      connect(cuArray(x)(y), sbArray(x)(y+1))
+      connect(cuArray(x)(y), sbArray(x+1)(y))
+      connect(cuArray(x)(y), sbArray(x+1)(y+1))
 
-      // SB to CU
-      // NW (top left)
-      connect(sbArray(x)(y+1), "SE", cuArray(x)(y), "NW")
-      // NE (top right)
-      connect(sbArray(x+1)(y+1), "SW", cuArray(x)(y), "NE")
-      // SW (bottom left)
-      connect(sbArray(x)(y), "NE", cuArray(x)(y), "SW")
-      // SE (bottom right)
-      connect(sbArray(x+1)(y), "NW", cuArray(x)(y), "SE")
+      /* ----- SB to CU Connection ----- */
+      connect(sbArray(x)(y), cuArray(x)(y))
+      connect(sbArray(x)(y+1), cuArray(x)(y))
+      connect(sbArray(x+1)(y), cuArray(x)(y))
+      connect(sbArray(x+1)(y+1), cuArray(x)(y))
     }
   }
 
@@ -74,94 +70,60 @@ class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticM
       /* ---- SB to SB connections ----*/
       // SB to SB (Horizontal)
       if (x!=numCols) {
-        // W -> E 
-        connect(sbArray(x)(y), "E", sbArray(x+1)(y), "W")
-        // E -> W
-        connect(sbArray(x+1)(y), "W", sbArray(x)(y), "E")
+        connect(sbArray(x)(y), sbArray(x+1)(y))
+        connect(sbArray(x+1)(y), sbArray(x)(y))
       }
       // SB to SB (Vertical)
       if (y!=numRows) {
-        // S -> N
-        connect(sbArray(x)(y), "N", sbArray(x)(y+1), "S")
-        // N -> S 
-        connect(sbArray(x)(y+1), "S", sbArray(x)(y), "N")
+        connect(sbArray(x)(y), sbArray(x)(y+1))
+        connect(sbArray(x)(y+1), sbArray(x)(y))
       }
 
-      // Top to SB
-      // Top Switches
-      if (y==numRows) {
-        // S -> N
-        connect(sbArray(x)(y), "N", argFringe, "S") // bottom up 
-        // N -> S
-        connect(argFringe, "S", sbArray(x)(y), "N") // top down
+      /* ---- Top to SB connections ----*/
+      if (y==numRows) { // Top Switches
+        connect(argFringe, sbArray(x)(y)) // top down
+        connect(sbArray(x)(y), argFringe) // bottom up 
       }
-      // Bottom Switches
-      if (y==0) {
-        // N -> S
-        connect(sbArray(x)(y), "S", argFringe, "N") // top down 
-        // S -> N
-        connect(argFringe, "N", sbArray(x)(y), "S") // bottom up
-      }
+      //if (y==0) { // Bottom Switches
+        //connect(argFringe, sbArray(x)(y)) // bottom up
+        //connect(sbArray(x)(y), argFringe) // top down 
+      //}
 
-
-      ///* ---- OCU and SB connection ----*/
-      //// OCU to SB 
-      //connect(ocuArray(x)(y), "W", sbArray(x)(y), "E")
-
-      //// SB to OCU
-      //connect(sbArray(x)(y), "E", ocuArray(x)(y), "W")
     }
   }
 
-  /** ----- Fringe Connection ----- **/
+  ///** ----- Fringe Connection ----- **/
   for (y <- 0 until mcArray.headOption.map(_.size).getOrElse(0)) { //cols
     for (x <- 0 until mcArray.size) { //rows
 
-      ///* ---- DramAddrGen and SwitchBox connection ---- */
-      //if (x==0) {
-        //// DAG to SB (W -> E) (left side)
-        //connect(dagArray(x)(y), "E", sbArray(0)(y), "W")
-        //// SB to DAG (E -> W) (left side)
-        //connect(sbArray(0)(y), "W", dagArray(x)(y), "E")
-      //} else {
-        //// DAG to SB (E -> W) (right side)
-        //connect(dagArray(x)(y), "W", sbArray(numCols)(y), "E")
-        //// SB to DAG (W -> E) (right side)
-        //connect(sbArray(numCols)(y), "E", dagArray(x)(y), "W")
-      //}
-
-      ///* ---- SramAddrGen and SwitchBox connection ---- */
-      //if (x==0) {
-        //// SAG to SB (W -> E) (left side)
-        //connect(sramAGs(x)(y), "E", sbArray(0)(y), "W")
-        //// SB to SAG (E -> W) (left side)
-        //connect(sbArray(0)(y), "W", sramAGs(x)(y), "E")
-      //} else {
-        //// SAG to SB (E -> W) (right side)
-        //connect(sramAGs(x)(y), "W", sbArray(numCols)(y), "E")
-        //// SB to SAG (W -> E) (right side)
-        //connect(sbArray(numCols)(y), "E", sramAGs(x)(y), "W")
-      //}
-
       ///* ---- MC and SwitchBox connection ---- */
       if (x==0) {
-        // MC to SB (W -> E) (left side)
-        connect(mcArray(x)(y), "E", sbArray(0)(y), "W")
-        // SB to MC (E -> W) (left side)
-        connect(sbArray(0)(y), "W", mcArray(x)(y), "E")
+        connect(mcArray(x)(y), sbArray(0)(y)) // MC to SB (W -> E) (left side)
+        connect(sbArray(0)(y), mcArray(x)(y)) // SB to MC (E -> W) (left side)
       } else {
-        // MC to SB (E -> W) (right side)
-        connect(mcArray(x)(y), "W", sbArray(numCols)(y), "E")
-        // SB to MC (W -> E) (right side)
-        connect(sbArray(numCols)(y), "E", mcArray(x)(y), "W")
+        connect(mcArray(x)(y), sbArray(numCols)(y)) // MC to SB (E -> W) (right side)
+        connect(sbArray(numCols)(y), mcArray(x)(y)) // SB to MC (W -> E) (right side)
       }
+    }
+  }
 
-      ///* ---- MC and DramAddrGen connection ---- */
-      //val pos = if (x==0) "left" else "right"
-      //// MC to DAG (S -> N)
-      //connect(mcArray(x)(y), "N", dagArray(x)(y), "S", pos)
-      //// DAG to MC (N -> S)
-      //connect(dagArray(x)(y), "S", mcArray(x)(y), "N", pos)
+  dagArray.foreach { dagArray =>
+    for (y <- 0 until mcArray.headOption.map(_.size).getOrElse(0)) { //cols
+      for (x <- 0 until mcArray.size) { //rows
+
+        ///* ---- DramAddrGen and SwitchBox connection ---- */
+        if (x==0) {
+          connect(dagArray(x)(y), sbArray(0)(y)) // DAG to SB (W -> E) (left side)
+          connect(sbArray(0)(y), dagArray(x)(y)) // SB to DAG (E -> W) (left side)
+        } else {
+          connect(dagArray(x)(y), sbArray(numCols)(y)) // DAG to SB (E -> W) (right side)
+          connect(sbArray(numCols)(y), dagArray(x)(y)) // SB to DAG (W -> E) (right side)
+        }
+
+        ///* ---- MC and DramAddrGen connection ---- */
+        connect(mcArray(x)(y), dagArray(x)(y)) // MC to DAG (S -> N)
+        connect(dagArray(x)(y), mcArray(x)(y)) // DAG to MC (N -> S)
+      }
     }
   }
 

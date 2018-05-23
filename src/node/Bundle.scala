@@ -22,16 +22,17 @@ case class GridBundle[B<:PinType:ClassTag]()(implicit design:SpadeDesign) extend
     assertUnify(io.connected, "bundle") { _.src.asInstanceOf[GridBundle[B]] }
   }
 
-  def addIns(num:Int)(implicit design:SpadeDesign):List[Input[B]] = { 
+  def addIns(num:Int):List[Input[B]] = { 
     val ins = List.fill(num) { Input[B]("in") }
     _inputs ++= ins
     ins
   }
-  def addOuts(num:Int)(implicit design:SpadeDesign):List[Output[B]] = {
+  def addOuts(num:Int):List[Output[B]] = {
     val outs = List.fill(num) { Output[B]("out") }
     _outputs ++= outs
     outs
   }
+
 }
 object GridBundle {
   val fourDirections = List("W","N","E","S")

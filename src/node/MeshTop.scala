@@ -21,8 +21,6 @@ case class StaticMeshTop(override val param:StaticMeshTopParam)(implicit design:
 
   val scale = 2
 
-  @transient val argFringe = bundleGroup(fringePattern.argFringeParam, coord=None)
-
   @transient val cuArray = List.tabulate(numCols, numRows) { case (i,j) => 
     bundleGroup(
       centrolPattern.cuAt(i,j), 
@@ -38,6 +36,10 @@ case class StaticMeshTop(override val param:StaticMeshTopParam)(implicit design:
   }
 
   val sbrx = sbArray.last.head.coord.get._1
+  val sblx = sbArray.head.head.coord.get._1
+  val sbuy = sbArray.head.last.coord.get._2
+  val sbby = sbArray.head.head.coord.get._2
+
   @transient val dagArray = fringePattern.dagParam.map { dagParam =>
     List.tabulate(2, sbArray.head.size) { case (i, j) => 
       bundleGroup(
@@ -54,6 +56,8 @@ case class StaticMeshTop(override val param:StaticMeshTopParam)(implicit design:
     )
   }
 
+  @transient val argFringe = bundleGroup(fringePattern.argFringeParam, coord=Some(((sbrx + sblx)/2), sbuy+1))
+
   @transient val networks = networkParams.map { param => new StaticMeshNetwork(param, this) }
 
   bundleGroups.foreach { case b@BundleGroup(param, coord) => 
@@ -67,7 +71,7 @@ case class DynamicMeshTop(override val param:DynamicMeshTopParam)(implicit desig
   import param._
   import design.spademeta._
 
-  @transient val argFringe = bundleGroup(fringePattern.argFringeParam, coord=Some(numCols / 2 + fringeNumCols, numRows))
+  @transient val argFringe = bundleGroup(fringePattern.argFringeParam, coord=Some(numTotalCols / 2, numRows))
 
   @transient val cuArray = List.tabulate(numCols, numRows) { case (i,j) => 
     bundleGroup(

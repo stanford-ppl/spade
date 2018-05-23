@@ -14,6 +14,7 @@ abstract class StaticMeshNetworkParam[B<:PinType:ClassTag] extends Parameter {
   lazy val numArgOuts:Int = argFringeParam.numArgOuts
   lazy val numTokenOuts:Int = argFringeParam.numTokenOuts
   val channelWidth:StaticChannelWidth
+
 }
 
 trait StaticChannelWidth extends Table[String, String, Int]
@@ -82,22 +83,22 @@ case class StaticMeshScalarNetworkParam() extends StaticMeshNetworkParam[Word] {
     channelWidth("src"->"sb", "dst"->"sb") = 4
 
     // switch to PCU channel width
-    channelWidth("src"->"sb", "dst"->List("pcu", "scu")) = 1//roundUp(pcuSins / 4.0) 
+    channelWidth("src"->"sb", "dst"->List("pcu", "scu")) = 1
 
     // PCU to Switch channel width
-    channelWidth("src"->List("pcu", "scu"), "dst"->"sb") = 1//roundUp(pcuSouts / 4.0)
+    channelWidth("src"->List("pcu", "scu"), "dst"->"sb") = 1
 
     // switch to MCU channel width
-    channelWidth("src"->"sb", "dst"->List("pmu")) = 1//roundUp(pmuSins / 4.0) 
+    channelWidth("src"->"sb", "dst"->List("pmu")) = 1
 
     // MCU to Switch channel width
-    channelWidth("src"->List("pmu"), "dst"->"sb") = 1//roundUp(pmuSouts / 4.0)
+    channelWidth("src"->List("pmu"), "dst"->"sb") = 1
 
     // switch to DAG channel width
-    channelWidth("src"->"sb", "dst"->"scu") = 1//roundUp(ucuSins)
+    channelWidth("src"->"sb", "dst"->"scu") = 1
 
     // DAG to switch channel width
-    channelWidth("src"->"scu", "dst"->"sb") = 1//roundUp(ucuSouts) - 2
+    channelWidth("src"->"scu", "dst"->"sb") = 1
 
     // switch to SAG channel width
     channelWidth("src"->"sb", "dst"->"pcu") = 4 
@@ -133,16 +134,16 @@ case class StaticMeshVectorNetworkParam() extends StaticMeshNetworkParam[Vector]
     channelWidth("src"->"sb", "dst"->"sb") = 4
 
     // switch to PCU channel width
-    channelWidth("src"->"sb", "dst"->List("pcu")) = 1//roundUp(pcuVins / 4.0)
+    channelWidth("src"->"sb", "dst"->List("pcu")) = 1
 
     // PCU to Switch channel width
-    channelWidth("src"->List("pcu"), "dst"->"sb") = 1//roundUp(pcuVouts / 4.0)
+    channelWidth("src"->List("pcu"), "dst"->"sb") = 1
 
     // switch to MCU channel width
-    channelWidth("src"->"sb", "dst"->List("pmu")) = 1//roundUp(pmuVins / 4.0) 
+    channelWidth("src"->"sb", "dst"->List("pmu")) = 1
 
     // MCU to Switch channel width
-    channelWidth("src"->List("pmu"), "dst"->"sb") = 1//roundUp(pmuVouts / 4.0)
+    channelWidth("src"->List("pmu"), "dst"->"sb") = 1
 
     // switch to SAG channel width
     channelWidth("src"->"sb", "dst"->"pcu") = 4 

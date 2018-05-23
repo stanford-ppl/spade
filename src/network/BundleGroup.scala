@@ -13,4 +13,11 @@ case class BundleGroup(
   }
   def bundle[B<:PinType:ClassTag] = bundleMap(implicitly[ClassTag[B]]).asInstanceOf[GridBundle[B]]
   def bundles = bundleMap.values.toList
+
+  def connect[B<:PinType:ClassTag](dst:BundleGroup, channelWidth:Int):Unit = {
+    val outs = bundle[B].addOuts(channelWidth)
+    val ins = dst.bundle[B].addIns(channelWidth)
+    outs.zip(ins).foreach { case (o, i) => i <== o }
+  }
+
 }
