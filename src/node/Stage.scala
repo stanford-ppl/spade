@@ -1,5 +1,6 @@
 package spade
 package node
+import param._
 
 case class PipeReg(param:PipeRegParam)(implicit design:SpadeDesign) extends Module {
   val in = Input[Vector](s"in")

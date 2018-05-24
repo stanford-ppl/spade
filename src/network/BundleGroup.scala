@@ -1,6 +1,8 @@
 package spade
 package node
 
+import param._
+
 import scala.collection.mutable
 
 case class BundleGroup(

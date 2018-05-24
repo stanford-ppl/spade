@@ -1,6 +1,7 @@
 package spade
 package node
 
+import param._
 import scala.collection.mutable
 
 class StaticMeshNetwork[B<:PinType](

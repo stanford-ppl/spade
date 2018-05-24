@@ -1,5 +1,6 @@
 package spade
 package node
+import param._
 
 case class StaticCMeshTop(override val param:StaticCMeshTopParam)(implicit design:SpadeDesign) extends Top {
   import param._

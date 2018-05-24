@@ -1,5 +1,5 @@
 package spade
-package node
+package param
 
 trait MeshTopParam extends TopParam {
   val numRows:Int

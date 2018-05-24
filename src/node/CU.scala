@@ -1,5 +1,6 @@
 package spade
 package node
+import param._
 
 abstract class CU(
   val param:CUParam, 

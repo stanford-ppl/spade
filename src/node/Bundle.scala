@@ -1,6 +1,7 @@
 package spade
 package node
 
+import param._
 import scala.collection.mutable
 
 abstract class Bundle[B<:PinType:ClassTag]()(implicit design:SpadeDesign) extends Module {

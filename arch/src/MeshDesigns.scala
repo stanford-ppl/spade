@@ -1,6 +1,6 @@
 package arch
 
-import spade.node._
+import spade.param._
 import prism.enums._
 
 class StaticMeshCB(numRows:Int=2, numCols:Int=2, numArgIns:Int=3, numArgOuts:Int=3) extends Spade {

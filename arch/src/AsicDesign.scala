@@ -1,6 +1,6 @@
 package arch
 
-import spade.node._
+import spade.param._
 import prism.enums._
 
 object Asic extends Spade {

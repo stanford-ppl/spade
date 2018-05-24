@@ -1,5 +1,5 @@
 package spade
-package node
+package param
 
 case class StaticMeshTopParam (
   numRows:Int=2,

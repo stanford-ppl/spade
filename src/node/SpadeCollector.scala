@@ -1,5 +1,6 @@
 package spade
 package node
+import param._
 
 trait SpadeCollector extends prism.traversal.GraphCollector[SpadeNode] { self:SpadeNode =>
 

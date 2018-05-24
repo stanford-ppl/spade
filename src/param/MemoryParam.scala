@@ -1,5 +1,5 @@
 package spade
-package node
+package param
 
 trait OnChipMemParam extends Parameter { 
   val size:Int // Total capacity in word

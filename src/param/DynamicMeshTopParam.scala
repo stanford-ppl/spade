@@ -1,5 +1,5 @@
 package spade
-package node
+package param
 
 case class DynamicMeshTopParam (
   numRows:Int=2,

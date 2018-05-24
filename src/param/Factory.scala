@@ -1,6 +1,7 @@
 package spade
-package node
+package param
 
+import node._
 import prism.enums._
 import scala.collection.mutable._
 import pureconfig._

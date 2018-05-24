@@ -1,5 +1,6 @@
 package spade
 package node
+import param._
 
 case class SwitchBox (
   param:SwitchParam, 

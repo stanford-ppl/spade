@@ -1,5 +1,6 @@
 package spade
 package node
+import param._
 
 case class MC(param:MCParam, override val bundles:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends Routable(bundles) {
   import param._

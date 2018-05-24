@@ -1,5 +1,5 @@
 package spade
-package node
+package param
 
 import scala.collection.mutable
 

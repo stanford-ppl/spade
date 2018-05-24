@@ -1,4 +1,4 @@
 package spade
-package node
+package param
 
 case class RouterParam() extends Parameter

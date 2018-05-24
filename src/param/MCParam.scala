@@ -1,5 +1,5 @@
 package spade
-package node
+package param
 
 case class MCParam (
   wOffsetFifoParam:FIFOParam=FIFOParam(size=16),

@@ -2,6 +2,7 @@ package spade
 package codegen
 
 import spade.node._ 
+import spade.param._ 
 
 import sys.process._
 

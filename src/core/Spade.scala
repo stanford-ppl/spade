@@ -1,6 +1,7 @@
 package spade
 
 import spade.node._
+import spade.param._
 import spade.codegen._
 
 import java.io._

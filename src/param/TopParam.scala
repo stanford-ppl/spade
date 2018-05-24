@@ -1,9 +1,9 @@
 package spade
-package node
+package param
 
-case class DesignParam(
-  wordWidth:Int = 32,
-  vecWidth:Int = 16,
-  clockFrequency:Int = 1000000000, //Hz
-  topParam:TopParam=StaticMeshTopParam(),
-) extends Parameter
+trait TopParam extends Parameter {
+  lazy val wordWidth = 32
+  lazy val vecWidth = 16
+  lazy val clockFrequency:Int = 1000000000 //Hz
+  val busWithReady:Boolean // TODO: make this a parameter of network
+}

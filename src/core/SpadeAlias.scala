@@ -19,5 +19,10 @@ trait SpadeAlias extends SpadeLocalAlias {
   type ConfigMap = spade.config.ConfigMap
   val ConfigMap = spade.config.ConfigMap
   val SpadeConfig = spade.SpadeConfig
+
+  type Bit = spade.Bit
+  type Word = spade.Word
+  type Vector = spade.Vector
+  type PinType = spade.PinType
 }
 

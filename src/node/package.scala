@@ -1,4 +1,5 @@
 package spade
+import param._
 
 package object node {
 

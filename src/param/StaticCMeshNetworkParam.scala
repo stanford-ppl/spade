@@ -1,5 +1,5 @@
 package spade
-package node
+package param
 
 import prism.node._
 import prism.collection.mutable.Table

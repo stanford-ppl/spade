@@ -1,5 +1,6 @@
 package spade
 package node
+import param._
 
 trait Edge extends prism.node.Edge[SpadeNode]() {
   type A = Pin[_]

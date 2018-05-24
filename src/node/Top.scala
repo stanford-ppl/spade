@@ -1,5 +1,6 @@
 package spade
 package node
+import param._
 
 trait Top extends Module {
   val param:TopParam

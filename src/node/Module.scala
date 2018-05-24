@@ -1,5 +1,6 @@
 package spade
 package node
+import param._
 
 trait Module extends SpadeNode with prism.node.SubGraph[SpadeNode] {
   implicit val module:this.type = this

@@ -1,5 +1,5 @@
 package spade
-package node
+package param
                           
 sealed trait Pattern extends Parameter
 
