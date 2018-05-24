@@ -12,7 +12,7 @@ abstract class ParamCodegen(implicit compiler:Spade) extends Pass with BFSTopolo
       type N = Parameter
       val forward = false
       override def traverseNode(n:N, prev:T) = traverse(List(n), prev)
-    }.schedule(compiler.topParam).toSet.toList
+    }.schedule(compiler.designParam).toSet.toList
     dbg(s"allNodes=$allNodes")
     traverse(scheduleDepFree(allNodes), ())
   }

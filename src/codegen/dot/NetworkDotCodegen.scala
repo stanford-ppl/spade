@@ -23,7 +23,7 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
   val scale = 5
 
   def pos(attr:DotAttr, n:Any) = {
-    (n, compiler.topParam) match {
+    (n, compiler.designParam.topParam) match {
       case (n:SpadeNode, param:TopParam) =>
         indexOf.get(n).foreach { case List(x,y) =>
           n match {

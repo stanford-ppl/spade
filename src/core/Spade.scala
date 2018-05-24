@@ -26,9 +26,13 @@ trait Spade extends Compiler with SpadeWorld {
 
   val designPath = s"${outDir}${separator}${name}.spade"
 
-  lazy val topParam:TopParam = StaticMeshTopParam() // Default. Override by different designs
+  lazy val designParam:DesignParam = DesignParam() // Default. Override by different designs
 
-  def newDesign = design = SpadeDesign(topParam)
+  def newDesign = design = {
+    Factory.logger.withOpen(compiler.outDir, s"top.log", append=false) {
+      Factory.create(designParam)
+    }
+  }
 
   /* Analysis */
   //TODO: Area model
