@@ -23,12 +23,12 @@ trait CUParam extends Parameter {
     this.cu = cu
     simdParam.foreach{ _.set(cu) }
   }
-  lazy val numCins = cbundleOf(cu).fold(0) { _.inputs.size }
-  lazy val numSins = sbundleOf(cu).fold(0) { _.inputs.size }
-  lazy val numVins = vbundleOf(cu).fold(0) { _.inputs.size }
-  lazy val numCouts = cbundleOf(cu).fold(0) { _.outputs.size }
-  lazy val numSouts = sbundleOf(cu).fold(0) { _.outputs.size }
-  lazy val numVouts = vbundleOf(cu).fold(0) { _.outputs.size }
+  lazy val numCins = cu.bundle[Bit].fold(0) { _.inputs.size }
+  lazy val numSins = cu.bundle[Word].fold(0) { _.inputs.size }
+  lazy val numVins = cu.bundle[Vector].fold(0) { _.inputs.size }
+  lazy val numCouts = cu.bundle[Bit].fold(0) { _.outputs.size }
+  lazy val numSouts = cu.bundle[Word].fold(0) { _.outputs.size }
+  lazy val numVouts = cu.bundle[Vector].fold(0) { _.outputs.size }
   lazy val numVectorFifos = numVins
 }
 case class PCUParam (

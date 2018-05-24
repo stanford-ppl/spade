@@ -53,13 +53,6 @@ package object node {
   implicit def DynamicMeshNetworkToBct(x:DynamicMeshNetwork[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
   implicit def StaticMeshNetworkToBct(x:StaticMeshNetwork[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
 
-  def bundleOf[B<:PinType:ClassTag:TypeTag](x:SpadeNode) = {
-    x.collectDown[Bundle[B]]().headOption
-  }
-  def cbundleOf(x:SpadeNode) = bundleOf[Bit](x)
-  def sbundleOf(x:SpadeNode) = bundleOf[Word](x)
-  def vbundleOf(x:SpadeNode) = bundleOf[Vector](x)
-
   def isMesh(n:Top) = n match {
     case n:MeshTop => true
     case _ => false

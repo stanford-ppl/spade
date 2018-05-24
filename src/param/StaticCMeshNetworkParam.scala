@@ -33,10 +33,10 @@ case class StaticCMeshControlNetworkParam() extends StaticCMeshNetworkParam[Bit]
     channelWidth("src"->"sb", "dst"->"sb") = 6
 
     // switch to CU channel width
-    channelWidth("src"->"sb", "dst"->List("pcu", "mu", "pmu", "scu")) = 1
+    channelWidth("src"->"sb", "dst"->List("pcu", "pmu", "scu")) = 1
 
     // CU to Switch channel width
-    channelWidth("src"->List("pcu", "mu", "pmu", "scu"), "dst"->"sb") = 2
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->"sb") = 2
 
     // DAG to switch channel width
     channelWidth("src"->"dag", "dst"->"sb") = 1
