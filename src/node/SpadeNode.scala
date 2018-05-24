@@ -1,7 +1,7 @@
 package spade
 package node
 
-abstract class SpadeNode(implicit design:SpadeDesign) extends prism.node.Node[SpadeNode] with SpadeCollector { self =>
+abstract class SpadeNode(implicit protected val design:SpadeDesign) extends prism.node.Node[SpadeNode] with SpadeCollector { self =>
   val id = design.nextId
 
   type N = SpadeNode

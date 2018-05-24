@@ -20,7 +20,7 @@ class DynamicMeshNetwork[B<:PinType](param:DynamicMeshNetworkParam[B], top:Dynam
     case param:DramAGParam => "dag"
   }
 
-  def connect(src:BundleGroup, dst:BundleGroup)(implicit design:SpadeDesign):Unit = {
+  def connect(src:BundleGroup, dst:BundleGroup):Unit = {
     val cw = channelWidth("src"->tpOf(src), "dst"->tpOf(dst))
     val key = Seq("src"->tpOf(src), "dst"->tpOf(dst))
     val outs = src.bundle[B].addOuts(cw)

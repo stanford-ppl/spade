@@ -24,7 +24,7 @@ case class MC_DramAG(
 ) extends GridFringePattern
 
 trait GridCentrolPattern extends Pattern {
-  def cuAt(i:Int, j:Int)(implicit top:MeshTop):CUParam
+  def cuAt(i:Int, j:Int):CUParam
 }
 
 /*
@@ -40,7 +40,7 @@ case class Checkerboard (
   pcuParam:PCUParam=PCUParam(),
   pmuParam:PMUParam=PMUParam()
 ) extends GridCentrolPattern {
-  def cuAt(i:Int, j:Int)(implicit top:MeshTop) = {
+  def cuAt(i:Int, j:Int) = {
     if ((i+j) % 2 == 0) pcuParam else pmuParam 
   }
 }
@@ -57,7 +57,7 @@ case class ColumnStrip (
   pcuParam:PCUParam=PCUParam(),
   pmuParam:PMUParam=PMUParam()
 ) extends GridCentrolPattern {
-  def cuAt(i:Int, j:Int)(implicit top:MeshTop) = {
+  def cuAt(i:Int, j:Int) = {
     if (j % 2 == 0) pcuParam else pmuParam 
   }
 }
@@ -74,7 +74,7 @@ case class RowStrip (
   pcuParam:PCUParam=PCUParam(),
   pmuParam:PMUParam=PMUParam()
 ) extends GridCentrolPattern {
-  def cuAt(i:Int, j:Int)(implicit top:MeshTop) = {
+  def cuAt(i:Int, j:Int) = {
     if (i % 2 == 0) pcuParam else pmuParam 
   }
 }
@@ -92,7 +92,7 @@ case class MixAll (
   pmuParam:PMUParam=PMUParam(),
   scuParam:SCUParam=SCUParam()
 ) extends GridCentrolPattern {
-  def cuAt(i:Int, j:Int)(implicit top:MeshTop) = {
+  def cuAt(i:Int, j:Int) = {
     if (i % 2 == 0) {
       if (j % 2 == 0) pcuParam else pmuParam
     } else scuParam
@@ -112,7 +112,7 @@ case class HalfAndHalf (
   pmuParam:PMUParam=PMUParam(),
   scuParam:SCUParam=SCUParam()
 ) extends GridCentrolPattern {
-  def cuAt(i:Int, j:Int)(implicit top:MeshTop) = {
+  def cuAt(i:Int, j:Int) = {
     if (i % 2 == 0) if (j % 2 == 0) pcuParam else pmuParam
     else if (j % 2 == 0) pmuParam else scuParam
   }

@@ -1,4 +1,24 @@
 package spade
 package node
 
-abstract class Top(val param:TopParam)(implicit design:SpadeDesign) extends Module
+trait Top extends Module {
+  val param:TopParam
+  import param._
+  import design.spademeta._
+
+  @transient val bundleGroups = ListBuffer[BundleGroup]()
+
+  def bundleGroup(param:Parameter, coord:Option[(Int,Int)]=None) = {
+    val bg = BundleGroup(param,coord=coord)
+    bundleGroups += bg
+    bg
+  }
+
+  def createSubmodules = {
+    bundleGroups.foreach { case b@BundleGroup(param, coord) => 
+      val m = Module(Factory.create(param, b.bundles))
+      coord.foreach { coord => indexOf(m) = coord }
+    }
+  }
+
+}

@@ -3,7 +3,10 @@ package node
 
 import scala.collection.mutable
 
-class StaticMeshNetwork[B<:PinType](param:StaticMeshNetworkParam[B], top:StaticMeshTop)(implicit design:SpadeDesign) {
+class StaticMeshNetwork[B<:PinType](
+  param:StaticMeshNetworkParam[B], 
+  top:StaticMeshTop
+)(implicit design:SpadeDesign) {
   implicit val bct = param.bct
   import param._
   import top._

@@ -1,21 +1,13 @@
 package spade
 package node
 
-abstract class MeshTop(override val param:MeshTopParam)(implicit design:SpadeDesign) extends Top(param) {
-  import param._
-  import design.spademeta._
-
-  @transient val bundleGroups = ListBuffer[BundleGroup]()
-
-  def bundleGroup(param:Parameter, coord:Option[(Int,Int)]=None) = {
-    val bg = BundleGroup(param,coord=coord)
-    bundleGroups += bg
-    bg
-  }
-
+trait MeshTop extends Top {
+  override val param:MeshTopParam
 }
 
-case class StaticMeshTop(override val param:StaticMeshTopParam)(implicit design:SpadeDesign) extends MeshTop(param) {
+case class StaticMeshTop(
+  override val param:StaticMeshTopParam
+)(implicit design:SpadeDesign) extends MeshTop {
   import param._
   import design.spademeta._
 
@@ -60,14 +52,12 @@ case class StaticMeshTop(override val param:StaticMeshTopParam)(implicit design:
 
   @transient val networks = networkParams.map { param => new StaticMeshNetwork(param, this) }
 
-  bundleGroups.foreach { case b@BundleGroup(param, coord) => 
-    val m = Module(Factory.create(param, b.bundles))
-    coord.foreach { coord => indexOf(m) = coord }
-  }
-
+  createSubmodules
 }
 
-case class DynamicMeshTop(override val param:DynamicMeshTopParam)(implicit design:SpadeDesign) extends MeshTop(param) {
+case class DynamicMeshTop(
+  override val param:DynamicMeshTopParam
+)(implicit design:SpadeDesign) extends MeshTop {
   import param._
   import design.spademeta._
 
@@ -106,9 +96,5 @@ case class DynamicMeshTop(override val param:DynamicMeshTopParam)(implicit desig
 
   @transient val networks = networkParams.map { param => new DynamicMeshNetwork(param, this) }
 
-  bundleGroups.foreach { case b@BundleGroup(param, coord) => 
-    val m = Module(Factory.create(param, b.bundles))
-    coord.foreach { coord => indexOf(m) = coord }
-  }
-
+  createSubmodules
 }
