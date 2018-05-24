@@ -34,8 +34,3 @@ case class GridBundle[B<:PinType:ClassTag]()(implicit design:SpadeDesign) extend
   }
 
 }
-object GridBundle {
-  val fourDirections = List("W","N","E","S")
-  val diagDirections = List("NW","NE","SE","SW")
-  val eightDirections = List("W", "NW", "N", "NE", "E", "SE", "S", "SW")
-}

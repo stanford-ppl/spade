@@ -4,35 +4,35 @@ package node
 import prism.node._
 import prism.collection.mutable.Table
 
-abstract class DynamicMeshNetworkParam[B<:PinType:ClassTag] extends Parameter {
-  val bct = implicitly[ClassTag[B]]
-  lazy val meshTopParam = collectOut[MeshTopParam]().head
-  lazy val numRows:Int = meshTopParam.numRows
-  lazy val numCols:Int = meshTopParam.numCols
-  lazy val argFringeParam = meshTopParam.fringePattern.argFringeParam
+abstract class DynamicMeshNetworkParam[B<:PinType:ClassTag] extends NetworkParam[B] {
+  lazy val topParam = collectOut[MeshTopParam]().head
+  lazy val numRows:Int = topParam.numRows
+  lazy val numCols:Int = topParam.numCols
+  lazy val argFringeParam = topParam.fringePattern.argFringeParam
   lazy val numArgIns:Int = argFringeParam.numArgIns
   lazy val numArgOuts:Int = argFringeParam.numArgOuts
   lazy val numTokenOuts:Int = argFringeParam.numTokenOuts
-  val channelWidth:DynamicChannelWidth
+  val channelWidth:ChannelWidth
   val numVirtualClasses:Int
-}
 
-trait DynamicChannelWidth extends Table[String, String, Int]
-object DynamicChannelWidth {
-  def empty = new Table[String, String, Int] (
-    values=Map(
-      "src"->List("arg", "pcu", "ocu", "pmu", "scu", "dag", "mc", "rt"), 
-      "dst"->List("arg", "pcu", "ocu", "pmu", "scu", "dag", "mc", "rt")
-    ), 
-    default=Some(0)
-  ) with DynamicChannelWidth
+  trait ChannelWidth extends Table[String, String, Int]
+  object ChannelWidth {
+    def empty = new Table[String, String, Int] (
+      values=Map(
+        "src"->cuTypes, 
+        "dst"->cuTypes
+      ), 
+      default=Some(0)
+    ) with ChannelWidth
+  }
+
 }
 
 case class DynamicMeshControlNetworkParam(
   numVirtualClasses:Int = 4
 ) extends DynamicMeshNetworkParam[Bit] {
   override lazy val channelWidth = {
-    val channelWidth = DynamicChannelWidth.empty
+    val channelWidth = ChannelWidth.empty
     // switch to CU channel width
     channelWidth("src"->"rt", "dst"->List("pcu", "pmu", "scu")) = 4
 
@@ -66,7 +66,7 @@ case class DynamicMeshScalarNetworkParam(
   numVirtualClasses:Int = 4
 ) extends DynamicMeshNetworkParam[Word] {
   override lazy val channelWidth = {
-    val channelWidth = DynamicChannelWidth.empty
+    val channelWidth = ChannelWidth.empty
     // switch to PCU channel width
     channelWidth("src"->"rt", "dst"->List("pcu", "scu")) = 4//roundUp(pcuSins / 4.0) 
 
@@ -116,7 +116,7 @@ case class DynamicMeshVectorNetworkParam(
   numVirtualClasses:Int = 4
 ) extends DynamicMeshNetworkParam[Vector] {
   override lazy val channelWidth = {
-    val channelWidth = DynamicChannelWidth.empty
+    val channelWidth = ChannelWidth.empty
     // switch to PCU channel width
     channelWidth("src"->"rt", "dst"->List("pcu")) = 4//roundUp(pcuVins / 4.0)
 

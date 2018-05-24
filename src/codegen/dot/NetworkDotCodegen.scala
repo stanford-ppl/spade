@@ -9,7 +9,7 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
 
   import spademeta._
 
-  lazy val dynamic = isDynamic(compiler.top)
+  //lazy val dynamic = isDynamic(compiler.top)
 
   override def finPass = {
     super.finPass
@@ -18,43 +18,22 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
 
   def getLabel(n:Any) = quote(n)
 
-  //def labelWithPort(attr:DotAttr, n:Routable) = {
-    //val nio = n.nios.flatMap(as[Bundle,B]).head.asInstanceOf[GridBundle[B]]
-    //val recs = ListBuffer[String]()
-    //def ports(dir:String) = {
-      //var ins = nio.inAt(dir).map{io => s"<$io> $io(${indexOf(io)})"}
-      //var outs = nio.outAt(dir).map{io => s"<$io> $io(${indexOf(io)})"}
-      //val maxLength = Math.max(ins.size, outs.size)
-      //ins = ins ++ List.fill(maxLength-ins.size){""}
-      //outs = outs ++ List.fill(maxLength-outs.size){""}
-      //val ios = ins.zip(outs).flatMap{case (i,o) => 
-        //if (dir=="S" || dir=="E") List(o,i)
-        //else List(i,o)
-      //}
-      //ios.mkString("|")
-    //}
-    //recs += s"{${ports("NW")}  | ${ports("N")}          | ${ports("NE")}}"
-    //recs += s"{{${ports("W")}} | {${getLabel(n)}}  | {${ports("E")}}}"
-    //recs += s"{${ports("SW")}  | ${ports("S")}          | ${ports("SE")}}"
-    //val label = s"{${recs.mkString("|")}}"
-    //attr.label(label)
-  //}
-
   //def shape(attr:DotAttr, n:Any) = attr.shape(box)
 
   val scale = 5
 
   def pos(attr:DotAttr, n:Any) = {
     (n, compiler.topParam) match {
-      case (n:SpadeNode, param:MeshTopParam) =>
+      case (n:SpadeNode, param:TopParam) =>
         indexOf.get(n).foreach { case List(x,y) =>
           n match {
             case n:Router => attr.pos(((x-0.5)*scale, (y-0.5)*scale))
             case n => attr.pos((x*scale, y*scale))
           }
         }
-      case ((n:ArgFringe, "top"), param:MeshTopParam) if !dynamic => attr.pos(((param.numCols/2)*scale*2, (param.numRows+1)*scale*2))
-      case ((n:ArgFringe, "bottom"), param:MeshTopParam) if !dynamic => attr.pos(((param.numCols/2)*scale*2, -scale*2))
+      //case ((n:ArgFringe, "top"), param:MeshTopParam) if !dynamic => attr.pos(((param.numCols/2)*scale*2, (param.numRows+1)*scale*2))
+      //case ((n:ArgFringe, "bottom"), param:MeshTopParam) if !dynamic => attr.pos(((param.numCols/2)*scale*2, -scale*2))
+      case _ =>
     }
     attr
   }

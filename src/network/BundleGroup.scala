@@ -7,6 +7,7 @@ case class BundleGroup(
   param:Parameter, 
   coord:Option[(Int,Int)]=None
 ) {
+
   val bundleMap = mutable.Map[ClassTag[_], GridBundle[_<:PinType]]()
   def addBundle[B<:PinType:ClassTag](bundle:GridBundle[B]) = {
     bundleMap += implicitly[ClassTag[B]] -> bundle
@@ -19,5 +20,4 @@ case class BundleGroup(
     val ins = dst.bundle[B].addIns(channelWidth)
     outs.zip(ins).foreach { case (o, i) => i <== o }
   }
-
 }

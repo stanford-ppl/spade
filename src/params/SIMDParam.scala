@@ -30,8 +30,8 @@ case class DefaultSIMDParam (
 trait SIMDParam extends Parameter {
   val numRegs:Int
   val vectorized:Boolean
-  lazy val meshTopParam = collectOut[MeshTopParam]().head
-  lazy val vecWidth = meshTopParam.vecWidth
+  lazy val topParam = collectOut[TopParam]().head
+  lazy val vecWidth = topParam.vecWidth
   lazy val numLanes:Int = if (vectorized) vecWidth else 1
   val reductionIndices:List[Option[Int]]
   def set(cu:CU):Unit

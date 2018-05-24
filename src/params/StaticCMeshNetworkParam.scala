@@ -4,11 +4,11 @@ package node
 import prism.node._
 import prism.collection.mutable.Table
 
-abstract class StaticMeshNetworkParam[B<:PinType:ClassTag] extends NetworkParam[B] {
-  lazy val meshTopParam = collectOut[MeshTopParam]().head
-  lazy val numRows:Int = meshTopParam.numRows
-  lazy val numCols:Int = meshTopParam.numCols
-  lazy val argFringeParam = meshTopParam.fringePattern.argFringeParam
+abstract class StaticCMeshNetworkParam[B<:PinType:ClassTag] extends NetworkParam[B] {
+  lazy val topParam = collectOut[CMeshTopParam]().head
+  lazy val numRows:Int = topParam.numRows
+  lazy val numCols:Int = topParam.numCols
+  lazy val argFringeParam = topParam.pattern.argFringeParam
   lazy val numArgIns:Int = argFringeParam.numArgIns
   lazy val numArgOuts:Int = argFringeParam.numArgOuts
   lazy val numTokenOuts:Int = argFringeParam.numTokenOuts
@@ -19,39 +19,30 @@ abstract class StaticMeshNetworkParam[B<:PinType:ClassTag] extends NetworkParam[
     def empty = new Table[String, String, Int] (
       values=Map(
         "src"->cuTypes, 
-        "dst"->cuTypes, 
-        "srcDir"->eightDirections, 
-        "dstDir"->eightDirections
+        "dst"->cuTypes
       ), 
       default=Some(0)
     ) with ChannelWidth
   }
-
 }
 
-case class StaticMeshControlNetworkParam() extends StaticMeshNetworkParam[Bit] {
+case class StaticCMeshControlNetworkParam() extends StaticCMeshNetworkParam[Bit] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // switch to switch channel width
     channelWidth("src"->"sb", "dst"->"sb") = 6
 
     // switch to CU channel width
-    channelWidth("src"->"sb", "dst"->List("pcu", "pmu", "scu")) = 1
+    channelWidth("src"->"sb", "dst"->List("pcu", "mu", "pmu", "scu")) = 1
 
     // CU to Switch channel width
-    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->"sb") = 2
+    channelWidth("src"->List("pcu", "mu", "pmu", "scu"), "dst"->"sb") = 2
 
     // DAG to switch channel width
     channelWidth("src"->"dag", "dst"->"sb") = 1
 
     // switch to DAG channel width
     channelWidth("src"->"sb", "dst"->"dag") = 1
-
-    // switch to SAG channel width
-    channelWidth("src"->"sb", "dst"->"pcu") = 2
-
-    // SAG to switch channel width
-    channelWidth("src"->"pcu", "dst"->"sb") = 2 
 
     // switch to MC channel width
     channelWidth("src"->"sb", "dst"->"mc") = 1
@@ -75,7 +66,7 @@ case class StaticMeshControlNetworkParam() extends StaticMeshNetworkParam[Bit] {
   }
 }
 
-case class StaticMeshScalarNetworkParam() extends StaticMeshNetworkParam[Word] {
+case class StaticCMeshScalarNetworkParam() extends StaticCMeshNetworkParam[Word] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // switch to switch channel width
@@ -99,12 +90,6 @@ case class StaticMeshScalarNetworkParam() extends StaticMeshNetworkParam[Word] {
     // DAG to switch channel width
     channelWidth("src"->"dag", "dst"->"sb") = 1
 
-    // switch to SAG channel width
-    channelWidth("src"->"sb", "dst"->"pcu") = 4 
-
-    // SAG to switch channel width
-    channelWidth("src"->"pcu", "dst"->"sb") = 2 
-
     // switch to MC channel width
     channelWidth("src"->"sb", "dst"->"mc") = 3
 
@@ -126,7 +111,7 @@ case class StaticMeshScalarNetworkParam() extends StaticMeshNetworkParam[Word] {
   }
 }
 
-case class StaticMeshVectorNetworkParam() extends StaticMeshNetworkParam[Vector] {
+case class StaticCMeshVectorNetworkParam() extends StaticCMeshNetworkParam[Vector] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // switch to switch channel width
@@ -143,12 +128,6 @@ case class StaticMeshVectorNetworkParam() extends StaticMeshNetworkParam[Vector]
 
     // MCU to Switch channel width
     channelWidth("src"->List("pmu"), "dst"->"sb") = 1
-
-    // switch to SAG channel width
-    channelWidth("src"->"sb", "dst"->"pcu") = 4 
-
-    // SAG to switch channel width
-    channelWidth("src"->"pcu", "dst"->"sb") = 2 
 
     // switch to MC channel width
     channelWidth("src"->"sb", "dst"->"mc") = 1

@@ -3,8 +3,6 @@ package node
                           
 sealed trait Pattern extends Parameter
 
-trait GridPattern extends Pattern
-
 trait GridFringePattern extends Pattern {
   val argFringeParam:ArgFringeParam
   val mcParam:MCParam
@@ -115,5 +113,64 @@ case class HalfAndHalf (
   def cuAt(i:Int, j:Int) = {
     if (i % 2 == 0) if (j % 2 == 0) pcuParam else pmuParam
     else if (j % 2 == 0) pmuParam else scuParam
+  }
+}
+
+trait CMeshPattern extends Pattern {
+  lazy val topParam = collectOut[CMeshTopParam]().head
+  val pcuParam:PCUParam
+  val pmuParam:PMUParam
+  val mcParam:MCParam
+  val dagParam:Option[DramAGParam]
+  val argFringeParam:ArgFringeParam
+  def cuAt(i:Int, j:Int)(ii:Int, jj:Int):Parameter
+}
+
+/*
+ *  First column
+ *  +-----+-----+
+ *  | MC  | PMU |
+ *  +-----+-----+
+ *  | DAG | PCU |
+ *  +-----+-----+
+ *
+ *  Middle columns
+ *  +-----+-----+
+ *  | PCU | PMU |
+ *  +-----+-----+
+ *  | PMU | PCU |
+ *  +-----+-----+
+ *
+ *  Last column
+ *  +-----+-----+
+ *  | PCU | DAG |
+ *  +-----+-----+
+ *  | PMU | MC  |
+ *  +-----+-----+
+ * */
+case class CMeshCheckerboard(
+  pcuParam:PCUParam=PCUParam(),
+  pmuParam:PMUParam=PMUParam(),
+  mcParam:MCParam=MCParam(),
+  dagParam:Option[DramAGParam]=Some(DramAGParam()),
+  argFringeParam:ArgFringeParam=ArgFringeParam()
+) extends CMeshPattern {
+  def cuAt(i:Int, j:Int)(ii:Int, jj:Int):Parameter = {
+    import topParam._
+    if ((ii + jj) % 2 == 0) {
+      if (i==0 && ii==0) // first col
+        mcParam
+      else if (i==numCols-1 && ii==1) // last col
+        mcParam
+      else
+        pcuParam
+    } else {
+      if (i==0 && ii==0) // first col
+        dagParam.getOrElse(pcuParam) 
+      else if (i==numCols-1 && ii==1) // last col
+        dagParam.getOrElse(pcuParam)
+      else
+        pmuParam
+    }
   }
 }

@@ -1,7 +1,10 @@
 package spade
 package node
 
-abstract class CU(val param:CUParam, bundles:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends Routable(bundles) {
+abstract class CU(
+  val param:CUParam, 
+  bundles:List[Bundle[_<:PinType]]
+)(implicit design:SpadeDesign) extends Routable(bundles) {
   param.set(this) // Compute derived parameters
   import param._
 
