@@ -2,9 +2,9 @@ package spade
 package node
 import param._
 
-case class DynamicMeshTop(
-  override val param:DynamicMeshTopParam
-)(implicit design:SpadeDesign) extends MeshTop {
+case class DynamicGridTop(
+  override val param:DynamicGridTopParam
+)(implicit design:SpadeDesign) extends GridTop {
   import param._
   import design.spademeta._
 
@@ -41,7 +41,7 @@ case class DynamicMeshTop(
     )
   }
 
-  @transient val networks = networkParams.map { param => new DynamicMeshNetwork(param, this) }
+  @transient val networks = networkParams.map { param => Factory.create(param, this) }
 
   createSubmodules
 }

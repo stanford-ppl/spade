@@ -4,7 +4,7 @@ import spade.param._
 import prism.enums._
 
 class StaticMeshCB(numRows:Int=2, numCols:Int=2, numArgIns:Int=3, numArgOuts:Int=3) extends Spade {
-  override lazy val designParam = DesignParam(topParam=StaticMeshTopParam(
+  override lazy val designParam = DesignParam(topParam=StaticGridTopParam(
     numRows=numRows,
     numCols=numCols,
     centrolPattern=Checkerboard(),
@@ -19,7 +19,7 @@ object SMeshCB4x4 extends StaticMeshCB(numRows=4, numCols=4, numArgIns=10, numAr
 object SMeshCB16x8 extends StaticMeshCB(numRows=16, numCols=8, numArgIns=10, numArgOuts=3)
 
 class DynamicMeshCB(numRows:Int=2, numCols:Int=2, numArgIns:Int=3, numArgOuts:Int=3) extends Spade {
-  override lazy val designParam = DesignParam(topParam=DynamicMeshTopParam(
+  override lazy val designParam = DesignParam(topParam=DynamicGridTopParam(
     numRows=numRows,
     numCols=numCols,
     centrolPattern=Checkerboard(),
@@ -36,37 +36,42 @@ object DMeshCB16x8 extends DynamicMeshCB(numRows=16, numCols=8, numArgIns=10, nu
 
 object MyDesign extends Spade {
   /* Example of overriding memory size parameters */
-  //override lazy val designParam = DesignParam(topParam=DynamicMeshTopParam(
-    //numRows=4,
-    //numCols=4,
-    //centrolPattern=Checkerboard(
-      //pcuParam=PCUParam(
-        //controlFifoParam=FIFOParam(5),
-        //scalarFifoParam=FIFOParam(5),
-        //vectorFifoParam=FIFOParam(5)
-      //),
-      //pmuParam=PMUParam(
-        //controlFifoParam=FIFOParam(5),
-        //scalarFifoParam=FIFOParam(5),
-        //vectorFifoParam=FIFOParam(5),
-        //sramParam=SRAMParam(size=256 * 1024 / 4, depth=4) // 256 kB capacity
-      //)
-    //),
-    //fringePattern=MC_DramAG(
-      //argFringeParam=ArgFringeParam(numArgIns=3, numArgOuts=3),
-      //mcParam=MCParam(
-        //wOffsetFifoParam=FIFOParam(size=16),
-        //rOffsetFifoParam=FIFOParam(size=16),
-        //wSizeFifoParam=FIFOParam(size=16),
-        //rSizeFifoParam=FIFOParam(size=16),
-        //sDataFifoParam=FIFOParam(size=16),
-        //vDataFifoParam=FIFOParam(size=16)
-      //)
-    //)
-  //))
-  override lazy val designParam = DesignParam(topParam=StaticCMeshTopParam(
+  override lazy val designParam = DesignParam(topParam=StaticGridTopParam(
     numRows=4,
     numCols=4,
-    pattern=CMeshCheckerboard()
+    centrolPattern=Checkerboard(
+      pcuParam=PCUParam(
+        controlFifoParam=FIFOParam(5),
+        scalarFifoParam=FIFOParam(5),
+        vectorFifoParam=FIFOParam(5)
+      ),
+      pmuParam=PMUParam(
+        controlFifoParam=FIFOParam(5),
+        scalarFifoParam=FIFOParam(5),
+        vectorFifoParam=FIFOParam(5),
+        sramParam=SRAMParam(size=256 * 1024 / 4, depth=4) // 256 kB capacity
+      )
+    ),
+    fringePattern=MC_DramAG(
+      argFringeParam=ArgFringeParam(numArgIns=3, numArgOuts=3),
+      mcParam=MCParam(
+        wOffsetFifoParam=FIFOParam(size=16),
+        rOffsetFifoParam=FIFOParam(size=16),
+        wSizeFifoParam=FIFOParam(size=16),
+        rSizeFifoParam=FIFOParam(size=16),
+        sDataFifoParam=FIFOParam(size=16),
+        vDataFifoParam=FIFOParam(size=16)
+      )
+    ),
+    networkParams = List(
+      StaticGridControlNetworkParam(isTorus=true),
+      StaticGridScalarNetworkParam(isTorus=true),
+      StaticGridVectorNetworkParam(isTorus=true)
+    )
   ))
+  //override lazy val designParam = DesignParam(topParam=StaticCMeshTopParam(
+    //numRows=4,
+    //numCols=4,
+    //pattern=CMeshCheckerboard()
+  //))
 }

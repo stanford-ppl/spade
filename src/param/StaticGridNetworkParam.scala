@@ -4,14 +4,16 @@ package param
 import prism.node._
 import prism.collection.mutable.Table
 
-abstract class StaticMeshNetworkParam[B<:PinType:ClassTag] extends NetworkParam[B] {
-  lazy val meshTopParam = collectOut[MeshTopParam]().head
+abstract class StaticGridNetworkParam[B<:PinType:ClassTag] extends NetworkParam[B] {
+  lazy val meshTopParam = collectOut[GridTopParam]().head
   lazy val numRows:Int = meshTopParam.numRows
   lazy val numCols:Int = meshTopParam.numCols
   lazy val argFringeParam = meshTopParam.fringePattern.argFringeParam
   lazy val numArgIns:Int = argFringeParam.numArgIns
   lazy val numArgOuts:Int = argFringeParam.numArgOuts
   lazy val numTokenOuts:Int = argFringeParam.numTokenOuts
+  val isTorus:Boolean
+  val isMesh = !isTorus
   val channelWidth:ChannelWidth
 
   trait ChannelWidth extends Table[String, String, Int]
@@ -29,7 +31,9 @@ abstract class StaticMeshNetworkParam[B<:PinType:ClassTag] extends NetworkParam[
 
 }
 
-case class StaticMeshControlNetworkParam() extends StaticMeshNetworkParam[Bit] {
+case class StaticGridControlNetworkParam(
+  isTorus:Boolean=false
+) extends StaticGridNetworkParam[Bit] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // switch to switch channel width
@@ -75,7 +79,9 @@ case class StaticMeshControlNetworkParam() extends StaticMeshNetworkParam[Bit] {
   }
 }
 
-case class StaticMeshScalarNetworkParam() extends StaticMeshNetworkParam[Word] {
+case class StaticGridScalarNetworkParam(
+  isTorus:Boolean=false
+) extends StaticGridNetworkParam[Word] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // switch to switch channel width
@@ -126,7 +132,9 @@ case class StaticMeshScalarNetworkParam() extends StaticMeshNetworkParam[Word] {
   }
 }
 
-case class StaticMeshVectorNetworkParam() extends StaticMeshNetworkParam[Vector] {
+case class StaticGridVectorNetworkParam(
+  isTorus:Boolean=false
+) extends StaticGridNetworkParam[Vector] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // switch to switch channel width

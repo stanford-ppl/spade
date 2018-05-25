@@ -2,9 +2,9 @@ package spade
 package node
 import param._
 
-case class StaticMeshTop(
-  override val param:StaticMeshTopParam
-)(implicit design:SpadeDesign) extends MeshTop {
+case class StaticGridTop(
+  override val param:StaticGridTopParam
+)(implicit design:SpadeDesign) extends GridTop {
   import param._
   import design.spademeta._
 
@@ -33,7 +33,7 @@ case class StaticMeshTop(
     List.tabulate(2, sbArray.head.size) { case (i, j) => 
       bundleGroup(
         dagParam, 
-        coord=Some(if (i==0) (0*scale, j*scale) else (sbrx+1, j*scale))
+        coord=Some(if (i==0) (0*scale, j*scale+1) else (sbrx+1, j*scale+1))
       )
     }
   }
@@ -47,7 +47,7 @@ case class StaticMeshTop(
 
   @transient val argFringe = bundleGroup(fringePattern.argFringeParam, coord=Some(((sbrx + sblx)/2), sbuy+1))
 
-  @transient val networks = networkParams.map { param => new StaticMeshNetwork(param, this) }
+  @transient val networks = networkParams.map { param => Factory.create(param, this) }
 
   createSubmodules
 }

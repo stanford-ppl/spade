@@ -4,9 +4,9 @@ package node
 import param._
 import scala.collection.mutable
 
-class StaticMeshNetwork[B<:PinType](
-  param:StaticMeshNetworkParam[B], 
-  top:StaticMeshTop
+case class StaticGridNetwork[B<:PinType](
+  param:StaticGridNetworkParam[B], 
+  top:StaticGridTop
 )(implicit design:SpadeDesign) extends Network[B](param, top){
   import param._
   import top._
@@ -57,6 +57,15 @@ class StaticMeshNetwork[B<:PinType](
       if (y==numRows) connect(argFringe, sbArray(x)(y)) // Top Switches
       //if (y==0) connect(argFringe, sbArray(x)(y)) // Bottom Switches
 
+    }
+  }
+
+  if (param.isTorus) {
+    for (y <- 0 until numRows+1) {
+      connect(sbArray(0)(y), sbArray(numCols)(y)) // Horizontal, first col to last col
+    }
+    for (x <- 0 until numCols+1) {
+      connect(sbArray(x)(0), sbArray(x)(numRows)) // Vertical, first row to last row
     }
   }
 

@@ -22,10 +22,10 @@ trait SpadeNodeUtil {
     case x:DirectedEdge[_,_] => x.bct
     case x:Pin[_] => x.bct
     case x:Bundle[_] => x.bct
-    case x:StaticMeshNetwork[_] => x.bct
-    case x:StaticMeshNetworkParam[_] => x.bct
-    case x:DynamicMeshNetwork[_] => x.bct
-    case x:DynamicMeshNetworkParam[_] => x.bct
+    case x:StaticGridNetwork[_] => x.bct
+    case x:StaticGridNetworkParam[_] => x.bct
+    case x:DynamicGridNetwork[_] => x.bct
+    case x:DynamicGridNetworkParam[_] => x.bct
     case x:FIFO[_] => x.bct
     case x => throw PIRException(s"don't have ClassTag[_<:PinType] for $x")
   }
@@ -51,27 +51,40 @@ trait SpadeNodeUtil {
   implicit def PinToBct(x:Pin[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
   implicit def BundleToBct(x:Bundle[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
   implicit def FIFOToBct(x:FIFO[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
-  implicit def DynamicMeshNetworkToBct(x:DynamicMeshNetwork[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
-  implicit def StaticMeshNetworkToBct(x:StaticMeshNetwork[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
+  implicit def DynamicGridNetworkToBct(x:DynamicGridNetwork[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
+  implicit def StaticGridNetworkToBct(x:StaticGridNetwork[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
 
-  def isMesh(n:Top) = n match {
-    case n:MeshTop => true
+  def isMesh(n:Any):Boolean = n match {
+    case n:GridTop => n.param.networkParams.forall(isMesh)
+    case n:StaticGridNetwork[_] => isMesh(n.param)
+    case n:DynamicGridNetwork[_] => isMesh(n.param)
+    case n:DynamicGridNetworkParam[_] => n.isMesh
+    case n:StaticGridNetworkParam[_] => n.isMesh
+    case _ => false
+  }
+
+  def isTorus(n:Any):Boolean = n match {
+    case n:GridTop => n.param.networkParams.forall(isTorus)
+    case n:StaticGridNetwork[_] => isTorus(n.param)
+    case n:DynamicGridNetwork[_] => isTorus(n.param)
+    case n:DynamicGridNetworkParam[_] => n.isTorus
+    case n:StaticGridNetworkParam[_] => n.isTorus
     case _ => false
   }
 
   def isDynamic(n:Any) = n match {
-    case n:DynamicMeshTop => true
-    case n:DynamicMeshTopParam => true
-    case n:DynamicMeshNetwork[_] => true
-    case n:DynamicMeshNetworkParam[_] => true
+    case n:DynamicGridTop => true
+    case n:DynamicGridTopParam => true
+    case n:DynamicGridNetwork[_] => true
+    case n:DynamicGridNetworkParam[_] => true
     case n => false
   }
 
   def isStatic(n:Any) = n match {
-    case n:StaticMeshTop => true
-    case n:StaticMeshTopParam => true
-    case n:StaticMeshNetwork[_] => true
-    case n:StaticMeshNetworkParam[_] => true
+    case n:StaticGridTop => true
+    case n:StaticGridTopParam => true
+    case n:StaticGridNetwork[_] => true
+    case n:StaticGridNetworkParam[_] => true
     case n => false
   }
 

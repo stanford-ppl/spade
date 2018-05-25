@@ -4,8 +4,9 @@ package node
 import param._
 import scala.collection.mutable
 
-class DynamicMeshNetwork[B<:PinType](
-  param:DynamicMeshNetworkParam[B], top:DynamicMeshTop
+case class DynamicGridNetwork[B<:PinType](
+  param:DynamicGridNetworkParam[B], 
+  top:DynamicGridTop
 )(implicit design:SpadeDesign) extends Network[B](param, top) {
   import param._
   import top._
