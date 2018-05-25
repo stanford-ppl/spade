@@ -10,7 +10,7 @@ trait SpadeLocalAlias {
   type SpadeMetadata = spade.util.SpadeMetadata
 }
 
-trait SpadeAlias extends SpadeLocalAlias {
+trait SpadeAlias extends SpadeLocalAlias with spade.node.SpadeNodeUtil {
   type Spade = spade.Spade
   type SNode = spade.node.SpadeNode
 
