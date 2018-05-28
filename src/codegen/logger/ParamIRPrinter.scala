@@ -8,8 +8,4 @@ class ParamIRPrinter(val fileName:String)(implicit compiler:Spade) extends Param
 
   def qdef(n:Any) = quote(n)
 
-  override def emitNode(n:N) = {
-    super.emitNode(n)
-    println(n, isVisited(n), "-----------")
-  }
 }
