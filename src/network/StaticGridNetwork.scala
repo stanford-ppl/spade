@@ -11,8 +11,8 @@ case class StaticGridNetwork[B<:PinType](
   import param._
   import top._
 
-  def connect(src:BundleGroup, dst:BundleGroup, outDir:String, inDir:String):Unit = {
-    val cw = channelWidth("src"->tpOf(src), "dst"->tpOf(dst), "srcDir"->inDir, "dstDir"->outDir)
+  def connect(src:BundleGroup, dst:BundleGroup, srcDir:String, dstDir:String):Unit = {
+    val cw = channelWidth("src"->tpOf(src), "dst"->tpOf(dst), "srcDir"->srcDir, "dstDir"->dstDir)
     src.connect[B](dst, cw)
   }
 

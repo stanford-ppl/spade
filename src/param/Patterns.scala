@@ -1,6 +1,7 @@
 package spade
 package param
                           
+import SpadeConfig._
 sealed trait Pattern extends Parameter
 
 trait GridFringePattern extends Pattern {
@@ -152,7 +153,7 @@ case class CMeshCheckerboard(
   pcuParam:PCUParam=PCUParam(),
   pmuParam:PMUParam=PMUParam(),
   mcParam:MCParam=MCParam(),
-  dagParam:Option[DramAGParam]=Some(DramAGParam()),
+  dagParam:Option[DramAGParam]=if (option[Boolean]("dag")) Some(DramAGParam()) else None,
   argFringeParam:ArgFringeParam=ArgFringeParam()
 ) extends CMeshPattern {
   def cuAt(i:Int, j:Int)(ii:Int, jj:Int):Parameter = {

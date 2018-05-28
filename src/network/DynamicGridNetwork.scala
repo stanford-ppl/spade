@@ -30,6 +30,13 @@ case class DynamicGridNetwork[B<:PinType](
 
   /** ----- Central Array Connection ----- **/
   connectTerminalArrayWithSwitch(cuArray)
+  /* ----- CU to CU Connection ----- */
+  for (y <- 0 until numRows) {
+    for (x <- 0 until numCols) {
+      if (x!=numCols-1) connect(cuArray(x)(y), cuArray(x+1)(y)) // (Horizontal)
+      if (y!=numRows-1) connect(cuArray(x)(y), cuArray(x)(y+1)) // (Vertical)
+    }
+  }
 
   /** ----- Fringe Connection ----- **/
   dagArray.map { dagArray => 

@@ -4,6 +4,7 @@ package param
 import prism.node._
 import prism.collection.mutable.Table
 
+import SpadeConfig._
 abstract class StaticCMeshNetworkParam[B<:PinType:ClassTag] extends NetworkParam[B] {
   lazy val topParam = collectOut[CMeshTopParam]().head
   lazy val numRows:Int = topParam.numRows
@@ -37,6 +38,9 @@ case class StaticCMeshControlNetworkParam() extends StaticCMeshNetworkParam[Bit]
 
     // CU to Switch channel width
     channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->"sb") = 2
+
+    // CU to CU channel width
+    channelWidth("src"->List("pcu", "pmu", "scu","mc"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
 
     // DAG to switch channel width
     channelWidth("src"->"dag", "dst"->"sb") = 1
@@ -72,11 +76,14 @@ case class StaticCMeshScalarNetworkParam() extends StaticCMeshNetworkParam[Word]
     // switch to switch channel width
     channelWidth("src"->"sb", "dst"->"sb") = 4
 
-    // switch to PCU channel width
+    // switch to CU channel width
     channelWidth("src"->"sb", "dst"->List("pcu", "scu")) = 1
 
-    // PCU to Switch channel width
+    // CU to Switch channel width
     channelWidth("src"->List("pcu", "scu"), "dst"->"sb") = 1
+
+    // CU to CU channel width
+    channelWidth("src"->List("pcu", "pmu", "scu","mc"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
 
     // switch to MCU channel width
     channelWidth("src"->"sb", "dst"->List("pmu")) = 1
@@ -117,11 +124,14 @@ case class StaticCMeshVectorNetworkParam() extends StaticCMeshNetworkParam[Vecto
     // switch to switch channel width
     channelWidth("src"->"sb", "dst"->"sb") = 4
 
-    // switch to PCU channel width
+    // switch to CU channel width
     channelWidth("src"->"sb", "dst"->List("pcu")) = 1
 
-    // PCU to Switch channel width
+    // CU to Switch channel width
     channelWidth("src"->List("pcu"), "dst"->"sb") = 1
+
+    // CU to CU channel width
+    channelWidth("src"->List("pcu", "pmu", "scu","mc"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
 
     // switch to MCU channel width
     channelWidth("src"->"sb", "dst"->List("pmu")) = 1

@@ -3,8 +3,9 @@ package param
 
 import prism.enums._
 
+import SpadeConfig._
 case class ArgFringeParam(
-  numArgIns:Int=6,
-  numArgOuts:Int=4,
-  numTokenOuts:Int=5
+  numArgIns:Int=option[Int]("argin"),
+  numArgOuts:Int=option[Int]("argout"),
+  numTokenOuts:Int=option[Int]("tokenout")
 ) extends Parameter

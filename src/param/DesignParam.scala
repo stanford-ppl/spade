@@ -1,9 +1,10 @@
 package spade
 package param
 
+import SpadeConfig._
 case class DesignParam(
-  wordWidth:Int = 32,
-  vecWidth:Int = 16,
+  wordWidth:Int = option[Int]("word"),
+  vecWidth:Int = option[Int]("vec"),
   clockFrequency:Int = 1000000000, //Hz
-  topParam:TopParam=StaticGridTopParam(),
+  topParam:TopParam = defaultTopParam
 ) extends Parameter

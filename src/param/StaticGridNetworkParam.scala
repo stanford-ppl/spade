@@ -4,6 +4,7 @@ package param
 import prism.node._
 import prism.collection.mutable.Table
 
+import SpadeConfig._
 abstract class StaticGridNetworkParam[B<:PinType:ClassTag] extends NetworkParam[B] {
   lazy val meshTopParam = collectOut[GridTopParam]().head
   lazy val numRows:Int = meshTopParam.numRows
@@ -32,7 +33,7 @@ abstract class StaticGridNetworkParam[B<:PinType:ClassTag] extends NetworkParam[
 }
 
 case class StaticGridControlNetworkParam(
-  isTorus:Boolean=false
+  isTorus:Boolean=defaultIsTorus
 ) extends StaticGridNetworkParam[Bit] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
@@ -44,6 +45,15 @@ case class StaticGridControlNetworkParam(
 
     // CU to Switch channel width
     channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->"sb") = 2
+
+    // CU to CU channel width (Left -> Right)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"W", "dstDir"->"E") = if (option[Boolean]("nn")) 2 else 0
+    // CU to CU channel width (Right -> Left)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"E", "dstDir"->"W") = 0
+    // CU to CU channel width (Top -> Bottom)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
+    // CU to CU channel width (Bottom -> Top)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
 
     // DAG to switch channel width
     channelWidth("src"->"dag", "dst"->"sb") = 1
@@ -80,23 +90,32 @@ case class StaticGridControlNetworkParam(
 }
 
 case class StaticGridScalarNetworkParam(
-  isTorus:Boolean=false
+  isTorus:Boolean=defaultIsTorus
 ) extends StaticGridNetworkParam[Word] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // switch to switch channel width
     channelWidth("src"->"sb", "dst"->"sb") = 4
 
-    // switch to PCU channel width
+    // switch to CU channel width
     channelWidth("src"->"sb", "dst"->List("pcu", "scu")) = 1
 
-    // PCU to Switch channel width
+    // CU to Switch channel width
     channelWidth("src"->List("pcu", "scu"), "dst"->"sb") = 1
 
-    // switch to MCU channel width
+    // CU to CU channel width (Left -> Right)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"W", "dstDir"->"E") = if (option[Boolean]("nn")) 2 else 0
+    // CU to CU channel width (Right -> Left)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"E", "dstDir"->"W") = 0
+    // CU to CU channel width (Top -> Bottom)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
+    // CU to CU channel width (Bottom -> Top)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
+
+    // switch to PMU channel width
     channelWidth("src"->"sb", "dst"->List("pmu")) = 1
 
-    // MCU to Switch channel width
+    // PMU to Switch channel width
     channelWidth("src"->List("pmu"), "dst"->"sb") = 1
 
     // switch to DAG channel width
@@ -133,23 +152,32 @@ case class StaticGridScalarNetworkParam(
 }
 
 case class StaticGridVectorNetworkParam(
-  isTorus:Boolean=false
+  isTorus:Boolean=defaultIsTorus
 ) extends StaticGridNetworkParam[Vector] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // switch to switch channel width
     channelWidth("src"->"sb", "dst"->"sb") = 4
 
-    // switch to PCU channel width
+    // switch to CU channel width
     channelWidth("src"->"sb", "dst"->List("pcu")) = 1
 
-    // PCU to Switch channel width
+    // CU to Switch channel width
     channelWidth("src"->List("pcu"), "dst"->"sb") = 1
 
-    // switch to MCU channel width
+    // CU to CU channel width (Left -> Right)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"W", "dstDir"->"E") = if (option[Boolean]("nn")) 2 else 0
+    // CU to CU channel width (Right -> Left)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"E", "dstDir"->"W") = 0
+    // CU to CU channel width (Top -> Bottom)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
+    // CU to CU channel width (Bottom -> Top)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
+
+    // switch to PMU channel width
     channelWidth("src"->"sb", "dst"->List("pmu")) = 1
 
-    // MCU to Switch channel width
+    // PMU to Switch channel width
     channelWidth("src"->List("pmu"), "dst"->"sb") = 1
 
     // switch to SAG channel width

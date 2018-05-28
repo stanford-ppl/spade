@@ -34,44 +34,4 @@ object DMeshCB4x2 extends DynamicMeshCB(numRows=4, numCols=2, numArgIns=3, numAr
 object DMeshCB4x4 extends DynamicMeshCB(numRows=4, numCols=4, numArgIns=10, numArgOuts=3)
 object DMeshCB16x8 extends DynamicMeshCB(numRows=16, numCols=8, numArgIns=10, numArgOuts=3)
 
-object MyDesign extends Spade {
-  /* Example of overriding memory size parameters */
-  override lazy val designParam = DesignParam(topParam=StaticGridTopParam(
-    numRows=4,
-    numCols=4,
-    centrolPattern=Checkerboard(
-      pcuParam=PCUParam(
-        controlFifoParam=FIFOParam(5),
-        scalarFifoParam=FIFOParam(5),
-        vectorFifoParam=FIFOParam(5)
-      ),
-      pmuParam=PMUParam(
-        controlFifoParam=FIFOParam(5),
-        scalarFifoParam=FIFOParam(5),
-        vectorFifoParam=FIFOParam(5),
-        sramParam=SRAMParam(size=256 * 1024 / 4, depth=4) // 256 kB capacity
-      )
-    ),
-    fringePattern=MC_DramAG(
-      argFringeParam=ArgFringeParam(numArgIns=3, numArgOuts=3),
-      mcParam=MCParam(
-        wOffsetFifoParam=FIFOParam(size=16),
-        rOffsetFifoParam=FIFOParam(size=16),
-        wSizeFifoParam=FIFOParam(size=16),
-        rSizeFifoParam=FIFOParam(size=16),
-        sDataFifoParam=FIFOParam(size=16),
-        vDataFifoParam=FIFOParam(size=16)
-      )
-    ),
-    networkParams = List(
-      StaticGridControlNetworkParam(isTorus=true),
-      StaticGridScalarNetworkParam(isTorus=true),
-      StaticGridVectorNetworkParam(isTorus=true)
-    )
-  ))
-  //override lazy val designParam = DesignParam(topParam=StaticCMeshTopParam(
-    //numRows=4,
-    //numCols=4,
-    //pattern=CMeshCheckerboard()
-  //))
-}
+object MyDesign extends Spade

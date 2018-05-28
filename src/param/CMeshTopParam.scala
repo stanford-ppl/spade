@@ -7,9 +7,10 @@ trait CMeshTopParam extends TopParam {
   val pattern:CMeshPattern
 }
 
+import SpadeConfig._
 case class StaticCMeshTopParam (
-  numRows:Int=2,
-  numCols:Int=2,
+  numRows:Int=option[Int]("row"),
+  numCols:Int=option[Int]("col"),
   switchParam:SwitchParam=SwitchParam(),
   pattern:CMeshPattern=CMeshCheckerboard(),
   networkParams:List[StaticCMeshNetworkParam[_<:PinType]] = List(

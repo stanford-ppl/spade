@@ -1,12 +1,13 @@
 package spade
 package param
 
+import SpadeConfig._
 case class StaticGridTopParam (
-  numRows:Int=2,
-  numCols:Int=2,
+  numRows:Int=option[Int]("row"),
+  numCols:Int=option[Int]("col"),
   switchParam:SwitchParam=SwitchParam(),
-  centrolPattern:GridCentrolPattern=Checkerboard(),
-  fringePattern:GridFringePattern=MCOnly(),
+  centrolPattern:GridCentrolPattern=defaultCentrolPattern,
+  fringePattern:GridFringePattern=defaultFringePattern,
   networkParams:List[StaticGridNetworkParam[_<:PinType]] = List(
     StaticGridControlNetworkParam(),
     StaticGridScalarNetworkParam(),

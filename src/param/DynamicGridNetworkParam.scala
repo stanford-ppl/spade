@@ -4,6 +4,7 @@ package param
 import prism.node._
 import prism.collection.mutable.Table
 
+import SpadeConfig._
 abstract class DynamicGridNetworkParam[B<:PinType:ClassTag] extends NetworkParam[B] {
   lazy val topParam = collectOut[GridTopParam]().head
   lazy val numRows:Int = topParam.numRows
@@ -32,7 +33,7 @@ abstract class DynamicGridNetworkParam[B<:PinType:ClassTag] extends NetworkParam
 
 case class DynamicGridControlNetworkParam(
   numVirtualClasses:Int = 4,
-  isTorus:Boolean=false
+  isTorus:Boolean=defaultIsTorus
 ) extends DynamicGridNetworkParam[Bit] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
@@ -41,6 +42,9 @@ case class DynamicGridControlNetworkParam(
 
     // CU to Switch channel width
     channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->"rt") = 4
+
+    // CU to CU channel width
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
 
     // DAG to switch channel width
     channelWidth("src"->"dag", "dst"->"rt") = 1
@@ -67,15 +71,18 @@ case class DynamicGridControlNetworkParam(
 
 case class DynamicGridScalarNetworkParam(
   numVirtualClasses:Int = 4,
-  isTorus:Boolean=false
+  isTorus:Boolean=defaultIsTorus
 ) extends DynamicGridNetworkParam[Word] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
-    // switch to PCU channel width
+    // switch to CU channel width
     channelWidth("src"->"rt", "dst"->List("pcu", "scu")) = 4//roundUp(pcuSins / 4.0) 
 
-    // PCU to Switch channel width
+    // CU to Switch channel width
     channelWidth("src"->List("pcu", "scu"), "dst"->"rt") = 4//roundUp(pcuSouts / 4.0)
+
+    // CU to CU channel width
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
 
     // switch to PMU channel width
     channelWidth("src"->"rt", "dst"->List("pmu")) = 4//roundUp(pmuSins / 4.0) 
@@ -118,15 +125,18 @@ case class DynamicGridScalarNetworkParam(
 
 case class DynamicGridVectorNetworkParam(
   numVirtualClasses:Int = 4,
-  isTorus:Boolean=false
+  isTorus:Boolean=defaultIsTorus
 ) extends DynamicGridNetworkParam[Vector] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
-    // switch to PCU channel width
+    // switch to CU channel width
     channelWidth("src"->"rt", "dst"->List("pcu")) = 4//roundUp(pcuVins / 4.0)
 
-    // PCU to Switch channel width
+    // CU to Switch channel width
     channelWidth("src"->List("pcu"), "dst"->"rt") = 4//roundUp(pcuVouts / 4.0)
+
+    // CU to CU channel width
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
 
     // switch to PMU channel width
     channelWidth("src"->"rt", "dst"->List("pmu")) = 4//roundUp(pmuVins / 4.0) 

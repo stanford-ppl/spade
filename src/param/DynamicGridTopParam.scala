@@ -1,12 +1,13 @@
 package spade
 package param
 
+import SpadeConfig._
 case class DynamicGridTopParam (
-  numRows:Int=2,
-  numCols:Int=2,
+  numRows:Int=option[Int]("row"),
+  numCols:Int=option[Int]("col"),
   routerParam:RouterParam=RouterParam(),
-  centrolPattern:GridCentrolPattern=Checkerboard(),
-  fringePattern:GridFringePattern=MCOnly(),
+  centrolPattern:GridCentrolPattern=defaultCentrolPattern,
+  fringePattern:GridFringePattern=defaultFringePattern,
   networkParams:List[DynamicGridNetworkParam[_<:PinType]] = List(
     DynamicGridControlNetworkParam(),
     DynamicGridScalarNetworkParam(),
