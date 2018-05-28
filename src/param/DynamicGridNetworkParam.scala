@@ -81,14 +81,14 @@ case class DynamicGridScalarNetworkParam(
     // CU to Switch channel width
     channelWidth("src"->List("pcu", "scu"), "dst"->"rt") = 4//roundUp(pcuSouts / 4.0)
 
-    // CU to CU channel width
-    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
-
     // switch to PMU channel width
     channelWidth("src"->"rt", "dst"->List("pmu")) = 4//roundUp(pmuSins / 4.0) 
 
     // PMU to Switch channel width
     channelWidth("src"->List("pmu"), "dst"->"rt") = 4//roundUp(pmuSouts / 4.0)
+
+    // CU to CU channel width
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
     
     // switch to DAG channel width
     channelWidth("src"->"rt", "dst"->"dag") = 1//roundUp(ucuSins)
@@ -135,14 +135,14 @@ case class DynamicGridVectorNetworkParam(
     // CU to Switch channel width
     channelWidth("src"->List("pcu"), "dst"->"rt") = 4//roundUp(pcuVouts / 4.0)
 
-    // CU to CU channel width
-    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
-
     // switch to PMU channel width
     channelWidth("src"->"rt", "dst"->List("pmu")) = 4//roundUp(pmuVins / 4.0) 
 
     // PMU to Switch channel width
     channelWidth("src"->List("pmu"), "dst"->"rt") = 4//roundUp(pmuVouts / 4.0)
+
+    // CU to CU channel width
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
 
     // switch to MC channel width
     channelWidth("src"->"rt", "dst"->"mc") = 1

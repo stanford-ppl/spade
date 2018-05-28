@@ -33,39 +33,29 @@ case class StaticCMeshControlNetworkParam() extends StaticCMeshNetworkParam[Bit]
     // switch to switch channel width
     channelWidth("src"->"sb", "dst"->"sb") = 6
 
-    // switch to CU channel width
-    channelWidth("src"->"sb", "dst"->List("pcu", "pmu", "scu")) = 1
-
-    // CU to Switch channel width
+    // switch - CU channel width
+    channelWidth("src"->"sb", "dst"->List("pcu", "pmu", "scu")) = 2
     channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->"sb") = 2
 
-    // CU to CU channel width
+    // CU - CU channel width
     channelWidth("src"->List("pcu", "pmu", "scu","mc"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
 
-    // DAG to switch channel width
+    // DAG - switch channel width
     channelWidth("src"->"dag", "dst"->"sb") = 1
-
-    // switch to DAG channel width
     channelWidth("src"->"sb", "dst"->"dag") = 1
 
-    // switch to MC channel width
+    // switch - MC channel width
     channelWidth("src"->"sb", "dst"->"mc") = 1
-
-    // MC to switch channel width
     channelWidth("src"->"mc", "dst"->"sb") = 2
 
-    // MC to DAG channel width
+    // MC - DAG channel width
     channelWidth("src"->"mc", "dst"->"dag") = 2
       
-    // OCU to switch channel width
-    channelWidth("src"->"ocu", "dst"->"sb") = 2
-    // switch to OCU channel width
-    channelWidth("src"->"sb", "dst"->"ocu") = 4
-
-    // Top to switch channel width
+    // Top - switch channel width
     channelWidth("src"->"arg", "dst"->"sb") = 1
-    // switch to Top channel width
+    // switch - Top channel width
     channelWidth("src"->"sb", "dst"->"arg") = numTokenOuts
+
     channelWidth
   }
 }
@@ -73,47 +63,33 @@ case class StaticCMeshControlNetworkParam() extends StaticCMeshNetworkParam[Bit]
 case class StaticCMeshScalarNetworkParam() extends StaticCMeshNetworkParam[Word] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
-    // switch to switch channel width
+    // switch - switch channel width
     channelWidth("src"->"sb", "dst"->"sb") = 4
 
-    // switch to CU channel width
-    channelWidth("src"->"sb", "dst"->List("pcu", "scu")) = 1
+    // CU - Switch channel width
+    channelWidth("src"->"sb", "dst"->List("pcu", "scu")) = 4
+    channelWidth("src"->List("pcu", "scu"), "dst"->"sb") = 4
+    channelWidth("src"->"sb", "dst"->List("pmu")) = 4
+    channelWidth("src"->List("pmu"), "dst"->"sb") = 4
 
-    // CU to Switch channel width
-    channelWidth("src"->List("pcu", "scu"), "dst"->"sb") = 1
-
-    // CU to CU channel width
+    // CU - CU channel width
     channelWidth("src"->List("pcu", "pmu", "scu","mc"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
 
-    // switch to MCU channel width
-    channelWidth("src"->"sb", "dst"->List("pmu")) = 1
-
-    // MCU to Switch channel width
-    channelWidth("src"->List("pmu"), "dst"->"sb") = 1
-
-    // switch to DAG channel width
+    // switch - DAG channel width
     channelWidth("src"->"sb", "dst"->"dag") = 1
-
-    // DAG to switch channel width
     channelWidth("src"->"dag", "dst"->"sb") = 1
 
-    // switch to MC channel width
+    // switch - MC channel width
     channelWidth("src"->"sb", "dst"->"mc") = 3
-
-    // MC to switch channel width
     channelWidth("src"->"mc", "dst"->"sb") = 1
 
-    // DAG to MC channel width
+    // DAG - MC channel width
     channelWidth("src"->"dag", "dst"->"mc") = 2
 
-    //// switch to OCU channel width
-    channelWidth("src"->"sb", "dst"->"ocu") = 5
-
-    //// Top to switch channel width
+    //// switch - Top channel width
+    channelWidth("src"->"sb", "dst"->"arg") = numArgOuts
     channelWidth("src"->"arg", "dst"->"sb") = numArgIns
 
-    //// switch to Top channel width
-    channelWidth("src"->"sb", "dst"->"arg") = numArgOuts
     channelWidth
   }
 }
@@ -121,29 +97,22 @@ case class StaticCMeshScalarNetworkParam() extends StaticCMeshNetworkParam[Word]
 case class StaticCMeshVectorNetworkParam() extends StaticCMeshNetworkParam[Vector] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
-    // switch to switch channel width
+    // switch - switch channel width
     channelWidth("src"->"sb", "dst"->"sb") = 4
 
-    // switch to CU channel width
-    channelWidth("src"->"sb", "dst"->List("pcu")) = 1
+    // switch - CU channel width
+    channelWidth("src"->"sb", "dst"->List("pcu")) = 4
+    channelWidth("src"->List("pcu"), "dst"->"sb") = 4
+    channelWidth("src"->"sb", "dst"->List("pmu")) = 4
+    channelWidth("src"->List("pmu"), "dst"->"sb") = 4
 
-    // CU to Switch channel width
-    channelWidth("src"->List("pcu"), "dst"->"sb") = 1
-
-    // CU to CU channel width
+    // CU - CU channel width
     channelWidth("src"->List("pcu", "pmu", "scu","mc"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
 
-    // switch to MCU channel width
-    channelWidth("src"->"sb", "dst"->List("pmu")) = 1
-
-    // MCU to Switch channel width
-    channelWidth("src"->List("pmu"), "dst"->"sb") = 1
-
-    // switch to MC channel width
+    // switch - MC channel width
     channelWidth("src"->"sb", "dst"->"mc") = 1
-
-    // MC to switch channel width
     channelWidth("src"->"mc", "dst"->"sb") = 1
+
     channelWidth
   }
 }

@@ -83,8 +83,12 @@ trait SpadeNodeUtil {
   def isStatic(n:Any) = n match {
     case n:StaticGridTop => true
     case n:StaticGridTopParam => true
+    case n:StaticCMeshTop => true
+    case n:StaticCMeshTopParam => true
     case n:StaticGridNetwork[_] => true
     case n:StaticGridNetworkParam[_] => true
+    case n:StaticCMeshNetwork[_] => true
+    case n:StaticCMeshNetworkParam[_] => true
     case n => false
   }
 

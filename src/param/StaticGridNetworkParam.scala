@@ -49,7 +49,7 @@ case class StaticGridControlNetworkParam(
     // CU to CU channel width (Left -> Right)
     channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"W", "dstDir"->"E") = if (option[Boolean]("nn")) 2 else 0
     // CU to CU channel width (Right -> Left)
-    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"E", "dstDir"->"W") = 0
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"E", "dstDir"->"W") = if (option[Boolean]("nn")) 2 else 0
     // CU to CU channel width (Top -> Bottom)
     channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
     // CU to CU channel width (Bottom -> Top)
@@ -103,20 +103,20 @@ case class StaticGridScalarNetworkParam(
     // CU to Switch channel width
     channelWidth("src"->List("pcu", "scu"), "dst"->"sb") = 1
 
-    // CU to CU channel width (Left -> Right)
-    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"W", "dstDir"->"E") = if (option[Boolean]("nn")) 2 else 0
-    // CU to CU channel width (Right -> Left)
-    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"E", "dstDir"->"W") = 0
-    // CU to CU channel width (Top -> Bottom)
-    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
-    // CU to CU channel width (Bottom -> Top)
-    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
-
     // switch to PMU channel width
     channelWidth("src"->"sb", "dst"->List("pmu")) = 1
 
     // PMU to Switch channel width
     channelWidth("src"->List("pmu"), "dst"->"sb") = 1
+
+    // CU to CU channel width (Left -> Right)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"W", "dstDir"->"E") = if (option[Boolean]("nn")) 2 else 0
+    // CU to CU channel width (Right -> Left)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"E", "dstDir"->"W") = if (option[Boolean]("nn")) 2 else 0
+    // CU to CU channel width (Top -> Bottom)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
+    // CU to CU channel width (Bottom -> Top)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
 
     // switch to DAG channel width
     channelWidth("src"->"sb", "dst"->"dag") = 1
@@ -165,20 +165,20 @@ case class StaticGridVectorNetworkParam(
     // CU to Switch channel width
     channelWidth("src"->List("pcu"), "dst"->"sb") = 1
 
-    // CU to CU channel width (Left -> Right)
-    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"W", "dstDir"->"E") = if (option[Boolean]("nn")) 2 else 0
-    // CU to CU channel width (Right -> Left)
-    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"E", "dstDir"->"W") = 0
-    // CU to CU channel width (Top -> Bottom)
-    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
-    // CU to CU channel width (Bottom -> Top)
-    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
-
     // switch to PMU channel width
     channelWidth("src"->"sb", "dst"->List("pmu")) = 1
 
     // PMU to Switch channel width
     channelWidth("src"->List("pmu"), "dst"->"sb") = 1
+
+    // CU to CU channel width (Left -> Right)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"W", "dstDir"->"E") = if (option[Boolean]("nn")) 2 else 0
+    // CU to CU channel width (Right -> Left)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"E", "dstDir"->"W") = if (option[Boolean]("nn")) 2 else 0
+    // CU to CU channel width (Top -> Bottom)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
+    // CU to CU channel width (Bottom -> Top)
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
 
     // switch to SAG channel width
     channelWidth("src"->"sb", "dst"->"pcu") = 4 
