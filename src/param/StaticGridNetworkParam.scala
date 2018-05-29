@@ -119,7 +119,7 @@ case class StaticGridScalarNetworkParam(
     channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
 
     // switch to DAG channel width
-    channelWidth("src"->"sb", "dst"->"dag") = 1
+    channelWidth("src"->"sb", "dst"->"dag") = 4
 
     // DAG to switch channel width
     channelWidth("src"->"dag", "dst"->"sb") = 1
