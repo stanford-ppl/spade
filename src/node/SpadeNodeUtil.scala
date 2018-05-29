@@ -55,6 +55,7 @@ trait SpadeNodeUtil {
   implicit def StaticGridNetworkToBct(x:StaticGridNetwork[_]):ClassTag[_<:PinType] = x.bct.asInstanceOf[ClassTag[_<:PinType]]
 
   def isMesh(n:Any):Boolean = n match {
+    case n:SpadeDesign => isMesh(n.top)
     case n:GridTop => n.param.networkParams.forall(isMesh)
     case n:StaticGridNetwork[_] => isMesh(n.param)
     case n:DynamicGridNetwork[_] => isMesh(n.param)
@@ -64,6 +65,7 @@ trait SpadeNodeUtil {
   }
 
   def isTorus(n:Any):Boolean = n match {
+    case n:SpadeDesign => isTorus(n.top)
     case n:GridTop => n.param.networkParams.forall(isTorus)
     case n:StaticGridNetwork[_] => isTorus(n.param)
     case n:DynamicGridNetwork[_] => isTorus(n.param)
@@ -72,7 +74,16 @@ trait SpadeNodeUtil {
     case _ => false
   }
 
-  def isDynamic(n:Any) = n match {
+  def isCMesh(n:Any):Boolean = n match {
+    case n:SpadeDesign => isCMesh(n.top)
+    case n:StaticCMeshTop => n.param.networkParams.forall(isCMesh)
+    case n:StaticCMeshNetwork[_] => true
+    case n:StaticCMeshNetworkParam[_] => true
+    case _ => false
+  }
+
+  def isDynamic(n:Any):Boolean = n match {
+    case n:SpadeDesign => isDynamic(n.top)
     case n:DynamicGridTop => true
     case n:DynamicGridTopParam => true
     case n:DynamicGridNetwork[_] => true
@@ -80,7 +91,8 @@ trait SpadeNodeUtil {
     case n => false
   }
 
-  def isStatic(n:Any) = n match {
+  def isStatic(n:Any):Boolean = n match {
+    case n:SpadeDesign => isStatic(n.top)
     case n:StaticGridTop => true
     case n:StaticGridTopParam => true
     case n:StaticCMeshTop => true
@@ -92,7 +104,8 @@ trait SpadeNodeUtil {
     case n => false
   }
 
-  def isAsic(n:Any) = n match {
+  def isAsic(n:Any):Boolean = n match {
+    case n:SpadeDesign => isAsic(n.top)
     case n:AsicTop => true
     case n:AsicTopParam => true
     case n => false

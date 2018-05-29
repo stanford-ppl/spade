@@ -25,6 +25,10 @@ case class DynamicGridTop(
   }
 
   val rtrx = rtArray.last.head.coord.get._1
+  val rtlx = rtArray.head.head.coord.get._1
+  val rtuy = rtArray.head.last.coord.get._2
+  val rtby = rtArray.head.head.coord.get._2
+
   @transient val dagArray = fringePattern.dagParam.map { dagParam =>
     List.tabulate(2, numRows) { case (i, j) => 
       bundleGroup(
