@@ -10,7 +10,7 @@ trait DefaultParams {
       case ("cmesh" , "static") => StaticCMeshTopParam()
       case ("mesh"  , "dynamic")=> DynamicGridTopParam()
       case ("torus" , "dynamic") => DynamicGridTopParam()
-      //case ("cmesh" , "dynamic") => DynamicCMeshTopParam() //TODO
+      case ("cmesh" , "dynamic") => DynamicCMeshTopParam()
       case (_       , "asic") => AsicTopParam()
       case _ => StaticGridTopParam()
     }

@@ -2,19 +2,13 @@ package spade
 package node
 
 import param._
-import scala.collection.mutable
 
-class StaticCMeshNetwork[B<:PinType](
+case class StaticCMeshNetwork[B<:PinType](
   param:StaticCMeshNetworkParam[B], 
   top:StaticCMeshTop
 )(implicit design:SpadeDesign) extends Network[B](param, top){
   import param._
   import top._
-
-  def connect(a:BundleGroup, b:BundleGroup):Unit = {
-    a.connect[B](b, channelWidth("src"->tpOf(a), "dst"->tpOf(b)))
-    b.connect[B](a, channelWidth("src"->tpOf(b), "dst"->tpOf(a)))
-  }
 
   cuArray.zipWithIndex.foreach { case (col, i) =>
     col.zipWithIndex.foreach { case (cluster, j) =>
@@ -44,3 +38,4 @@ class StaticCMeshNetwork[B<:PinType](
   }
 
 }
+

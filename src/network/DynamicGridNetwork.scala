@@ -11,11 +11,6 @@ case class DynamicGridNetwork[B<:PinType](
   import param._
   import top._
 
-  def connect(a:BundleGroup, b:BundleGroup):Unit = {
-    a.connect[B](b, channelWidth("src"->tpOf(a), "dst"->tpOf(b)))
-    b.connect[B](a, channelWidth("src"->tpOf(b), "dst"->tpOf(a)))
-  }
-
   def connectTerminalWithSwitch(terminal:BundleGroup) = {
     val (x,y) = terminal.coord.get
     val rt = rtArray(x)(y)
@@ -35,6 +30,21 @@ case class DynamicGridNetwork[B<:PinType](
     for (x <- 0 until numCols) {
       if (x!=numCols-1) connect(cuArray(x)(y), cuArray(x+1)(y)) // (Horizontal)
       if (y!=numRows-1) connect(cuArray(x)(y), cuArray(x)(y+1)) // (Vertical)
+    }
+  }
+  /* ----- router to router Connection ----- */
+  for (y <- 0 until numTotalRows) {
+    for (x <- 0 until numTotalCols) {
+      if (x!=numTotalCols-1) connect(rtArray(x)(y), rtArray(x+1)(y)) // (Horizontal)
+      if (y!=numTotalRows-1) connect(rtArray(x)(y), rtArray(x)(y+1)) // (Vertical)
+    }
+  }
+  if (param.isTorus) {
+    for (y <- 0 until numTotalRows) {
+      connect(rtArray(0)(y), rtArray(numCols)(y)) // Horizontal, first col to last col
+    }
+    for (x <- 0 until numTotalCols) {
+      connect(rtArray(x)(0), rtArray(x)(numRows)) // Vertical, first row to last row
     }
   }
 

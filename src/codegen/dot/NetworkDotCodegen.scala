@@ -25,15 +25,15 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
 
   def pos(attr:DotAttr, n:Any) = {
     (n, compiler.designParam.topParam) match {
-      case (n:SpadeNode, param:TopParam) =>
+      case (n:SpadeNode, param:DynamicGridTopParam) =>
         indexOf.get(n).foreach { case List(x,y) =>
           n match {
             case n:Router => attr.pos(((x-0.5)*scale, (y-0.5)*scale))
             case n => attr.pos((x*scale, y*scale))
           }
         }
-      //case ((n:ArgFringe, "top"), param:MeshTopParam) if !dynamic => attr.pos(((param.numCols/2)*scale*2, (param.numRows+1)*scale*2))
-      //case ((n:ArgFringe, "bottom"), param:MeshTopParam) if !dynamic => attr.pos(((param.numCols/2)*scale*2, -scale*2))
+      case (n:SpadeNode, param) =>
+        indexOf.get(n).foreach { case List(x,y) => attr.pos((x*scale, y*scale)) }
       case _ =>
     }
     attr

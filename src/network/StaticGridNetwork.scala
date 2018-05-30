@@ -11,24 +11,6 @@ case class StaticGridNetwork[B<:PinType](
   import param._
   import top._
 
-  def connect(src:BundleGroup, dst:BundleGroup, srcDir:String, dstDir:String):Unit = {
-    val cw = channelWidth("src"->tpOf(src), "dst"->tpOf(dst), "srcDir"->srcDir, "dstDir"->dstDir)
-    src.connect[B](dst, cw)
-  }
-
-  def uniconnect(src:BundleGroup, dst:BundleGroup):Unit = (src, dst) match {
-    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy < dy & sx == dx) => connect(src, dst, "S", "N")
-    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy > dy & sx == dx) => connect(src, dst, "N", "S")
-    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy == dy & sx < dx) => connect(src, dst, "W", "E")
-    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy == dy & sx > dx) => connect(src, dst, "E", "W")
-    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy < dy & sx < dx) => connect(src, dst, "SW", "NE")
-    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy > dy & sx < dx) => connect(src, dst, "NW", "SE")
-    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy < dy & sx > dx) => connect(src, dst, "SE", "NW")
-    case (BundleGroup(_, Some((sx, sy))), BundleGroup(_, Some((dx, dy)))) if (sy > dy & sx > dx) => connect(src, dst, "NE", "SW")
-  }
-
-  def connect(a:BundleGroup, b:BundleGroup) = { uniconnect(a, b); uniconnect(b, a) }
-
   /** ----- Central Array Connection ----- **/
   for (y <- 0 until numRows) {
     for (x <- 0 until numCols) {

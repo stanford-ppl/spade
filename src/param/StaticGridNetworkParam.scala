@@ -15,9 +15,7 @@ abstract class StaticGridNetworkParam[B<:PinType:ClassTag] extends NetworkParam[
   lazy val numTokenOuts:Int = argFringeParam.numTokenOuts
   val isTorus:Boolean
   val isMesh = !isTorus
-  val channelWidth:ChannelWidth
 
-  trait ChannelWidth extends Table[String, String, Int]
   object ChannelWidth {
     def empty = new Table[String, String, Int] (
       values=Map(
@@ -27,7 +25,7 @@ abstract class StaticGridNetworkParam[B<:PinType:ClassTag] extends NetworkParam[
         "dstDir"->eightDirections
       ), 
       default=Some(0)
-    ) with ChannelWidth
+    )
   }
 
 }

@@ -21,3 +21,18 @@ case class StaticCMeshTopParam (
 ) extends CMeshTopParam {
   val busWithReady = true
 }
+case class DynamicCMeshTopParam (
+  numRows:Int=option[Int]("row"),
+  numCols:Int=option[Int]("col"),
+  routerParam:RouterParam=RouterParam(),
+  pattern:CMeshPattern=CMeshCheckerboard(),
+  networkParams:List[DynamicCMeshNetworkParam[_<:PinType]] = List(
+    DynamicCMeshControlNetworkParam(),
+    DynamicCMeshScalarNetworkParam(),
+    DynamicCMeshVectorNetworkParam()
+  )
+) extends CMeshTopParam {
+  val busWithReady = true
+  val numTotalRows = numRows + 1
+  val numTotalCols = numCols
+}

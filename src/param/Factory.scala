@@ -14,6 +14,7 @@ object Factory extends Logging {
     case param:StaticGridTopParam => StaticGridTop(param)
     case param:DynamicGridTopParam => DynamicGridTop(param)
     case param:StaticCMeshTopParam => StaticCMeshTop(param)
+    case param:DynamicCMeshTopParam => DynamicCMeshTop(param)
     case param:AsicTopParam => AsicTop(param)
   }
   def create(param:Parameter, nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) = param match {
@@ -28,8 +29,10 @@ object Factory extends Logging {
     case param:RouterParam => Router(param, nios)
   }
   def create[B<:PinType](param:NetworkParam[B], top:Top)(implicit design:SpadeDesign) = (param,top) match {
-    case (param:DynamicGridNetworkParam[_], top:DynamicGridTop) => DynamicGridNetwork[B](param, top)
     case (param:StaticGridNetworkParam[_], top:StaticGridTop) => StaticGridNetwork[B](param, top)
+    case (param:DynamicGridNetworkParam[_], top:DynamicGridTop) => DynamicGridNetwork[B](param, top)
+    case (param:StaticCMeshNetworkParam[_], top:StaticCMeshTop) => StaticCMeshNetwork[B](param, top)
+    case (param:DynamicCMeshNetworkParam[_], top:DynamicCMeshTop) => DynamicCMeshNetwork[B](param, top)
     case (param, top) => throw PIRException(s"Don't know how to create ($param, $top)")
   }
 

@@ -11,4 +11,7 @@ abstract class NetworkParam[B<:PinType:ClassTag] extends Parameter {
   val fourDirections = List("W","N","E","S")
   val diagDirections = List("NW","NE","SE","SW")
   val eightDirections = List("W", "NW", "N", "NE", "E", "SE", "S", "SW")
+
+  val channelWidth:Table[String, String, Int]
+
 }
