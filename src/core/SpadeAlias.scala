@@ -13,6 +13,7 @@ trait SpadeLocalAlias {
 trait SpadeAlias extends SpadeLocalAlias with spade.node.SpadeNodeUtil {
   type Spade = spade.Spade
   type SNode = spade.node.SpadeNode
+  type SpadeDesign = spade.node.SpadeDesign
 
   type FIMap = spade.config.FIMap
   val FIMap = spade.config.FIMap

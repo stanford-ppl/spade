@@ -86,8 +86,12 @@ trait SpadeNodeUtil {
     case n:SpadeDesign => isDynamic(n.top)
     case n:DynamicGridTop => true
     case n:DynamicGridTopParam => true
+    case n:DynamicCMeshTop => true
+    case n:DynamicCMeshTopParam => true
     case n:DynamicGridNetwork[_] => true
     case n:DynamicGridNetworkParam[_] => true
+    case n:DynamicCMeshNetwork[_] => true
+    case n:DynamicCMeshNetworkParam[_] => true
     case n => false
   }
 

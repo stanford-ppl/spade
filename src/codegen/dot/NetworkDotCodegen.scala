@@ -11,10 +11,12 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
   import spademeta._
 
   //lazy val dynamic = isDynamic(compiler.top)
+  
+  def openDot = SpadeConfig.openDot
 
   override def finPass = {
     super.finPass
-    if (SpadeConfig.openDot) open
+    if (openDot) open
   }
 
   def getLabel(n:Any) = quote(n)

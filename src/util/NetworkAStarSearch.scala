@@ -14,11 +14,11 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
 
   val cnu:Numeric[Int] = implicitly[Numeric[Int]]
 
-  def arch:Spade
-  lazy val heuristicCost: Routable => (Bundle[_] => Int) = arch match {
-    case arch if isMesh(arch.design) => meshHeuristicCost _
-    case arch if isCMesh(arch.design) => meshHeuristicCost _
-    case arch if isTorus(arch.design) => torusHeuristicCost _
+  def designS:SpadeDesign
+  lazy val heuristicCost: Routable => (Bundle[_] => Int) = designS match {
+    case designS if isMesh(designS) => meshHeuristicCost _
+    case designS if isCMesh(designS) => meshHeuristicCost _
+    case designS if isTorus(designS) => torusHeuristicCost _
   }
 
   def meshHeuristicCost(end:Routable)(newState:Bundle[_]):Int = {
@@ -29,11 +29,11 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
     }.getOrElse(0)
   }
 
-  lazy val maxWidth = arch.design.top match {
+  lazy val maxWidth = designS.top match {
     case top:StaticGridTop => top.sbrx - top.sblx
     case top:DynamicGridTop => top.rtrx - top.rtlx
   }
-  lazy val maxHeight = arch.design.top match {
+  lazy val maxHeight = designS.top match {
     case top:StaticGridTop => top.sbuy - top.sbby
     case top:DynamicGridTop => top.rtuy - top.rtby
   }
