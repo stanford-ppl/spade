@@ -14,45 +14,10 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
 
   val cnu:Numeric[Int] = implicitly[Numeric[Int]]
 
-  def designS:SpadeDesign
-  lazy val heuristicCost: Routable => (Bundle[_] => Int) = designS match {
-    case designS if isMesh(designS) => meshHeuristicCost _
-    case designS if isCMesh(designS) => meshHeuristicCost _
-    case designS if isTorus(designS) => torusHeuristicCost _
-  }
-
-  def meshHeuristicCost(end:Routable)(newState:Bundle[_]):Int = {
-    val next = routableOf(newState).get
-    zipMap(indexOf.get(next), indexOf.get(end)) { case (List(nx, ny), List(ex, ey)) =>
-      // Manhattan distance between two points
-      Math.abs(nx - ex) + Math.abs(ny - ey)
-    }.getOrElse(0)
-  }
-
-  lazy val maxWidth = designS.top match {
-    case top:StaticGridTop => top.sbrx - top.sblx
-    case top:DynamicGridTop => top.rtrx - top.rtlx
-  }
-  lazy val maxHeight = designS.top match {
-    case top:StaticGridTop => top.sbuy - top.sbby
-    case top:DynamicGridTop => top.rtuy - top.rtby
-  }
-  def torusHeuristicCost(end:Routable)(newState:Bundle[_]):Int = {
-    val next = routableOf(newState).get
-    zipMap(indexOf.get(next), indexOf.get(end)) { case (List(nx, ny), List(ex, ey)) =>
-      // Manhattan distance between two points with wrap around
-      val xdelt = Math.abs(nx - ex)
-      val ydelt = Math.abs(ny - ey)
-      val xdist = Math.min(xdelt, maxWidth - xdelt)
-      val ydist = Math.min(ydelt, maxHeight - ydelt)
-      xdist + ydist
-    }.getOrElse(0)
-  }
-
   def advance(
     startTails:List[PT],
-    tailToHead:Edge => List[(Edge,C)],
-    heuristicCost:Bundle[_] => C,
+    tailToHead:Edge => List[Edge],
+    linkCost:(PT, PT) => C,
     maxCost:Int
   )(
     state:Bundle[_], 
@@ -71,12 +36,12 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
            *   +----------+      +----------+       +----------+
            * */
           val (_, (tail1, head1), _) = backPointers(state)
-          tailToHead(head1.internal).flatMap { case (tail2ic, cost1) =>
+          tailToHead(head1.internal).flatMap { tail2ic =>
             val tail2 = tail2ic.src.asInstanceOf[PT]
-            tailToHead(tail2.external).map { case (head2edge, cost2) =>
+            tailToHead(tail2.external).map { head2edge =>
               val head2 = head2edge.src.asInstanceOf[PT]
               val newState = head2.src.asInstanceOf[Bundle[_<:PinType]]
-              (newState, (tail2, head2), (cost1 + cost2) + heuristicCost(newState))
+              (newState, (tail2, head2), linkCost(tail2, head2))
             }
           }
         case _:Routable =>
@@ -87,10 +52,10 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
            *   +----------+      +----------+
            * */
           startTails.flatMap { tail =>
-            tailToHead(tail.external).map { case (headedge, cost) =>
+            tailToHead(tail.external).map { headedge =>
               val head = headedge.src.asInstanceOf[PT]
               val newState = head.src.asInstanceOf[Bundle[_<:PinType]]
-              (newState, (tail, head), cost + heuristicCost(newState))
+              (newState, (tail, head), linkCost(tail, head))
             }
           }
       }
