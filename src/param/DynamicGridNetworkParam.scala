@@ -91,10 +91,10 @@ case class DynamicGridScalarNetworkParam(
     channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
     
     // router to DAG channel width
-    channelWidth("src"->"rt", "dst"->"dag") = 1//roundUp(ucuSins)
+    channelWidth("src"->"rt", "dst"->"dag") = 4
 
     // DAG to router channel width
-    channelWidth("src"->"dag", "dst"->"rt") = 1//roundUp(ucuSouts) - 2
+    channelWidth("src"->"dag", "dst"->"rt") = 1
 
     // router to SAG channel width
     channelWidth("src"->"rt", "dst"->"pcu") = 4 

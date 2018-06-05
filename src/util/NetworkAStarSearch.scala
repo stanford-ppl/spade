@@ -51,7 +51,7 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
 
   def advance(
     startTails:List[PT],
-    tailToHead:Edge => List[Edge],
+    tailToHead:Edge => List[(Edge,C)],
     heuristicCost:Bundle[_] => C,
     maxCost:Int
   )(
@@ -63,7 +63,7 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
     if (maxCost>0 && pastCost>maxCost) return Nil
     dbgblk(s"advance(state=${quote(state)} pastCost=$pastCost)",buffer=false) {
       routableOf(state).get match {
-        case rt:SwitchBox =>
+        case _:SwitchBox | _:Router =>
           /*
            *   +----------+      +----------+       +----------+
            *   |        t1+----->|h1      t2+------>|h2        |
@@ -71,15 +71,15 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
            *   +----------+      +----------+       +----------+
            * */
           val (_, (tail1, head1), _) = backPointers(state)
-          tailToHead(head1.internal).flatMap { tail2ic =>
+          tailToHead(head1.internal).flatMap { case (tail2ic, cost1) =>
             val tail2 = tail2ic.src.asInstanceOf[PT]
-            tailToHead(tail2.external).map { head2edge =>
+            tailToHead(tail2.external).map { case (head2edge, cost2) =>
               val head2 = head2edge.src.asInstanceOf[PT]
               val newState = head2.src.asInstanceOf[Bundle[_<:PinType]]
-              (newState, (tail2, head2), 1 + heuristicCost(newState))
+              (newState, (tail2, head2), (cost1 + cost2) + heuristicCost(newState))
             }
           }
-        case rt:Routable =>
+        case _:Routable =>
           /*
            *   +----------+      +----------+
            *   |    tails +----->|heads     +
@@ -87,10 +87,10 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
            *   +----------+      +----------+
            * */
           startTails.flatMap { tail =>
-            tailToHead(tail.external).map { headedge =>
+            tailToHead(tail.external).map { case (headedge, cost) =>
               val head = headedge.src.asInstanceOf[PT]
               val newState = head.src.asInstanceOf[Bundle[_<:PinType]]
-              (newState, (tail, head), 1 + heuristicCost(newState))
+              (newState, (tail, head), cost + heuristicCost(newState))
             }
           }
       }
