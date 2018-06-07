@@ -4,8 +4,8 @@ import param._
 
 case class SwitchBox (
   param:SwitchParam, 
-  override val bundles:List[Bundle[_<:PinType]]
-)(implicit design:SpadeDesign) extends Routable(bundles) {
+  bundles:List[Bundle[_<:PinType]]
+)(implicit design:SpadeDesign) extends Routable {
   import param._
 
   connection match {

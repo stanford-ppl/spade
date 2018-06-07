@@ -4,8 +4,8 @@ import param._
 
 case class Router (
   param:RouterParam, 
-  override val bundles:List[Bundle[_<:PinType]]
-)(implicit design:SpadeDesign) extends Routable(bundles) {
+  bundles:List[Bundle[_<:PinType]]
+)(implicit design:SpadeDesign) extends Routable {
   bundles.foreach { bundle =>
     bundle match {
       case bundle:GridBundle[_] => connectCrossBar(bundle)

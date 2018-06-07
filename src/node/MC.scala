@@ -2,7 +2,10 @@ package spade
 package node
 import param._
 
-case class MC(param:MCParam, override val bundles:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends Routable(bundles) {
+case class MC(
+  param:MCParam, 
+  bundles:List[Bundle[_<:PinType]]
+)(implicit design:SpadeDesign) extends Terminal {
   import param._
   val wOffset = Module(FIFO[Word](wOffsetFifoParam),"wOffset")
   val rOffset = Module(FIFO[Word](rOffsetFifoParam),"rOffset")

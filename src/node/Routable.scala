@@ -2,10 +2,9 @@ package spade
 package node
 import param._
 
-abstract class Routable(val bundles:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) extends Module {
+trait Routable extends Module {
+  val bundles:List[Bundle[_<:PinType]]
   bundles.foreach { _.setParent(this) }
 
   def bundle[B<:PinType:ClassTag] = bundles.flatMap{ bundle => as[Bundle,B](bundle) }.headOption
 }
-
-

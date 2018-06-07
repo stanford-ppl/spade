@@ -4,8 +4,8 @@ import param._
 
 abstract class CU(
   val param:CUParam, 
-  bundles:List[Bundle[_<:PinType]]
-)(implicit design:SpadeDesign) extends Routable(bundles) {
+  val bundles:List[Bundle[_<:PinType]]
+)(implicit design:SpadeDesign) extends Terminal {
   param.set(this) // Compute derived parameters
   //import param._
 
