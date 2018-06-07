@@ -16,7 +16,7 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
 
   def advance(
     startTails:List[PT],
-    tailToHead:Edge => List[Edge],
+    tailToHead:(Edge, BackPointer) => List[Edge],
     linkCost:(PT, PT) => C,
     maxCost:Int
   )(
@@ -36,9 +36,9 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
            *   +----------+      +----------+       +----------+
            * */
           val (_, (tail1, head1), _) = backPointers(state)
-          tailToHead(head1.internal).flatMap { tail2ic =>
+          tailToHead(head1.internal, backPointers).flatMap { tail2ic =>
             val tail2 = tail2ic.src.asInstanceOf[PT]
-            tailToHead(tail2.external).map { head2edge =>
+            tailToHead(tail2.external, backPointers).map { head2edge =>
               val head2 = head2edge.src.asInstanceOf[PT]
               val newState = head2.src.asInstanceOf[Bundle[_<:PinType]]
               (newState, (tail2, head2), linkCost(tail2, head2))
@@ -52,7 +52,7 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
            *   +----------+      +----------+
            * */
           startTails.flatMap { tail =>
-            tailToHead(tail.external).map { headedge =>
+            tailToHead(tail.external, backPointers).map { headedge =>
               val head = headedge.src.asInstanceOf[PT]
               val newState = head.src.asInstanceOf[Bundle[_<:PinType]]
               (newState, (tail, head), linkCost(tail, head))
