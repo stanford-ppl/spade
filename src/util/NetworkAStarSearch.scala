@@ -28,6 +28,20 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
     if (maxCost>0 && pastCost>maxCost) return Nil
     dbgblk(s"advance(state=${quote(state)} pastCost=$pastCost)",buffer=false) {
       routableOf(state).get match {
+        case _:Terminal =>
+          /*
+           *   +----------+      +----------+
+           *   |    tails +----->|heads     +
+           *   |  curr    +----->|          |
+           *   +----------+      +----------+
+           * */
+          startTails.flatMap { tail =>
+            tailToHead(tail.external, backPointers).map { headedge =>
+              val head = headedge.src.asInstanceOf[PT]
+              val newState = head.src.asInstanceOf[Bundle[_<:PinType]]
+              (newState, (tail, head), linkCost(tail, head))
+            }
+          }
         case _:SwitchBox | _:Router =>
           /*
            *   +----------+      +----------+       +----------+
@@ -42,20 +56,6 @@ trait NetworkAStarSearch extends prism.mapper.UniformCostGraphSearch[Bundle[_], 
               val head2 = head2edge.src.asInstanceOf[PT]
               val newState = head2.src.asInstanceOf[Bundle[_<:PinType]]
               (newState, (tail2, head2), linkCost(tail2, head2))
-            }
-          }
-        case _:Routable =>
-          /*
-           *   +----------+      +----------+
-           *   |    tails +----->|heads     +
-           *   |  curr    +----->|          |
-           *   +----------+      +----------+
-           * */
-          startTails.flatMap { tail =>
-            tailToHead(tail.external, backPointers).map { headedge =>
-              val head = headedge.src.asInstanceOf[PT]
-              val newState = head.src.asInstanceOf[Bundle[_<:PinType]]
-              (newState, (tail, head), linkCost(tail, head))
             }
           }
       }
