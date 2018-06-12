@@ -41,10 +41,10 @@ case class DynamicGridNetwork[B<:PinType](
   }
   if (param.isTorus) {
     for (y <- 0 until numTotalRows) {
-      connect(rtArray(0)(y), rtArray(numCols)(y)) // Horizontal, first col to last col
+      connect(rtArray.head(y), rtArray.last(y)) // Horizontal, first col to last col
     }
     for (x <- 0 until numTotalCols) {
-      connect(rtArray(x)(0), rtArray(x)(numRows)) // Vertical, first row to last row
+      connect(rtArray(x).head, rtArray(x).last) // Vertical, first row to last row
     }
   }
 
