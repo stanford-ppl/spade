@@ -79,6 +79,10 @@ trait SpadeNodeUtil {
     case n:StaticCMeshTop => n.param.networkParams.forall(isCMesh)
     case n:StaticCMeshNetwork[_] => true
     case n:StaticCMeshNetworkParam[_] => true
+    case n:DynamicCMeshTop => true
+    case n:DynamicCMeshTopParam => true
+    case n:DynamicCMeshNetwork[_] => true
+    case n:DynamicCMeshNetworkParam[_] => true
     case _ => false
   }
 
