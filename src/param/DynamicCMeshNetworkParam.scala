@@ -15,6 +15,7 @@ abstract class DynamicCMeshNetworkParam[B<:PinType:ClassTag] extends NetworkPara
   lazy val numArgIns:Int = argFringeParam.numArgIns
   lazy val numArgOuts:Int = argFringeParam.numArgOuts
   lazy val numTokenOuts:Int = argFringeParam.numTokenOuts
+  val numVirtualClasses:Int
 
   object ChannelWidth {
     def empty = new Table[String, String, Int] (
@@ -27,7 +28,9 @@ abstract class DynamicCMeshNetworkParam[B<:PinType:ClassTag] extends NetworkPara
   }
 }
 
-case class DynamicCMeshControlNetworkParam() extends DynamicCMeshNetworkParam[Bit] {
+case class DynamicCMeshControlNetworkParam(
+  numVirtualClasses:Int = 4
+) extends DynamicCMeshNetworkParam[Bit] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // switch to switch channel width
@@ -60,7 +63,9 @@ case class DynamicCMeshControlNetworkParam() extends DynamicCMeshNetworkParam[Bi
   }
 }
 
-case class DynamicCMeshScalarNetworkParam() extends DynamicCMeshNetworkParam[Word] {
+case class DynamicCMeshScalarNetworkParam(
+  numVirtualClasses:Int = 4
+) extends DynamicCMeshNetworkParam[Word] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // switch - switch channel width
@@ -94,7 +99,9 @@ case class DynamicCMeshScalarNetworkParam() extends DynamicCMeshNetworkParam[Wor
   }
 }
 
-case class DynamicCMeshVectorNetworkParam() extends DynamicCMeshNetworkParam[Vector] {
+case class DynamicCMeshVectorNetworkParam(
+  numVirtualClasses:Int = 4
+) extends DynamicCMeshNetworkParam[Vector] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // switch - switch channel width
