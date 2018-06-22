@@ -81,19 +81,4 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
     }
   }
 
-  override def emitEdge(from:N, to:N, attr:DotAttr):Unit = {
-    val (fromStr, toStr) = (from, to) match {
-      //case (from:SwitchBox, to:ArgFringe) if !dynamic =>
-        //val List(x,y) = indexOf(from)
-        //val toStr = if (y==0) s"${to}_bottom" else s"${to}_top"
-        //(from.toString, toStr)
-      //case (from:ArgFringe, to:SwitchBox) if !dynamic =>
-        //val List(x,y) = indexOf(to)
-        //val fromStr = if (y==0) s"${from}_bottom" else s"${from}_top"
-        //(fromStr, to.toString)
-      case (from, to) => (from.toString, to.toString)
-    }
-    super.emitEdge(fromStr, toStr, attr) // String, String
-  }
-
 }

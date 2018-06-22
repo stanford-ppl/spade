@@ -86,7 +86,7 @@ case class DramAGParam (
   scalarFifoParam:FIFOParam=FIFOParam(size=4),
   vectorFifoParam:FIFOParam=FIFOParam(size=4),
   numCtrs:Int=6,
-  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=6, vectorized=false, numRegs=16))
+  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=8, vectorized=false, numRegs=16))
 ) extends CUParam {
   val numSrams:Int = 0
   val sramParam:SRAMParam = SRAMParam(0,0)
