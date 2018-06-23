@@ -11,8 +11,7 @@ abstract class ParamCodegen(implicit compiler:Spade) extends Pass with BFSTopolo
     val allNodes = new BFSTopologicalTraversal with GraphSchedular {
       type N = Parameter
       val forward = false
-      override def traverseNode(n:N, prev:T) = traverse(List(n), prev)
-    }.schedule(compiler.designParam).toSet.toList
+    }.scheduleNode(compiler.designParam).toSet.toList
     traverse(scheduleDepFree(allNodes), ())
   }
   
