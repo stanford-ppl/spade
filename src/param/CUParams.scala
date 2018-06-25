@@ -62,10 +62,10 @@ case class PMUParam (
   scalarFifoParam:FIFOParam=FIFOParam(size=4),
   vectorFifoParam:FIFOParam=FIFOParam(size=4),
   sramParam:SRAMParam=SRAMParam(size=256 * 1024 / 4,4), // 256 kB
-  numCtrs:Int=6
+  numCtrs:Int=6,
+  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=4, vectorized=true, numRegs=16))
 ) extends CUParam {
   val numSrams:Int = 1 
-  val simdParam = None
 }
 case class SramAGParam (
   numControlFifos:Int=6,
