@@ -81,4 +81,8 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
     }
   }
 
+  override def open = {
+    s"bin/dot -c ${outputPath} &".replace(".dot", "") !
+  }
+
 }
