@@ -3,6 +3,7 @@ package node
 import param._
 
 trait Routable extends Module {
+  val param:Parameter
   val bundles:List[Bundle[_<:PinType]]
   bundles.foreach { _.setParent(this) }
 
