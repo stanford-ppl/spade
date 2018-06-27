@@ -5,6 +5,7 @@ import spade.node._
 import prism.enums._
 import prism.node._
 
+import SpadeConfig._
 trait CUParam extends Parameter {
   // Memory
   val numSrams:Int
@@ -34,9 +35,9 @@ trait CUParam extends Parameter {
 case class PCUParam (
   numControlFifos:Int=6,
   numScalarFifos:Int=6,
-  controlFifoParam:FIFOParam=FIFOParam(size=4),
-  scalarFifoParam:FIFOParam=FIFOParam(size=4),
-  vectorFifoParam:FIFOParam=FIFOParam(size=4),
+  controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
+  scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
+  vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   numCtrs:Int=6,
   simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=6, vectorized=true, numRegs=16))
 ) extends CUParam {
@@ -46,9 +47,9 @@ case class PCUParam (
 case class SCUParam (
   numControlFifos:Int=6,
   numScalarFifos:Int=6,
-  controlFifoParam:FIFOParam=FIFOParam(size=4),
-  scalarFifoParam:FIFOParam=FIFOParam(size=4),
-  vectorFifoParam:FIFOParam=FIFOParam(size=4),
+  controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
+  scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
+  vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   numCtrs:Int=6,
   simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=6, vectorized=false, numRegs=16))
 ) extends CUParam {
@@ -58,9 +59,9 @@ case class SCUParam (
 case class PMUParam (
   numControlFifos:Int=6,
   numScalarFifos:Int=6,
-  controlFifoParam:FIFOParam=FIFOParam(size=4),
-  scalarFifoParam:FIFOParam=FIFOParam(size=4),
-  vectorFifoParam:FIFOParam=FIFOParam(size=4),
+  controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
+  scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
+  vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   sramParam:SRAMParam=SRAMParam(size=256 * 1024 / 4,4), // 256 kB
   numCtrs:Int=6,
   simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=4, vectorized=true, numRegs=16))
@@ -70,9 +71,9 @@ case class PMUParam (
 case class SramAGParam (
   numControlFifos:Int=6,
   numScalarFifos:Int=6,
-  controlFifoParam:FIFOParam=FIFOParam(size=4),
-  scalarFifoParam:FIFOParam=FIFOParam(size=4),
-  vectorFifoParam:FIFOParam=FIFOParam(size=4),
+  controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
+  scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
+  vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   numCtrs:Int=6,
   simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=6, vectorized=true, numRegs=16))
 ) extends CUParam {
@@ -82,9 +83,9 @@ case class SramAGParam (
 case class DramAGParam (
   numControlFifos:Int=6,
   numScalarFifos:Int=6,
-  controlFifoParam:FIFOParam=FIFOParam(size=4),
-  scalarFifoParam:FIFOParam=FIFOParam(size=4),
-  vectorFifoParam:FIFOParam=FIFOParam(size=4),
+  controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
+  scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
+  vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   numCtrs:Int=6,
   simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=8, vectorized=false, numRegs=16))
 ) extends CUParam {

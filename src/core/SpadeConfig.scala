@@ -33,4 +33,5 @@ object SpadeConfig extends prism.GlobalConfig {
   register[Int]("argin", default=6, info="number of ArgIn")
   register[Int]("argout", default=4, info="number of ArgOut")
   register[Int]("tokenout", default=5, info="number of TokenOut")
+  register[Int]("fifo-depth", default=4, info="Depth of FIFO")
 }
