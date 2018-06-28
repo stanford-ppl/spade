@@ -4,8 +4,6 @@ package codegen
 import spade.node._ 
 import spade.param._ 
 
-import sys.process._
-
 class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compiler:Spade) extends SpadeCodegen with IRDotCodegen {
 
   import spademeta._
@@ -82,7 +80,7 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
   }
 
   override def open = {
-    s"bin/dot -c ${outputPath} &".replace(".dot", "") !
+    shell(s"bin/dot -c ${outputPath} &".replace(".dot", ""))
   }
 
 }
