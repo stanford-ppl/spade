@@ -2,14 +2,14 @@ package spade
 package param
 
 import node._
-import prism.enums._
 
 case class DefaultSIMDParam (
   numStages:Int,
   vectorized:Boolean,
   numRegs:Int,
   numScalarOuts:Int,
-  numVectorOuts:Int
+  numVectorOuts:Int,
+  ops:List[Op]
 ) extends SIMDParam {
   lazy val numReductionStages = (Math.log(numLanes) / Math.log(2)).toInt
   lazy val numNonReductionStages = numStages - numReductionStages
@@ -41,6 +41,7 @@ trait SIMDParam extends Parameter {
   lazy val topParam = collectOut[TopParam]().head
   lazy val vecWidth = topParam.vecWidth
   lazy val numLanes:Int = if (vectorized) vecWidth else 1
+  val ops:List[Op]
   val reductionIndices:List[Option[Int]]
   val numScalarOuts:Int
   val numVectorOuts:Int
@@ -50,7 +51,7 @@ trait SIMDParam extends Parameter {
   }
 }
 
-trait RegColor extends Enum
+trait RegColor extends prism.enums.Enum
 case object VecInReg extends RegColor
 case object VecOutReg extends RegColor
 case object ScalarInReg extends RegColor
