@@ -76,7 +76,7 @@ case class SramAGParam (
 }
 case class DramAGParam (
   numControlFifos:Int=3,
-  numScalarFifos:Int=3,
+  numScalarFifos:Int=4,
   numVectorFifos:Int=0,
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
