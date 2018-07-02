@@ -43,13 +43,11 @@ trait Spade extends Compiler with SpadeWorld {
 
   /* Codegen */
   //lazy val spadeNetworkCodegen = new SpadeNetworkCodegen()
-  //lazy val spadeParamCodegen = new SpadeParamCodegen()
+  lazy val statCodegen = new StatCodegen()
+  lazy val paramScalaCodegen = new ParamScalaCodegen(s"GeneratedParameters.scala")
 
   /* Debug */
   //lazy val spadePrinter = new SpadePrinter()
-  //lazy val plasticineVecDotPrinter = new PlasticineVectorDotPrinter()
-  //lazy val plasticineScalDotPrinter = new PlasticineScalarDotPrinter()
-  //lazy val plasticineCtrlDotPrinter = new PlasticineCtrlDotPrinter()
 
   override def initSession = {
     val sess = session
@@ -68,12 +66,10 @@ trait Spade extends Compiler with SpadeWorld {
     //addPass(new SpadeIRDotCodegen[PMU](s"pmu.dot"))
     //addPass(new SpadeIRDotCodegen[SCU](s"scu.dot"))
     //addPass(spadePrinter)
-    //addPass(plasticineVecDotPrinter)
-    //addPass(plasticineScalDotPrinter)
-    //addPass(plasticineCtrlDotPrinter)
 
     // Codegen
-    addPass(new ParamScalaCodegen(s"GeneratedParameters.scala"))
+    addPass(statCodegen)
+    addPass(paramScalaCodegen)
     //addPass(spadeNetworkCodegen)
     //addPass(spadeParamCodegen)
   }

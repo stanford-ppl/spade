@@ -7,6 +7,7 @@ object SpadeConfig extends prism.GlobalConfig {
   register("waveform", true, info="Enable waveform")
   register("time-out", 100, info="Simulation time out after X cycles")
   register("open", default=false, info="Open dot graph after codegen")
+  register("stat", default=false, info="Printing statistics")
 
   def saveDesign:Boolean = option[Boolean]("save-spade")
   def loadDesign:Boolean = option[Boolean]("load-spade")
@@ -19,8 +20,9 @@ object SpadeConfig extends prism.GlobalConfig {
 
   def debug = Config.option[Boolean]("debug")
   def openDot = option[Boolean]("open")
+  def printStat = option[Boolean]("stat")
   
-  /* Architecture parameters */
+  /* ------------------ Architecture parameters ---------------- */
   register[Int]("word", default=32, info="Word width")
   register[Int]("vec", default=16, info="Vector width of SIMD lanes and vector network")
   register[String]("net", default="static", info="Network type [dynamic, static, asic]")
@@ -34,4 +36,5 @@ object SpadeConfig extends prism.GlobalConfig {
   register[Int]("argout", default=4, info="number of ArgOut")
   register[Int]("tokenout", default=5, info="number of TokenOut")
   register[Int]("fifo-depth", default=4, info="Depth of FIFO for all CUs")
+
 }

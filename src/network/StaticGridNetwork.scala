@@ -75,5 +75,4 @@ case class StaticGridNetwork[B<:PinType](
       }
     }
   }
-
 }

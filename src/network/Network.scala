@@ -4,7 +4,7 @@ package node
 import param._
 import scala.collection.mutable
 
-class Network[B<:PinType](
+abstract class Network[B<:PinType](
   param:NetworkParam[B], top:Top
 )(implicit design:SpadeDesign) {
   implicit val bct = param.bct

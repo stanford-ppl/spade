@@ -20,6 +20,6 @@ case class DynamicGridTopParam (
     case _:MC_DramAG => 2
   }
   // Oneside
-  val numTotalRows = numRows + 1 // one row for arg fringe
+  val numTotalRows = numRows
   val numTotalCols = numCols+fringeNumCols*2
 }

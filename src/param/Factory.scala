@@ -7,17 +7,17 @@ import scala.collection.mutable._
 import pureconfig._
 
 object Factory extends Logging {
-  def create(param:DesignParam)(implicit design:Spade) = {
+  def create(param:DesignParam)(implicit design:Spade):SpadeDesign = {
     SpadeDesign(param)
   }
-  def create(param:Parameter)(implicit design:SpadeDesign) = param match {
+  def create(param:Parameter)(implicit design:SpadeDesign):Top = param match {
     case param:StaticGridTopParam => StaticGridTop(param)
     case param:DynamicGridTopParam => DynamicGridTop(param)
     case param:StaticCMeshTopParam => StaticCMeshTop(param)
     case param:DynamicCMeshTopParam => DynamicCMeshTop(param)
     case param:AsicTopParam => AsicTop(param)
   }
-  def create(param:Parameter, nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign) = param match {
+  def create(param:Parameter, nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign):Routable = param match {
     case param:PCUParam => PCU(param, nios)
     case param:PMUParam => PMU(param, nios)
     case param:SCUParam => SCU(param, nios)
@@ -28,7 +28,7 @@ object Factory extends Logging {
     case param:SwitchParam => SwitchBox(param, nios)
     case param:RouterParam => Router(param, nios)
   }
-  def create[B<:PinType](param:NetworkParam[B], top:Top)(implicit design:SpadeDesign) = (param,top) match {
+  def create[B<:PinType](param:NetworkParam[B], top:Top)(implicit design:SpadeDesign):Network[B] = (param,top) match {
     case (param:StaticGridNetworkParam[_], top:StaticGridTop) => StaticGridNetwork[B](param, top)
     case (param:DynamicGridNetworkParam[_], top:DynamicGridTop) => DynamicGridNetwork[B](param, top)
     case (param:StaticCMeshNetworkParam[_], top:StaticCMeshTop) => StaticCMeshNetwork[B](param, top)

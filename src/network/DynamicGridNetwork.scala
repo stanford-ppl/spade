@@ -59,6 +59,5 @@ case class DynamicGridNetwork[B<:PinType](
     }
   }
   connectTerminalArrayWithSwitch(mcArray)
-  connectTerminalWithSwitch(argFringe)
 
 }

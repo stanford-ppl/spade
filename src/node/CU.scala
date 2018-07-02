@@ -6,8 +6,7 @@ abstract class CU(
   val param:CUParam, 
   val bundles:List[Bundle[_<:PinType]]
 )(implicit design:SpadeDesign) extends Terminal {
-  param.set(this) // Compute derived parameters
-  //import param._
+  import param._
 
   /* ------- SUBMODULES --------------*/
 

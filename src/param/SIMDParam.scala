@@ -7,24 +7,31 @@ import prism.enums._
 case class DefaultSIMDParam (
   numStages:Int,
   vectorized:Boolean,
-  numRegs:Int
+  numRegs:Int,
+  numScalarOuts:Int,
+  numVectorOuts:Int
 ) extends SIMDParam {
   lazy val numReductionStages = (Math.log(numLanes) / Math.log(2)).toInt
   lazy val numNonReductionStages = numStages - numReductionStages
   lazy val reductionIndices = List.tabulate(numStages){ i =>
     if (i >= numNonReductionStages) Some(i - numNonReductionStages) else None
   }
-  def set(cu:CU):Unit = {
-    import cu.param._
-    pipeRegParams.slice(0, numCtrs).map(_.color(CounterReg))
+
+  lazy val cuParam = collectOut[CUParam]().head
+
+  override lazy val pipeRegParams = {
+    import cuParam._
+    val prs = List.tabulate(numRegs) { ir => this.addField(PipeRegParam()) }
+    prs.slice(0, numCtrs).map(_.color(CounterReg))
     if (numReductionStages > 0) {
-      pipeRegParams(0).color(ReduceReg) 
-      pipeRegParams(1).color(AccumReg) 
+      prs(0).color(ReduceReg) 
+      prs(1).color(AccumReg) 
     }
-    pipeRegParams.takeRight(numScalarFifos).map(_.color(ScalarInReg))
-    pipeRegParams.takeRight(numSouts).map(_.color(ScalarOutReg))
-    pipeRegParams.takeRight(numVectorFifos).map(_.color(VecInReg))
-    pipeRegParams.takeRight(numVouts).map(_.color(VecOutReg))
+    prs.takeRight(numScalarFifos).map(_.color(ScalarInReg))
+    prs.takeRight(numScalarOuts).map(_.color(ScalarOutReg))
+    prs.takeRight(numVectorFifos).map(_.color(VecInReg))
+    prs.takeRight(numVectorOuts).map(_.color(VecOutReg))
+    prs
   }
 }
 
@@ -35,8 +42,9 @@ trait SIMDParam extends Parameter {
   lazy val vecWidth = topParam.vecWidth
   lazy val numLanes:Int = if (vectorized) vecWidth else 1
   val reductionIndices:List[Option[Int]]
-  def set(cu:CU):Unit
-  val pipeRegParams:List[PipeRegParam] = List.tabulate(numRegs) { ir => addField(PipeRegParam()) }
+  val numScalarOuts:Int
+  val numVectorOuts:Int
+  lazy val pipeRegParams:List[PipeRegParam] = List.tabulate(numRegs) { ir => addField(PipeRegParam()) }
   lazy val stageParams = reductionIndices.map { reductionIdx =>
     addField(StageParam(reductionIdx=reductionIdx))
   }

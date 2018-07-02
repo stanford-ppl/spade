@@ -17,7 +17,21 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
     if (openDot) open
   }
 
-  def getLabel(n:Any) = quote(n)
+  override def label(attr:DotAttr, n:Any) = {
+    var label = quote(n)
+    compiler.top.param match {
+      case param:DynamicGridTopParam =>
+        n match {
+          case n:Routable =>
+            val List(x,y) = indexOf(n)
+            val idx = (param.numTotalRows-1-y) * param.numTotalCols + x
+            label += s"\n($idx)"
+          case n =>
+        }
+      case param =>
+    }
+    attr.label(label)
+  }
 
   //def shape(attr:DotAttr, n:Any) = attr.shape(box)
 
@@ -81,6 +95,11 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
 
   override def open = {
     shell(s"bin/dot -c ${outputPath} &".replace(".dot", ""))
+  }
+
+  override def quote(n:Any):String = n match {
+    case n:SpadeNode => n.qindex
+    case _ => n.toString
   }
 
 }

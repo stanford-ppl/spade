@@ -11,8 +11,9 @@ trait CUParam extends Parameter {
   val numSrams:Int
   val sramParam:SRAMParam
   val numControlFifos:Int
-  val controlFifoParam:FIFOParam
   val numScalarFifos:Int
+  val numVectorFifos:Int
+  val controlFifoParam:FIFOParam
   val scalarFifoParam:FIFOParam
   val vectorFifoParam:FIFOParam
   val numCtrs:Int
@@ -20,26 +21,16 @@ trait CUParam extends Parameter {
 
   // -----   Derived parameters
   var cu:CU = _
-  def set(cu:CU):Unit = {
-    this.cu = cu
-    simdParam.foreach{ _.set(cu) }
-  }
-  lazy val numCins = cu.bundle[Bit].fold(0) { _.inputs.size }
-  lazy val numSins = cu.bundle[Word].fold(0) { _.inputs.size }
-  lazy val numVins = cu.bundle[Vector].fold(0) { _.inputs.size }
-  lazy val numCouts = cu.bundle[Bit].fold(0) { _.outputs.size }
-  lazy val numSouts = cu.bundle[Word].fold(0) { _.outputs.size }
-  lazy val numVouts = cu.bundle[Vector].fold(0) { _.outputs.size }
-  lazy val numVectorFifos = numVins
 }
 case class PCUParam (
   numControlFifos:Int=6,
   numScalarFifos:Int=6,
+  numVectorFifos:Int=6,
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   numCtrs:Int=6,
-  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=6, vectorized=true, numRegs=16))
+  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=6, vectorized=true, numRegs=16, numScalarOuts=4, numVectorOuts=4))
 ) extends CUParam {
   val numSrams:Int = 0
   val sramParam:SRAMParam = SRAMParam(0,0)
@@ -47,11 +38,12 @@ case class PCUParam (
 case class SCUParam (
   numControlFifos:Int=6,
   numScalarFifos:Int=6,
+  numVectorFifos:Int=0,
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   numCtrs:Int=6,
-  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=6, vectorized=false, numRegs=16))
+  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=6, vectorized=false, numRegs=16, numScalarOuts=4, numVectorOuts=0))
 ) extends CUParam {
   val numSrams:Int = 0
   val sramParam:SRAMParam = SRAMParam(0,0)
@@ -59,23 +51,25 @@ case class SCUParam (
 case class PMUParam (
   numControlFifos:Int=6,
   numScalarFifos:Int=6,
+  numVectorFifos:Int=6,
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   sramParam:SRAMParam=SRAMParam(size=256 * 1024 / 4,4), // 256 kB
   numCtrs:Int=6,
-  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=4, vectorized=true, numRegs=16))
+  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=4, vectorized=true, numRegs=16, numScalarOuts=4, numVectorOuts=4))
 ) extends CUParam {
   val numSrams:Int = 1 
 }
 case class SramAGParam (
   numControlFifos:Int=6,
   numScalarFifos:Int=6,
+  numVectorFifos:Int=6,
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   numCtrs:Int=6,
-  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=6, vectorized=true, numRegs=16))
+  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=6, vectorized=true, numRegs=16, numScalarOuts=4, numVectorOuts=4))
 ) extends CUParam {
   val numSrams:Int = 0
   val sramParam:SRAMParam = SRAMParam(0,0)
@@ -83,11 +77,12 @@ case class SramAGParam (
 case class DramAGParam (
   numControlFifos:Int=6,
   numScalarFifos:Int=6,
+  numVectorFifos:Int=0,
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   numCtrs:Int=6,
-  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=8, vectorized=false, numRegs=16))
+  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=8, vectorized=false, numRegs=16, numScalarOuts=4, numVectorOuts=0))
 ) extends CUParam {
   val numSrams:Int = 0
   val sramParam:SRAMParam = SRAMParam(0,0)
