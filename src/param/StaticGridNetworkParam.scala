@@ -36,13 +36,13 @@ case class StaticGridControlNetworkParam(
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // switch to switch channel width
-    channelWidth("src"->"sb", "dst"->"sb") = 6
+    channelWidth("src"->"sb", "dst"->"sb") = 1
 
     // switch to CU channel width
     channelWidth("src"->"sb", "dst"->List("pcu", "pmu", "scu")) = 1
 
     // CU to Switch channel width
-    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->"sb") = 2
+    channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->"sb") = 1
 
     // CU to CU channel width (Left -> Right)
     channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"W", "dstDir"->"E") = if (option[Boolean]("nn")) 2 else 0
@@ -58,12 +58,6 @@ case class StaticGridControlNetworkParam(
 
     // switch to DAG channel width
     channelWidth("src"->"sb", "dst"->"dag") = 1
-
-    // switch to SAG channel width
-    channelWidth("src"->"sb", "dst"->"pcu") = 2
-
-    // SAG to switch channel width
-    channelWidth("src"->"pcu", "dst"->"sb") = 2 
 
     // switch to MC channel width
     channelWidth("src"->"sb", "dst"->"mc") = 1
@@ -96,13 +90,13 @@ case class StaticGridScalarNetworkParam(
     channelWidth("src"->"sb", "dst"->"sb") = 4
 
     // switch to CU channel width
-    channelWidth("src"->"sb", "dst"->List("pcu", "scu")) = 1
+    channelWidth("src"->"sb", "dst"->List("pcu", "scu")) = 2
 
     // CU to Switch channel width
     channelWidth("src"->List("pcu", "scu"), "dst"->"sb") = 1
 
     // switch to PMU channel width
-    channelWidth("src"->"sb", "dst"->List("pmu")) = 1
+    channelWidth("src"->"sb", "dst"->List("pmu")) = 2
 
     // PMU to Switch channel width
     channelWidth("src"->List("pmu"), "dst"->"sb") = 1
@@ -121,12 +115,6 @@ case class StaticGridScalarNetworkParam(
 
     // DAG to switch channel width
     channelWidth("src"->"dag", "dst"->"sb") = 1
-
-    // switch to SAG channel width
-    channelWidth("src"->"sb", "dst"->"pcu") = 4 
-
-    // SAG to switch channel width
-    channelWidth("src"->"pcu", "dst"->"sb") = 2 
 
     // switch to MC channel width
     channelWidth("src"->"sb", "dst"->"mc") = 3
@@ -158,13 +146,13 @@ case class StaticGridVectorNetworkParam(
     channelWidth("src"->"sb", "dst"->"sb") = 4
 
     // switch to CU channel width
-    channelWidth("src"->"sb", "dst"->List("pcu")) = 1
+    channelWidth("src"->"sb", "dst"->List("pcu")) = 2
 
     // CU to Switch channel width
     channelWidth("src"->List("pcu"), "dst"->"sb") = 1
 
     // switch to PMU channel width
-    channelWidth("src"->"sb", "dst"->List("pmu")) = 1
+    channelWidth("src"->"sb", "dst"->List("pmu")) = 2
 
     // PMU to Switch channel width
     channelWidth("src"->List("pmu"), "dst"->"sb") = 1
@@ -177,12 +165,6 @@ case class StaticGridVectorNetworkParam(
     channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
     // CU to CU channel width (Bottom -> Top)
     channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu"), "srcDir"->"N", "dstDir"->"E") = 0
-
-    // switch to SAG channel width
-    channelWidth("src"->"sb", "dst"->"pcu") = 4 
-
-    // SAG to switch channel width
-    channelWidth("src"->"pcu", "dst"->"sb") = 2 
 
     // switch to MC channel width
     channelWidth("src"->"sb", "dst"->"mc") = 1

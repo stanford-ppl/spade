@@ -23,7 +23,7 @@ trait CUParam extends Parameter {
   var cu:CU = _
 }
 case class PCUParam (
-  numControlFifos:Int=6,
+  numControlFifos:Int=4,
   numScalarFifos:Int=6,
   numVectorFifos:Int=6,
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
@@ -36,7 +36,7 @@ case class PCUParam (
   val sramParam:SRAMParam = SRAMParam(0,0)
 }
 case class SCUParam (
-  numControlFifos:Int=6,
+  numControlFifos:Int=4,
   numScalarFifos:Int=6,
   numVectorFifos:Int=0,
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
@@ -49,7 +49,7 @@ case class SCUParam (
   val sramParam:SRAMParam = SRAMParam(0,0)
 }
 case class PMUParam (
-  numControlFifos:Int=6,
+  numControlFifos:Int=4,
   numScalarFifos:Int=6,
   numVectorFifos:Int=6,
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
@@ -62,7 +62,7 @@ case class PMUParam (
   val numSrams:Int = 1 
 }
 case class SramAGParam (
-  numControlFifos:Int=6,
+  numControlFifos:Int=4,
   numScalarFifos:Int=6,
   numVectorFifos:Int=6,
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
@@ -75,14 +75,14 @@ case class SramAGParam (
   val sramParam:SRAMParam = SRAMParam(0,0)
 }
 case class DramAGParam (
-  numControlFifos:Int=6,
-  numScalarFifos:Int=6,
+  numControlFifos:Int=3,
+  numScalarFifos:Int=3,
   numVectorFifos:Int=0,
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   numCtrs:Int=6,
-  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=8, vectorized=false, numRegs=16, numScalarOuts=4, numVectorOuts=0))
+  simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(numStages=8, vectorized=false, numRegs=16, numScalarOuts=3, numVectorOuts=0))
 ) extends CUParam {
   val numSrams:Int = 0
   val sramParam:SRAMParam = SRAMParam(0,0)

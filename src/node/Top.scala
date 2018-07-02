@@ -18,10 +18,30 @@ trait Top extends Module {
   }
 
   def createSubmodules = {
+    paramMap.head._2.keys.foreach(checkParam)
     bundleGroups.foreach { case b@BundleGroup(param, coord) => 
       val m = Module(Factory.create(param, b.bundles))
       coord.foreach { coord => indexOf(m) = coord }
     }
+  }
+
+  def checkParam(param:Parameter):Unit = param match {
+    case param:CUParam if param.simdParam.nonEmpty =>
+      checkParam(s"$param cin", minInputs[Bit](param), param.numControlFifos)
+      checkParam(s"$param sin", minInputs[Word](param), param.numScalarFifos)
+      checkParam(s"$param vin", minInputs[Vector](param), param.numVectorFifos)
+      val simd = param.simdParam.get
+      checkParam(s"$param sout", minOutputs[Word](param), simd.numScalarOuts)
+      checkParam(s"$param vout", minOutputs[Vector](param), simd.numVectorOuts)
+    case param:CUParam =>
+      checkParam(s"$param cin", minInputs[Bit](param), param.numControlFifos)
+      checkParam(s"$param sin", minInputs[Word](param), param.numScalarFifos)
+      checkParam(s"$param vin", minInputs[Vector](param), param.numVectorFifos)
+    case param =>
+  }
+
+  def checkParam(msg:String, netParam:Int, cuParam:Int):Unit = {
+    if (cuParam > netParam) warn(s"$msg cuParam=$cuParam > netParam=$netParam")
   }
 
   private lazy val paramMap:Map[ClassTag[_], Map[Parameter, List[Bundle[_]]]] = networks.map { net => 

@@ -76,13 +76,13 @@ case class DynamicGridScalarNetworkParam(
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // router to CU channel width
-    channelWidth("src"->"rt", "dst"->List("pcu", "scu")) = 4//roundUp(pcuSins / 4.0) 
+    channelWidth("src"->"rt", "dst"->List("pcu", "scu")) = 6
 
     // CU to Switch channel width
-    channelWidth("src"->List("pcu", "scu"), "dst"->"rt") = 4//roundUp(pcuSouts / 4.0)
+    channelWidth("src"->List("pcu", "scu"), "dst"->"rt") = 4
 
     // router to PMU channel width
-    channelWidth("src"->"rt", "dst"->List("pmu")) = 4//roundUp(pmuSins / 4.0) 
+    channelWidth("src"->"rt", "dst"->List("pmu")) = 6
 
     // PMU to Switch channel width
     channelWidth("src"->List("pmu"), "dst"->"rt") = 4//roundUp(pmuSouts / 4.0)
@@ -95,12 +95,6 @@ case class DynamicGridScalarNetworkParam(
 
     // DAG to router channel width
     channelWidth("src"->"dag", "dst"->"rt") = 1
-
-    // router to SAG channel width
-    channelWidth("src"->"rt", "dst"->"pcu") = 4 
-
-    // SAG to router channel width
-    channelWidth("src"->"pcu", "dst"->"rt") = 2 
 
     // router to MC channel width
     channelWidth("src"->"rt", "dst"->"mc") = 3
@@ -130,16 +124,16 @@ case class DynamicGridVectorNetworkParam(
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // router to CU channel width
-    channelWidth("src"->"rt", "dst"->List("pcu")) = 4//roundUp(pcuVins / 4.0)
+    channelWidth("src"->"rt", "dst"->List("pcu")) = 6
 
     // CU to Switch channel width
-    channelWidth("src"->List("pcu"), "dst"->"rt") = 4//roundUp(pcuVouts / 4.0)
+    channelWidth("src"->List("pcu"), "dst"->"rt") = 4
 
     // router to PMU channel width
-    channelWidth("src"->"rt", "dst"->List("pmu")) = 4//roundUp(pmuVins / 4.0) 
+    channelWidth("src"->"rt", "dst"->List("pmu")) = 6
 
     // PMU to Switch channel width
-    channelWidth("src"->List("pmu"), "dst"->"rt") = 4//roundUp(pmuVouts / 4.0)
+    channelWidth("src"->List("pmu"), "dst"->"rt") = 4
 
     // CU to CU channel width
     channelWidth("src"->List("pcu", "pmu", "scu"), "dst"->List("pcu", "pmu", "scu")) = if (option[Boolean]("nn")) 2 else 0
