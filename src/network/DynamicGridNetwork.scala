@@ -11,20 +11,20 @@ case class DynamicGridNetwork[B<:PinType](
   import param._
   import top._
 
-  def connectTerminalWithSwitch(terminal:BundleGroup) = {
+  def connectTerminalWithRouter(terminal:BundleGroup) = {
     val (x,y) = terminal.coord.get
     val rt = rtArray(x)(y)
     connect(terminal, rt)
   }
 
-  def connectTerminalArrayWithSwitch(array:List[List[BundleGroup]]) = {
+  def connectTerminalArrayWithRouter(array:List[List[BundleGroup]]) = {
     array.foreach { col => 
-      col.foreach { terminal => connectTerminalWithSwitch(terminal) }
+      col.foreach { terminal => connectTerminalWithRouter(terminal) }
     }
   }
 
   /** ----- Central Array Connection ----- **/
-  connectTerminalArrayWithSwitch(cuArray)
+  connectTerminalArrayWithRouter(cuArray)
   /* ----- CU to CU Connection ----- */
   for (y <- 0 until numRows) {
     for (x <- 0 until numCols) {
@@ -50,7 +50,7 @@ case class DynamicGridNetwork[B<:PinType](
 
   /** ----- Fringe Connection ----- **/
   dagArray.map { dagArray => 
-    connectTerminalArrayWithSwitch(dagArray)
+    connectTerminalArrayWithRouter(dagArray)
     dagArray.zipWithIndex.foreach { case (col, i) =>
       col.zipWithIndex.foreach { case (dag, j) =>
         val mc = mcArray(i)(j)
@@ -58,6 +58,6 @@ case class DynamicGridNetwork[B<:PinType](
       }
     }
   }
-  connectTerminalArrayWithSwitch(mcArray)
+  connectTerminalArrayWithRouter(mcArray)
 
 }
