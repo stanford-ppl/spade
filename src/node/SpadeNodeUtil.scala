@@ -119,6 +119,13 @@ trait SpadeNodeUtil {
     case n => false
   }
 
+  def isPointToPoint(n:Any):Boolean = n match {
+    case n:SpadeDesign => isPointToPoint(n.top)
+    case n:PointToPointTop => true
+    case n:PointToPointTopParam => true
+    case n => false
+  }
+
   def cuOf(n:SpadeNode) = n.collectUp[CU]().headOption
 
   def routableOf(n:SpadeNode) = n.collectUp[Routable]().headOption

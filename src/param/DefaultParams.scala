@@ -12,6 +12,7 @@ trait DefaultParams {
       case ("torus" , "dynamic") => DynamicGridTopParam()
       case ("cmesh" , "dynamic") => DynamicCMeshTopParam()
       case (_       , "asic") => AsicTopParam()
+      case (_       , "p2p") => PointToPointTopParam()
       case _ => StaticGridTopParam()
     }
   }

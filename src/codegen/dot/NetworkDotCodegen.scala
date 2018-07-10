@@ -8,8 +8,6 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
 
   import spademeta._
 
-  //lazy val dynamic = isDynamic(compiler.top)
-  
   def openDot = SpadeConfig.openDot
 
   override def finPass = {
@@ -32,8 +30,6 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
     }
     attr.label(label)
   }
-
-  //def shape(attr:DotAttr, n:Any) = attr.shape(box)
 
   val scale = 5
 
@@ -77,10 +73,6 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
   override def emitNode(n:N) = {
     n match {
       case n:Top => super.visitNode(n)
-      //case n:ArgFringe if !dynamic =>
-        //emitNode(s"${n}_top",setAttrs((n, "top")))
-        //emitNode(s"${n}_bottom",setAttrs((n, "bottom")))
-        //nodes += n
       case n:Routable => emitSingleNode(n)
     }
   }

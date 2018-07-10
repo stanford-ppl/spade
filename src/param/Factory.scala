@@ -16,6 +16,7 @@ object Factory extends Logging {
     case param:StaticCMeshTopParam => StaticCMeshTop(param)
     case param:DynamicCMeshTopParam => DynamicCMeshTop(param)
     case param:AsicTopParam => AsicTop(param)
+    case param:PointToPointTopParam => PointToPointTop(param)
   }
   def create(param:Parameter, nios:List[Bundle[_<:PinType]])(implicit design:SpadeDesign):Routable = param match {
     case param:PCUParam => PCU(param, nios)

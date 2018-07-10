@@ -18,7 +18,7 @@ trait Top extends Module {
   }
 
   def createSubmodules = {
-    paramMap.head._2.keys.foreach(checkParam)
+    paramMap.headOption.foreach { _._2.keys.foreach(checkParam) }
     bundleGroups.foreach { case b@BundleGroup(param, coord) => 
       val m = Module(Factory.create(param, b.bundles))
       coord.foreach { coord => indexOf(m) = coord }
