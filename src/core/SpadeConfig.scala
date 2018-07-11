@@ -36,5 +36,6 @@ object SpadeConfig extends prism.GlobalConfig {
   register[Int]("argout", default=4, info="number of ArgOut")
   register[Int]("tokenout", default=5, info="number of TokenOut")
   register[Int]("fifo-depth", default=4, info="Depth of FIFO for all CUs")
+  register[Int]("vc", default=64, info="Number of virtual classes per network")
 
 }

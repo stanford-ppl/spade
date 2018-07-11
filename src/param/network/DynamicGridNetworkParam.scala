@@ -32,7 +32,7 @@ abstract class DynamicGridNetworkParam[B<:PinType:ClassTag] extends NetworkParam
 }
 
 case class DynamicGridControlNetworkParam(
-  numVirtualClasses:Int = 4,
+  numVirtualClasses:Int = option[Int]("vc"),
   isTorus:Boolean=defaultIsTorus
 ) extends DynamicGridNetworkParam[Bit] {
   override lazy val channelWidth = {
@@ -70,7 +70,7 @@ case class DynamicGridControlNetworkParam(
 }
 
 case class DynamicGridScalarNetworkParam(
-  numVirtualClasses:Int = 4,
+  numVirtualClasses:Int = option[Int]("vc"),
   isTorus:Boolean=defaultIsTorus
 ) extends DynamicGridNetworkParam[Word] {
   override lazy val channelWidth = {
@@ -118,7 +118,7 @@ case class DynamicGridScalarNetworkParam(
 }
 
 case class DynamicGridVectorNetworkParam(
-  numVirtualClasses:Int = 4,
+  numVirtualClasses:Int = option[Int]("vc"),
   isTorus:Boolean=defaultIsTorus
 ) extends DynamicGridNetworkParam[Vector] {
   override lazy val channelWidth = {

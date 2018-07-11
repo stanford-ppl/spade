@@ -29,7 +29,7 @@ abstract class DynamicCMeshNetworkParam[B<:PinType:ClassTag] extends NetworkPara
 }
 
 case class DynamicCMeshControlNetworkParam(
-  numVirtualClasses:Int = 4
+  numVirtualClasses:Int = option[Int]("vc")
 ) extends DynamicCMeshNetworkParam[Bit] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
@@ -64,7 +64,7 @@ case class DynamicCMeshControlNetworkParam(
 }
 
 case class DynamicCMeshScalarNetworkParam(
-  numVirtualClasses:Int = 4
+  numVirtualClasses:Int = option[Int]("vc")
 ) extends DynamicCMeshNetworkParam[Word] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
@@ -100,7 +100,7 @@ case class DynamicCMeshScalarNetworkParam(
 }
 
 case class DynamicCMeshVectorNetworkParam(
-  numVirtualClasses:Int = 4
+  numVirtualClasses:Int = option[Int]("vc")
 ) extends DynamicCMeshNetworkParam[Vector] {
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
