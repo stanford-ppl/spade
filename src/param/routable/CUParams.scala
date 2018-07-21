@@ -25,7 +25,7 @@ trait CUParam extends Parameter {
 case class PCUParam (
   numControlFifos:Int=4,
   numScalarFifos:Int=6,
-  numVectorFifos:Int=6,
+  numVectorFifos:Int=option[Int]("vfifo"),
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
@@ -65,7 +65,7 @@ case class SCUParam (
 case class PMUParam (
   numControlFifos:Int=4,
   numScalarFifos:Int=6,
-  numVectorFifos:Int=6,
+  numVectorFifos:Int=option[Int]("vfifo"),
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
@@ -85,7 +85,7 @@ case class PMUParam (
 case class SramAGParam (
   numControlFifos:Int=4,
   numScalarFifos:Int=6,
-  numVectorFifos:Int=6,
+  numVectorFifos:Int=option[Int]("vfifo"),
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
