@@ -2,7 +2,7 @@ package spade
 package node
 
 import param._
-trait SpadeNodeUtil {
+trait SpadeNodeUtil extends Logging {
 
   def indexing[T<:SpadeNode](ns:List[T])(implicit design:SpadeDesign):List[T] = {
     import design.spademeta._
@@ -129,4 +129,9 @@ trait SpadeNodeUtil {
   def cuOf(n:SpadeNode) = n.collectUp[CU]().headOption
 
   def routableOf(n:SpadeNode) = n.collectUp[Routable]().headOption
+
+  override def quote(n:Any) = n match {
+    case n:SpadeNode => n.qindex
+    case n => super.quote(n)
+  }
 }
