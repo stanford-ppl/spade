@@ -22,7 +22,8 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
         n match {
           case n:Routable =>
             val List(x,y) = indexOf(n)
-            val idx = (param.numTotalRows-1-y) * param.numTotalCols + x
+            val maxDim = math.max(param.numTotalRows, param.numTotalCols)
+            val idx = (param.numTotalRows-1-y) * maxDim + x
             label += s"\n($idx)"
           case n =>
         }
