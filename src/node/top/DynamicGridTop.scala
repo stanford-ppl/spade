@@ -9,7 +9,7 @@ case class DynamicGridTop(
   import design.spademeta._
 
   @transient val cuArray = List.tabulate(numCols, numRows) { case (i,j) => 
-    if (i == numCols/2-1 && j == numRows-1) {
+    if (i == numCols/2-fringeNumCols && j == numRows-1) {
       bundleGroup(fringePattern.argFringeParam, coord=Some(i+fringeNumCols,j))
     } else {
       bundleGroup(
