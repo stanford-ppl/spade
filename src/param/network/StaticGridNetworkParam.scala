@@ -146,13 +146,13 @@ case class StaticGridVectorNetworkParam(
     channelWidth("src"->"sb", "dst"->"sb") = option[Int]("vlink")
 
     // switch to CU channel width
-    channelWidth("src"->"sb", "dst"->List("pcu")) = 2
+    channelWidth("src"->"sb", "dst"->List("pcu")) = 1
 
     // CU to Switch channel width
     channelWidth("src"->List("pcu"), "dst"->"sb") = 1
 
     // switch to PMU channel width
-    channelWidth("src"->"sb", "dst"->List("pmu")) = 2
+    channelWidth("src"->"sb", "dst"->List("pmu")) = 1
 
     // PMU to Switch channel width
     channelWidth("src"->List("pmu"), "dst"->"sb") = 1
