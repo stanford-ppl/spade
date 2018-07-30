@@ -38,6 +38,7 @@ object SpadeConfig extends prism.GlobalConfig {
   register[Int]("fifo-depth", default=4, info="Depth of FIFO for all CUs")
   register[Int]("vfifo", default=6, info="Number of vector FIFO within Terminal")
   register[Int]("vlink", default=4, info="Number of vector link between switches")
+  register[Int]("slink", default=6, info="Number of scalar link between switches")
   register[Int]("vc", default=64, info="Number of virtual classes per network")
 
 }

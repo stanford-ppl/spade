@@ -87,7 +87,7 @@ case class StaticGridScalarNetworkParam(
   override lazy val channelWidth = {
     val channelWidth = ChannelWidth.empty
     // switch to switch channel width
-    channelWidth("src"->"sb", "dst"->"sb") = 6
+    channelWidth("src"->"sb", "dst"->"sb") = option[String]("slink")
 
     // switch to CU channel width
     channelWidth("src"->"sb", "dst"->List("pcu", "scu")) = 2
