@@ -6,5 +6,9 @@ case class DesignParam(
   wordWidth:Int = option[Int]("word"),
   vecWidth:Int = option[Int]("vec"),
   clockFrequency:Int = 1000000000, //Hz
+  burstSize:Int = 512, // bit
   topParam:TopParam = defaultTopParam
-) extends Parameter
+) extends Parameter {
+  def burstSizeWord = burstSize / wordWidth
+  def burstSizeByte = burstSize / 8 
+}
