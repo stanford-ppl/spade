@@ -69,7 +69,7 @@ case class PMUParam (
   controlFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   scalarFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
   vectorFifoParam:FIFOParam=FIFOParam(size=option("fifo-depth")),
-  sramParam:SRAMParam=SRAMParam(size=256 * 1024 / 4,4), // 256 kB
+  sramParam:SRAMParam=SRAMParam(size=option("pmu-sram-size"),4), // 256 kB
   numCtrs:Int=6,
   simdParam:Option[SIMDParam]=Some(DefaultSIMDParam(
     numStages=4, 

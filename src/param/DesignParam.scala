@@ -11,5 +11,5 @@ case class DesignParam(
 ) extends Parameter {
   def burstSizeWord = burstSize / wordWidth
   def burstSizeByte = burstSize / 8 
-  def bytePerWord = designParam.wordWidth / 8
+  def bytePerWord = wordWidth / 8
 }
