@@ -17,7 +17,7 @@ case class DynamicGridTopParam (
   val busWithReady = true
   val fringeNumCols = fringePattern match {
     case _:MCOnly => 1
-    case _:MC_DramAG => 2
+    case _:MC_DramAG => 1
   }
   // Oneside
   val numTotalRows = numRows
