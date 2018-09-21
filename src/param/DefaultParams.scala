@@ -27,6 +27,7 @@ trait DefaultParams {
     case "rstrip" => RowStrip()
     case "mixall" => MixAll()
     case "half&half" => HalfAndHalf()
+    case "MCMcstrip" => MCMColumnStrip()
   }
 
 }

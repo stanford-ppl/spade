@@ -62,6 +62,23 @@ case class ColumnStrip (
 }
 /*
  *
+ *  +-----+-----+-----+
+ *  | PMU | PCU | PMU |
+ *  +-----+-----+-----+
+ *  | PMU | PCU | PMU |
+ *  +-----+-----+-----+
+ *
+ * */
+case class MCMColumnStrip (
+  pcuParam:PCUParam=PCUParam(),
+  pmuParam:PMUParam=PMUParam()
+) extends GridCentrolPattern {
+  def cuAt(i:Int, j:Int) = {
+    if (i % 3 % 2 == 0) pmuParam else pcuParam
+  }
+}
+/*
+ *
  *  +-----+-----+
  *  | PCU | PCU |
  *  +-----+-----+
