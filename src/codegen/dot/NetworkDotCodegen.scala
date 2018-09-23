@@ -40,6 +40,9 @@ class NetworkDotCodegen[B<:PinType:ClassTag](val fileName:String)(implicit compi
         indexOf.get(n).foreach { case List(x,y) =>
           n match {
             case n:Router => attr.pos(((x-0.5)*scale, (y-0.5)*scale))
+            case n:DramAG => attr.pos((x*scale, (y+0.15)*scale))
+            case n:MC => attr.pos((x*scale, (y-0.15)*scale))
+            case n:ArgFringe => attr.pos((x*scale, (y+0.5)*scale))
             case n => attr.pos((x*scale, y*scale))
           }
         }

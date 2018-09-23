@@ -8,15 +8,12 @@ case class DynamicGridTop(
   import param._
   import design.spademeta._
 
+  @transient val argFringe = bundleGroup(fringePattern.argFringeParam, coord=Some(numCols/2,numRows-1))
   @transient val cuArray = List.tabulate(numCols, numRows) { case (i,j) => 
-    if (i == numCols/2-fringeNumCols && j == numRows-1) {
-      bundleGroup(fringePattern.argFringeParam, coord=Some(i+fringeNumCols,j))
-    } else {
-      bundleGroup(
-        centrolPattern.cuAt(i,j),
-        coord=Some(i+fringeNumCols, j)
-      )
-    }
+    bundleGroup(
+      centrolPattern.cuAt(i,j),
+      coord=Some(i+fringeNumCols, j)
+    )
   }
 
   @transient val rtArray = List.tabulate(numTotalCols, numTotalRows) { case (i,j) => 
@@ -35,7 +32,7 @@ case class DynamicGridTop(
     List.tabulate(2, numRows) { case (i, j) => 
       bundleGroup(
         dagParam, 
-        coord=Some(if (i==0) (1, j) else (rtrx-1, j))
+        coord=Some(if (i==0) (0,j) else (rtrx,j))
       ) 
     }
   }
