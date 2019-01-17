@@ -43,5 +43,7 @@ object SpadeConfig extends prism.GlobalConfig {
   register[Int]("vc", default=4, info="Number of virtual classes per network")
   register[String]("link-prop", default="db", info="[db-double buffered, cd-credit based]")
   register[Int]("flit-width", default=512, info="Flit width for dynamic network")
+  register[Int]("pcu-stage", default=6, info="Number of stages in PCU")
+  register[Int]("pmu-stage", default=4, info="Number of stages in PMU")
 
 }
